@@ -62,13 +62,6 @@ const Login = () => {
 
         // Show success message
         toast(res.data.msg || "Login successful!");
-
-        // Redirect based on role
-        if (res.data.user.role === "admin") {
-          navigate("/admin");
-        } else {
-          navigate("/home");
-        }
       }
     } catch (error) {
       console.error("Login error:", error);
