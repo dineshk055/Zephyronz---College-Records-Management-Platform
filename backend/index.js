@@ -1,0 +1,36 @@
+import express from 'express';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import connectDB from './config/db.js';
+import authRoutes from './routes/auth.js';
+import userRoutes from "./routes/users.js";
+import adminRoutes from "./routes/adminRoutes.js";
+import fileRoutes from "./routes/fileRoutes.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config();
+
+connectDB();
+
+const myapp = express();
+
+myapp.use(cors());
+myapp.use(express.json());
+
+// Serve static files from uploads directory
+myapp.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+myapp.use("/api/auth", authRoutes);
+myapp.use("/api/users", userRoutes);
+myapp.use("/api/admin", adminRoutes);
+myapp.use("/api/files", fileRoutes);
+
+const PORT = process.env.PORT || 3000;
+
+myapp.listen(PORT, () => {
+  console.log(`Server connected successfully http://localhost:${PORT}`);
+});
