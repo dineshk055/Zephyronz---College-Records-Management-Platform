@@ -30,7 +30,7 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
-myapp.use(cors(corsOptions));
+myapp.use(cors());
 myapp.use(express.json());
 
 // Serve static files from uploads directory
