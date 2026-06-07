@@ -125,7 +125,7 @@ const AdminDashboard = () => {
   const handleDeleteFile = async (fileId) => {
     if (window.confirm("Are you sure you want to delete this file?")) {
       try {
-        const res = await axios.delete(`http://localhost:3000/api/files/${fileId}`, {
+        const res = await axios.delete(`${import.meta.env.VITE_API_URL}/api/files/${fileId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (res.data.success) {
