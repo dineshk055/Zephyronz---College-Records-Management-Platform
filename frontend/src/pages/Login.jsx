@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
-import toast from 'react-hot-toast'
-import { useNavigate } from "react-router-dom";
+import toast from 'react-hot-toast';
+import { useNavigate, Link } from "react-router-dom"; // Added Link import
 
 const Login = () => {
   const navigate = useNavigate();
@@ -61,7 +61,12 @@ const Login = () => {
         localStorage.setItem("user", JSON.stringify(res.data.user));
 
         // Show success message
-        toast(res.data.msg || "Login successful!");
+        toast.success(res.data.msg || "Login successful!");
+        
+        // Navigate to home page after successful login
+        setTimeout(() => {
+          navigate("/"); // or navigate("/home") based on your route configuration
+        }, 1000); // Small delay to show success toast
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -73,15 +78,15 @@ const Login = () => {
                         error.response.data?.message || 
                         "Login failed";
         setError(errorMsg);
-        alert(errorMsg);
+        toast.error(errorMsg);
       } else if (error.request) {
         // Request was made but no response
         setError("Cannot connect to server. Please check your connection.");
-        alert("Cannot connect to server. Please check if the backend is running.");
+        toast.error("Cannot connect to server. Please check if the backend is running.");
       } else {
         // Something else happened
         setError("An unexpected error occurred. Please try again.");
-        alert("An unexpected error occurred. Please try again.");
+        toast.error("An unexpected error occurred. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -168,9 +173,9 @@ const Login = () => {
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
             Don't have an account?{" "}
-            <a href="/register" className="text-blue-600 hover:text-blue-800 font-semibold hover:underline">
+            <Link to="/register" className="text-blue-600 hover:text-blue-800 font-semibold hover:underline">
               Sign up
-            </a>
+            </Link>
           </p>
         </div>
 
