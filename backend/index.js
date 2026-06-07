@@ -18,7 +18,19 @@ connectDB();
 
 const myapp = express();
 
-myapp.use(cors());
+// Configure CORS to allow frontend from Vercel and localhost
+const corsOptions = {
+  origin: [
+    "https://zephyronz-college-records-managemen.vercel.app",
+    "http://localhost:5173", // For local development
+    "http://localhost:3000"
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+myapp.use(cors(corsOptions));
 myapp.use(express.json());
 
 // Serve static files from uploads directory
