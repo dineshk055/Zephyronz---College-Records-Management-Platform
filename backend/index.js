@@ -21,8 +21,7 @@ const myapp = express();
 // Configure CORS to allow frontend from Vercel and localhost
 const corsOptions = {
   origin: [
-    "https://zephyronz-college-records-managemen.vercel.app",
-    "https://zephyronz-college-records-management-platform-mbhavysyo.vercel.app",
+    "https://zephyronz-college-records-management-platform-n00oro60l.vercel.app",
     "http://localhost:5173", // For local development
     "http://localhost:3000"
   ],
