@@ -68,7 +68,7 @@ const Register = () => {
     try {
       setLoading(true);
       const response = await axios.post(
-        "http://localhost:3000/api/auth/register",
+        "https://zephyronz-college-records-management.onrender.com/api/auth/register",
         {
           name: formData.name,
           email: formData.email,
