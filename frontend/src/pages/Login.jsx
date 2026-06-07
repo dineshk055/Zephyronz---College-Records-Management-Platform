@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
 import toast from 'react-hot-toast'
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -63,9 +65,9 @@ const Login = () => {
 
         // Redirect based on role
         if (res.data.user.role === "admin") {
-          window.location.href = "/admin";
+          navigate("/admin");
         } else {
-          window.location.href = "/home";
+          navigate("/home");
         }
       }
     } catch (error) {
