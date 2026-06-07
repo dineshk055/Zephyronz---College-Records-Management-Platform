@@ -30,7 +30,7 @@ const Home = () => {
       setLoading(true);
       setError(null);
       
-      const response = await axios.get("https://zephyronz-college-records-management.onrender.com/api/files", {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/files`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -100,7 +100,7 @@ const Home = () => {
 
   const getFileUrl = (fileUrl) => {
     if (!fileUrl) return null;
-    return `https://zephyronz-college-records-management.onrender.com/uploads/${fileUrl}`;
+    return `${import.meta.env.VITE_API_URL}/uploads/${fileUrl}`;
   };
 
   const handleViewFile = (file) => {

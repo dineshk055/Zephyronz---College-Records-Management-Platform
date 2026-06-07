@@ -30,7 +30,7 @@ const AdminDashboard = () => {
 
   const fetchFiles = async () => {
     try {
-      const res = await axios.get("https://zephyronz-college-records-management.onrender.com/api/files", {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/files`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.success) {
@@ -44,7 +44,7 @@ const AdminDashboard = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("https://zephyronz-college-records-management.onrender.com/api/users", {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const usersData = Array.isArray(res.data) ? res.data : res.data.users || [];
@@ -88,7 +88,7 @@ const AdminDashboard = () => {
       formData.append("title", title);
       formData.append("file", file);
 
-      const res = await axios.post("https://zephyronz-college-records-management.onrender.com/api/files/upload", formData, {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/files/upload`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
@@ -142,7 +142,7 @@ const AdminDashboard = () => {
   // Approve user handler
   const handleApproveUser = async (userId) => {
     try {
-      const res = await axios.put(`https://zephyronz-college-records-management.onrender.com/api/users/${userId}/approve`, {}, {
+      const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/users/${userId}/approve`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert(res.data.message || "User approved successfully");
@@ -157,7 +157,7 @@ const AdminDashboard = () => {
   const handleDeleteUser = async (userId) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       try {
-        const res = await axios.delete(`https://zephyronz-college-records-management.onrender.com/api/users/${userId}`, {
+        const res = await axios.delete(`${import.meta.env.VITE_API_URL}/api/users/${userId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         alert(res.data.message || "User deleted successfully");
@@ -199,7 +199,7 @@ const AdminDashboard = () => {
   const getFileUrl = (file) => {
     if (file.fileUrl) {
       let cleanPath = file.fileUrl.replace(/^\/?uploads\//, '');
-      return `https://zephyronz-college-records-management.onrender.com/uploads/${cleanPath}`;
+      return `${import.meta.env.VITE_API_URL}/uploads/${cleanPath}`;
     }
     return null;
   };

@@ -46,7 +46,7 @@ const Login = () => {
       setLoading(true);
 
       const res = await axios.post(
-        "https://zephyronz-college-records-management.onrender.com/api/auth/login",
+        `${import.meta.env.VITE_API_URL}/api/auth/login`,
         {
           email: formData.email,
           password: formData.password,

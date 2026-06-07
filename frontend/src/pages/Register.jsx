@@ -68,7 +68,7 @@ const Register = () => {
     try {
       setLoading(true);
       const response = await axios.post(
-        "https://zephyronz-college-records-management.onrender.com/api/auth/register",
+        `${import.meta.env.VITE_API_URL}/api/auth/register`,
         {
           name: formData.name,
           email: formData.email,
