@@ -22,7 +22,6 @@ const myapp = express();
 const corsOptions = {
   origin: [
     "https://zephyronz-college-records-management-platform-mbhavysyo.vercel.app",
-    "https://zephyronz-college-records-managemen.vercel.app",
     "http://localhost:5173", // For local development
     "http://localhost:3000"
   ],
