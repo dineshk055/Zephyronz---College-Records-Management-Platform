@@ -65,7 +65,7 @@ const Login = () => {
         
         // Navigate to home page after successful login
         setTimeout(() => {
-          navigate("/"); // or navigate("/home") based on your route configuration
+          navigate("/home"); // or navigate("/home") based on your route configuration
         }, 1000); // Small delay to show success toast
       }
     } catch (error) {
