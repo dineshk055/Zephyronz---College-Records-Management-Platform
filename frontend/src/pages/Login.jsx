@@ -100,7 +100,7 @@ const Login = () => {
         
         <div className="text-center mb-8">
           <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-            Welcome Back
+            Welcome
           </h2>
           <p className="text-gray-600 mt-2">Please login to your account</p>
         </div>
@@ -142,15 +142,7 @@ const Login = () => {
             />
           </div>
 
-          <div className="flex items-center justify-between">
-            <label className="flex items-center">
-              <input type="checkbox" className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" />
-              <span className="ml-2 text-sm text-gray-600">Remember me</span>
-            </label>
-            <a href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-800 hover:underline">
-              Forgot Password?
-            </a>
-          </div>
+          
 
           <button
             type="submit"
