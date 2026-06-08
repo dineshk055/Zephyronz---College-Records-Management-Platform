@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useState, useContext, useEffect } from "react";
 import axios from "axios";
 
@@ -8,20 +9,31 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem("token"));
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(() => {
+    const t = localStorage.getItem("token");
+    if (t) {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${t}`;
+    }
+    return t;
+  });
+
+  const [user, setUser] = useState(() => {
+    const userData = localStorage.getItem("user");
+    try {
+      return userData ? JSON.parse(userData) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const loading = false;
 
   useEffect(() => {
     if (token) {
-      const userData = localStorage.getItem("user");
-      if (userData) {
-        setUser(JSON.parse(userData));
-      }
-      // Set default axios header
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    } else {
+      delete axios.defaults.headers.common["Authorization"];
     }
-    setLoading(false);
   }, [token]);
 
   const login = (newToken, userData) => {
@@ -48,6 +60,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!token,
     isAdmin: user?.role === "admin",
     isApproved: user?.isApproved,
+    loading,
   };
 
   return (

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { 
-  FiUser, 
   FiMail, 
   FiShield, 
   FiCalendar, 
@@ -11,7 +10,6 @@ import {
   FiCheckCircle,
   FiClock,
   FiUserCheck,
-  FiLock,
   FiLogOut
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
@@ -51,7 +49,7 @@ const ProfileCard = () => {
       });
 
       if (response.ok) {
-        const data = await response.json();
+        await response.json();
         setMessage({ type: "success", text: "Profile updated successfully!" });
         
         // Update local storage
@@ -67,6 +65,7 @@ const ProfileCard = () => {
         throw new Error("Update failed");
       }
     } catch (error) {
+      console.error("Profile update error:", error);
       setMessage({ type: "error", text: "Failed to update profile. Please try again." });
     } finally {
       setLoading(false);

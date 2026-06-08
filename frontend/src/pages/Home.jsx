@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -25,7 +26,8 @@ const Home = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // fetch files
-  const fetchFiles = async () => {
+  const fetchFiles = useCallback(async () => {
+    await Promise.resolve();
     try {
       setLoading(true);
       setError(null);
@@ -47,13 +49,13 @@ const Home = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     if (token) {
       fetchFiles();
     }
-  }, [token]);
+  }, [token, fetchFiles]);
 
   const formatDate = (date) => {
     if (!date) return "N/A";

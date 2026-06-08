@@ -1,13 +1,13 @@
 import Navbar from "./components/Navbar";
 import AppRoutes from "./routes/AppRoutes";
-import { ToastContainer } from "react-toastify";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
     <>
       <Navbar />
       <AppRoutes />
-      <ToastContainer />
+      <Toaster position="top-right" />
     </>
   );
 }

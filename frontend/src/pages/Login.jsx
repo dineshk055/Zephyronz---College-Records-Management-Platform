@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import toast from 'react-hot-toast';
 import { useNavigate, Link } from "react-router-dom"; // Added Link import
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -56,9 +58,8 @@ const Login = () => {
       );
 
       if (res.data.success) {
-        // Store token and user data
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
+        // Log in using AuthContext
+        login(res.data.token, res.data.user);
 
         // Show success message
         toast.success(res.data.msg || "Login successful!");

@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { FiHome, FiLogIn, FiUserPlus, FiLogOut, FiUser, FiChevronDown, FiLock, FiSettings, FiShield } from "react-icons/fi";
+import { FiHome, FiLogIn, FiUserPlus, FiLogOut, FiUser, FiChevronDown, FiLock, FiShield } from "react-icons/fi";
 
 const Navbar = () => {
   const navigate = useNavigate();

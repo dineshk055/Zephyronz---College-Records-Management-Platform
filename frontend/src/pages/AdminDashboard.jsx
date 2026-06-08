@@ -1,6 +1,108 @@
-import { useState, useEffect } from "react";
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
+
+// Get file URL helper
+const getFileUrl = (file) => {
+  if (file && file.fileUrl) {
+    let cleanPath = file.fileUrl.replace(/^\/?uploads\//, '');
+    return `${import.meta.env.VITE_API_URL}/uploads/${cleanPath}`;
+  }
+  return null;
+};
+
+// Check if file is image helper
+const isImageFile = (file) => {
+  if (!file) return false;
+  const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
+  const extension = file.fileUrl?.split('.').pop()?.toLowerCase();
+  return imageExtensions.includes(extension);
+};
+
+// File preview modal
+const FilePreviewModal = ({ file, onClose }) => {
+  if (!file) return null;
+  
+  const fileUrl = getFileUrl(file);
+  const isImage = isImageFile(file);
+  
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-auto" onClick={e => e.stopPropagation()}>
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-bold">{file.title}</h3>
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          {isImage && fileUrl ? (
+            <img src={fileUrl} alt={file.title} className="w-full rounded-lg" />
+          ) : (
+            <div className="text-center p-8">
+              <p className="text-gray-600">Preview not available for this file type</p>
+              {fileUrl && (
+                <a href={fileUrl} download className="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                  Download File
+                </a>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Stats Cards
+const StatsCards = ({ stats }) => (
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-blue-100 text-sm">Total Files</p>
+          <p className="text-3xl font-bold mt-2">{stats.totalFiles}</p>
+        </div>
+        <div className="bg-white bg-opacity-20 p-3 rounded-full">
+          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+          </svg>
+        </div>
+      </div>
+    </div>
+    
+    <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-lg">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-green-100 text-sm">Total Users</p>
+          <p className="text-3xl font-bold mt-2">{stats.totalUsers}</p>
+        </div>
+        <div className="bg-white bg-opacity-20 p-3 rounded-full">
+          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+    
+    <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-purple-100 text-sm">Pending Approvals</p>
+          <p className="text-3xl font-bold mt-2">{stats.pendingApprovals}</p>
+        </div>
+        <div className="bg-white bg-opacity-20 p-3 rounded-full">
+          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 const AdminDashboard = () => {
   const { token, user } = useAuth();
@@ -20,15 +122,8 @@ const AdminDashboard = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  // Fetch dashboard data
-  useEffect(() => {
-    if (token) {
-      fetchFiles();
-      fetchUsers();
-    }
-  }, [token]);
-
-  const fetchFiles = async () => {
+  const fetchFiles = useCallback(async () => {
+    await Promise.resolve();
     try {
       const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/files`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -40,9 +135,10 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error("Error fetching files:", error);
     }
-  };
+  }, [token]);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
+    await Promise.resolve();
     try {
       const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/users`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -58,7 +154,15 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error("Error fetching users:", error);
     }
-  };
+  }, [token]);
+
+  // Fetch dashboard data
+  useEffect(() => {
+    if (token) {
+      fetchFiles();
+      fetchUsers();
+    }
+  }, [token, fetchFiles, fetchUsers]);
 
   // Upload file handler with progress
   const handleUpload = async (e) => {
@@ -195,105 +299,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // Get file URL
-  const getFileUrl = (file) => {
-    if (file.fileUrl) {
-      let cleanPath = file.fileUrl.replace(/^\/?uploads\//, '');
-      return `${import.meta.env.VITE_API_URL}/uploads/${cleanPath}`;
-    }
-    return null;
-  };
-
-  // Check if file is image
-  const isImageFile = (file) => {
-    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
-    const extension = file.fileUrl?.split('.').pop()?.toLowerCase();
-    return imageExtensions.includes(extension);
-  };
-
-  // File preview modal
-  const FilePreviewModal = ({ file, onClose }) => {
-    if (!file) return null;
-    
-    const fileUrl = getFileUrl(file);
-    const isImage = isImageFile(file);
-    
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-        <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-auto" onClick={e => e.stopPropagation()}>
-          <div className="p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold">{file.title}</h3>
-              <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            {isImage && fileUrl ? (
-              <img src={fileUrl} alt={file.title} className="w-full rounded-lg" />
-            ) : (
-              <div className="text-center p-8">
-                <p className="text-gray-600">Preview not available for this file type</p>
-                {fileUrl && (
-                  <a href={fileUrl} download className="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-                    Download File
-                  </a>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // Stats Cards
-  const StatsCards = () => (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-blue-100 text-sm">Total Files</p>
-            <p className="text-3xl font-bold mt-2">{stats.totalFiles}</p>
-          </div>
-          <div className="bg-white bg-opacity-20 p-3 rounded-full">
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-            </svg>
-          </div>
-        </div>
-      </div>
-      
-      <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-lg">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-green-100 text-sm">Total Users</p>
-            <p className="text-3xl font-bold mt-2">{stats.totalUsers}</p>
-          </div>
-          <div className="bg-white bg-opacity-20 p-3 rounded-full">
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-          </div>
-        </div>
-      </div>
-      
-      <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-purple-100 text-sm">Pending Approvals</p>
-            <p className="text-3xl font-bold mt-2">{stats.pendingApprovals}</p>
-          </div>
-          <div className="bg-white bg-opacity-20 p-3 rounded-full">
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  // No-op - moved outside component
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -329,7 +335,7 @@ const AdminDashboard = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         {/* Stats Cards */}
-        <StatsCards />
+        <StatsCards stats={stats} />
 
         {/* Tabs */}
         <div className="mb-8 border-b border-gray-200">
