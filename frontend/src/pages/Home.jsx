@@ -103,8 +103,9 @@ const Home = () => {
 
   const getFileUrl = (fileUrl) => {
     if (!fileUrl) return null;
+    const cleanPath = fileUrl.replace(/^\/?uploads\//, '');
     const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
-    return `${apiUrl}/uploads/${fileUrl}`;
+    return `${apiUrl}/uploads/${cleanPath}`;
   };
 
   const handleViewFile = (file) => {

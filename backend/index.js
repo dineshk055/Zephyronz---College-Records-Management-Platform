@@ -9,6 +9,7 @@ import userRoutes from "./routes/users.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import fileRoutes from "./routes/fileRoutes.js";
 import securityRoutes from "./routes/security.js";
+import fs from "fs";
 
 import { createServer } from "http";
 import { Server } from "socket.io";
@@ -18,6 +19,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 dotenv.config();
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+  console.log("Created uploads directory:", uploadsDir);
+}
 
 connectDB();
 
