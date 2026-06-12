@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useState, useContext, useEffect } from "react";
 import axios from "axios";
+import { io } from "socket.io-client";
 
 const AuthContext = createContext();
 
@@ -27,12 +28,30 @@ export const AuthProvider = ({ children }) => {
   });
 
   const loading = false;
+  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
     if (token) {
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      
+      const socketUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+      const newSocket = io(socketUrl, {
+        auth: { token },
+        transports: ["websocket", "polling"]
+      });
+      
+      setSocket(newSocket);
+
+      newSocket.on("connect", () => {
+        console.log("Socket connected to backend");
+      });
+
+      return () => {
+        newSocket.disconnect();
+      };
     } else {
       delete axios.defaults.headers.common["Authorization"];
+      setSocket(null);
     }
   }, [token]);
 
@@ -50,6 +69,9 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     delete axios.defaults.headers.common["Authorization"];
+    if (socket) {
+      socket.disconnect();
+    }
   };
 
   const value = {
@@ -59,8 +81,9 @@ export const AuthProvider = ({ children }) => {
     logout,
     isAuthenticated: !!token,
     isAdmin: user?.role === "admin",
-    isApproved: user?.isApproved,
+    isApproved: user?.status === "Approved" || user?.isApproved,
     loading,
+    socket,
   };
 
   return (

@@ -25,11 +25,13 @@ export const registerUser = async (req, res) => {
 
     let role = "user";
     let isApproved = false;
+    let status = "Pending";
 
     // first user becomes admin (auto-approved)
     if (usersCount === 0) {
       role = "admin";
       isApproved = true;
+      status = "Approved";
     }
 
     // create user
@@ -39,7 +41,25 @@ export const registerUser = async (req, res) => {
       password: hashedPassword,
       role,
       isApproved,
+      status,
     });
+
+    // Emit real-time notification to admin if it's a new user registration
+    if (req.io && role !== "admin") {
+      req.io.to("admin-room").emit("notification", {
+        type: "new_registration",
+        title: "New Registration Request",
+        message: `${user.name} (${user.email}) has registered and is pending approval.`,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          status: user.status,
+          createdAt: user.createdAt,
+        }
+      });
+    }
 
     res.status(201).json({
       success: true,
@@ -50,6 +70,7 @@ export const registerUser = async (req, res) => {
         email: user.email,
         role: user.role,
         isApproved: user.isApproved,
+        status: user.status,
       },
     });
 
@@ -94,7 +115,16 @@ export const login = async (req, res) => {
     }
 
     // CHECK APPROVAL - This is the key!
-    if (!user.isApproved) {
+    const effectiveStatus = user.status || (user.isApproved ? "Approved" : "Pending");
+
+    if (effectiveStatus === "Rejected") {
+      return res.status(403).json({
+        success: false,
+        msg: "Your account registration has been rejected by the admin.",
+      });
+    }
+
+    if (effectiveStatus === "Pending") {
       return res.status(403).json({
         success: false,
         msg: "Your account is pending admin approval. Please wait for approval.",
@@ -108,6 +138,7 @@ export const login = async (req, res) => {
         email: user.email,
         role: user.role,
         isApproved: user.isApproved,
+        status: user.status,
       },
       process.env.JWT_SECRET,
       {
@@ -126,6 +157,7 @@ export const login = async (req, res) => {
         email: user.email,
         role: user.role,
         isApproved: user.isApproved,
+        status: user.status,
       },
     });
 

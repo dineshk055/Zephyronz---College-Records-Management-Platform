@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
+import { toast } from "react-hot-toast";
 
 // Get file URL helper
 const getFileUrl = (file) => {
@@ -105,7 +106,7 @@ const StatsCards = ({ stats }) => (
 );
 
 const AdminDashboard = () => {
-  const { token, user } = useAuth();
+  const { token, user, socket } = useAuth();
   
   const [title, setTitle] = useState("");
   const [file, setFile] = useState(null);
@@ -145,7 +146,7 @@ const AdminDashboard = () => {
       });
       const usersData = Array.isArray(res.data) ? res.data : res.data.users || [];
       setUsers(usersData);
-      const pending = usersData.filter(u => !u.isApproved && u.role !== "admin").length;
+      const pending = usersData.filter(u => (u.status === "Pending" || !u.isApproved) && u.role !== "admin").length;
       setStats(prev => ({ 
         ...prev, 
         totalUsers: usersData.length, 
@@ -163,6 +164,32 @@ const AdminDashboard = () => {
       fetchUsers();
     }
   }, [token, fetchFiles, fetchUsers]);
+
+  // Real-time socket updates
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("notification", (data) => {
+      console.log("Admin notification received:", data);
+      if (data.type === "new_registration") {
+        toast.success(`New Registration: ${data.message}`, { icon: "👤", duration: 6000 });
+        fetchUsers();
+      } else if (data.type === "screenshot_attempt") {
+        toast.error(`Security Warning: ${data.message}`, { icon: "📸", duration: 8000 });
+      } else if (data.type === "unauthorized_action") {
+        toast.error(`Access Blocked: ${data.message}`, { icon: "🚫", duration: 8000 });
+      }
+    });
+
+    socket.on("user-status-changed", () => {
+      fetchUsers();
+    });
+
+    return () => {
+      socket.off("notification");
+      socket.off("user-status-changed");
+    };
+  }, [socket, fetchUsers]);
 
   // Upload file handler with progress
   const handleUpload = async (e) => {
@@ -254,6 +281,22 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error("Approval error:", error);
       alert(error.response?.data?.message || "Approval failed");
+    }
+  };
+
+  // Reject user handler
+  const handleRejectUser = async (userId) => {
+    if (window.confirm("Are you sure you want to reject this user?")) {
+      try {
+        const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/users/${userId}/reject`, {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        alert(res.data.message || "User rejected successfully");
+        await fetchUsers();
+      } catch (error) {
+        console.error("Rejection error:", error);
+        alert(error.response?.data?.message || "Rejection failed");
+      }
     }
   };
 
@@ -565,11 +608,13 @@ const AdminDashboard = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 py-1 text-xs rounded-full ${
-                            userItem.isApproved 
+                            userItem.status === "Approved" || userItem.isApproved 
                               ? "bg-green-100 text-green-800" 
+                              : userItem.status === "Rejected"
+                              ? "bg-red-100 text-red-800"
                               : "bg-yellow-100 text-yellow-800"
                           }`}>
-                            {userItem.isApproved ? "Approved" : "Pending"}
+                            {userItem.status || (userItem.isApproved ? "Approved" : "Pending")}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -577,12 +622,20 @@ const AdminDashboard = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <div className="flex space-x-2">
-                            {!userItem.isApproved && userItem.role !== "admin" && (
+                            {(userItem.status !== "Approved" && !userItem.isApproved) && userItem.role !== "admin" && (
                               <button
                                 onClick={() => handleApproveUser(userItem._id)}
                                 className="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 transition-colors text-xs"
                               >
                                 Approve
+                              </button>
+                            )}
+                            {userItem.status !== "Rejected" && userItem.role !== "admin" && (
+                              <button
+                                onClick={() => handleRejectUser(userItem._id)}
+                                className="bg-amber-500 text-white px-3 py-1 rounded-lg hover:bg-amber-600 transition-colors text-xs"
+                              >
+                                Reject
                               </button>
                             )}
                             {userItem.role !== "admin" && (

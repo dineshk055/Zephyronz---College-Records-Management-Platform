@@ -1,7 +1,7 @@
 import express from "express";
 import { protect } from "../middleware/authMiddleware.js";
 import { adminOnly } from "../middleware/adminMiddleware.js";
-import { getUsers, approveUser, deleteUser, getUserProfile, updateUserProfile } from "../controllers/userController.js";
+import { getUsers, approveUser, rejectUser, deleteUser, getUserProfile, updateUserProfile } from "../controllers/userController.js";
 
 const router = express.Router();
 
@@ -16,6 +16,9 @@ router.get("/", protect, adminOnly, getUsers);
 
 // Approve user - Admin only
 router.put("/:id/approve", protect, adminOnly, approveUser);
+
+// Reject user - Admin only
+router.put("/:id/reject", protect, adminOnly, rejectUser);
 
 // Delete user - Admin only
 router.delete("/:id", protect, adminOnly, deleteUser);

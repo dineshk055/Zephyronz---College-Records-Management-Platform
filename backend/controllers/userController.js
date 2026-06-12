@@ -76,9 +76,55 @@ export const approveUser = async (req, res) => {
     }
     
     user.isApproved = true;
+    user.status = "Approved";
     await user.save();
+
+    if (req.io) {
+      req.io.emit("user-status-changed", {
+        userId: user._id,
+        status: user.status,
+        isApproved: user.isApproved,
+        name: user.name,
+        email: user.email
+      });
+    }
     
     res.json({ message: 'User approved successfully', user });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// @desc    Reject user
+// @route   PUT /api/users/:id/reject
+// @access  Private/Admin
+export const rejectUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    if (user.role === 'admin') {
+      return res.status(400).json({ message: 'Cannot reject admin users' });
+    }
+    
+    user.isApproved = false;
+    user.status = "Rejected";
+    await user.save();
+
+    if (req.io) {
+      req.io.emit("user-status-changed", {
+        userId: user._id,
+        status: user.status,
+        isApproved: user.isApproved,
+        name: user.name,
+        email: user.email
+      });
+    }
+    
+    res.json({ message: 'User rejected successfully', user });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
