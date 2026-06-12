@@ -23,14 +23,33 @@ connectDB();
 
 const myapp = express();
 
+const allowedOrigins = [
+  "https://zephyronz-college-records-managemen.vercel.app",
+  "https://zephyronz-college-records-management.vercel.app",
+  "https://zephyronz-college-records-management-platform-n00oro60l.vercel.app",
+  "http://localhost:5173", // For local development
+  "http://localhost:3000"
+];
+
+const corsOriginFunction = (origin, callback) => {
+  if (!origin) return callback(null, true);
+  
+  const isAllowed = allowedOrigins.includes(origin) || 
+                    origin.endsWith(".vercel.app") || 
+                    origin.startsWith("http://localhost:");
+                    
+  if (isAllowed) {
+    callback(null, true);
+  } else {
+    console.log("CORS blocked origin:", origin);
+    callback(new Error('Not allowed by CORS'));
+  }
+};
+
 const httpServer = createServer(myapp);
 const io = new Server(httpServer, {
   cors: {
-    origin: [
-      "https://zephyronz-college-records-management-platform-n00oro60l.vercel.app",
-      "http://localhost:5173", // For local development
-      "http://localhost:3000"
-    ],
+    origin: corsOriginFunction,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   }
@@ -38,11 +57,7 @@ const io = new Server(httpServer, {
 
 // Configure CORS to allow frontend from Vercel and localhost
 const corsOptions = {
-  origin: [
-    "https://zephyronz-college-records-management-platform-n00oro60l.vercel.app",
-    "http://localhost:5173", // For local development
-    "http://localhost:3000"
-  ],
+  origin: corsOriginFunction,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
