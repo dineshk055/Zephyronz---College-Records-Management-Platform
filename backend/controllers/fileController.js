@@ -17,33 +17,40 @@ export const uploadFile = async (req, res) => {
       });
     }
 
-    const pdfFilePath = req.file.path;
+    const filePath = req.file.path;
     const uniqueSuffix = req.file.filename.split('.')[0];
-    const uploadDir = path.dirname(pdfFilePath);
+    const uploadDir = path.dirname(filePath);
 
     let pageFileNames = [];
-    try {
-      const pngPages = await pdfToPng(pdfFilePath, {
-        viewportScale: 2.0, // High quality scale
-        outputFolder: uploadDir,
-        outputFileMask: `${uniqueSuffix}-page`,
-      });
+    const isPDF = req.file.mimetype === "application/pdf" || req.file.originalname.toLowerCase().endsWith(".pdf");
 
-      pageFileNames = pngPages.map(page => page.name);
-    } catch (conversionError) {
-      console.error("PDF to PNG conversion error:", conversionError);
-      if (fs.existsSync(pdfFilePath)) {
-        fs.unlinkSync(pdfFilePath);
+    if (isPDF) {
+      try {
+        const pngPages = await pdfToPng(filePath, {
+          viewportScale: 2.0, // High quality scale
+          outputFolder: uploadDir,
+          outputFileMask: `${uniqueSuffix}-page`,
+        });
+
+        pageFileNames = pngPages.map(page => page.name);
+        
+        // Delete the original PDF file from the disk immediately
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      } catch (conversionError) {
+        console.error("PDF to PNG conversion error:", conversionError);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+        return res.status(500).json({
+          success: false,
+          msg: "Failed to process PDF file. Make sure it is a valid PDF.",
+        });
       }
-      return res.status(500).json({
-        success: false,
-        msg: "Failed to process PDF file. Make sure it is a valid PDF.",
-      });
-    }
-
-    // Delete the original PDF file from the disk immediately
-    if (fs.existsSync(pdfFilePath)) {
-      fs.unlinkSync(pdfFilePath);
+    } else {
+      // If it's already an image or another document, store its file name directly in the pages array
+      pageFileNames = [req.file.filename];
     }
 
     const newFile = await File.create({
