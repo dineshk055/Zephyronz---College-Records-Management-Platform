@@ -114,6 +114,7 @@ const AdminDashboard = () => {
   const [files, setFiles] = useState([]);
   const [users, setUsers] = useState([]);
   const [activeTab, setActiveTab] = useState("upload");
+  const [securityLogs, setSecurityLogs] = useState([]);
   const [stats, setStats] = useState({
     totalFiles: 0,
     totalUsers: 0,
@@ -157,13 +158,27 @@ const AdminDashboard = () => {
     }
   }, [token]);
 
+  const fetchSecurityLogs = useCallback(async () => {
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/security-logs`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success) {
+        setSecurityLogs(res.data.logs || []);
+      }
+    } catch (error) {
+      console.error("Error fetching security logs:", error);
+    }
+  }, [token]);
+
   // Fetch dashboard data
   useEffect(() => {
     if (token) {
       fetchFiles();
       fetchUsers();
+      fetchSecurityLogs();
     }
-  }, [token, fetchFiles, fetchUsers]);
+  }, [token, fetchFiles, fetchUsers, fetchSecurityLogs]);
 
   // Real-time socket updates
   useEffect(() => {
@@ -174,10 +189,15 @@ const AdminDashboard = () => {
       if (data.type === "new_registration") {
         toast.success(`New Registration: ${data.message}`, { icon: "👤", duration: 6000 });
         fetchUsers();
-      } else if (data.type === "screenshot_attempt") {
+      } else if (data.type === "screenshot" || data.type === "screenshot_attempt") {
         toast.error(`Security Warning: ${data.message}`, { icon: "📸", duration: 8000 });
+        fetchSecurityLogs();
       } else if (data.type === "unauthorized_action") {
         toast.error(`Access Blocked: ${data.message}`, { icon: "🚫", duration: 8000 });
+        fetchSecurityLogs();
+      } else if (data.type === "developer_shortcut" || data.type === "suspicious_activity" || data.type === "unauthorized_print") {
+        toast.error(`Suspicious Alert: ${data.message}`, { icon: "⚠️", duration: 8000 });
+        fetchSecurityLogs();
       }
     });
 
@@ -189,7 +209,7 @@ const AdminDashboard = () => {
       socket.off("notification");
       socket.off("user-status-changed");
     };
-  }, [socket, fetchUsers]);
+  }, [socket, fetchUsers, fetchSecurityLogs]);
 
   // Upload file handler with progress
   const handleUpload = async (e) => {
@@ -386,7 +406,8 @@ const AdminDashboard = () => {
             {[
               { id: "upload", label: "Upload Files", icon: "M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" },
               { id: "files", label: "Manage Files", icon: "M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" },
-              { id: "users", label: "Manage Users", icon: "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" }
+              { id: "users", label: "Manage Users", icon: "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" },
+              { id: "logs", label: "Activity Logs", icon: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -647,6 +668,70 @@ const AdminDashboard = () => {
                               </button>
                             )}
                           </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Activity Logs Tab */}
+        {activeTab === "logs" && (
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden animate-fadeIn">
+            <div className="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4">
+              <h2 className="text-xl font-semibold text-white">Security & Activity Logs</h2>
+              <p className="text-red-100 text-sm">Monitor screenshot blocks, developer tool shortcuts, and window blurs</p>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event Type</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP Address</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {securityLogs.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
+                        No security logs found
+                      </td>
+                    </tr>
+                  ) : (
+                    securityLogs.map((log) => (
+                      <tr key={log._id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <span className="text-gray-900 block font-semibold">{log.user?.name || "Visitor"}</span>
+                          <span className="text-gray-500 text-xs">{log.user?.email || "Anonymous"}</span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <span className={`px-2.5 py-1 text-xs rounded-full font-bold uppercase tracking-wider border ${
+                            log.eventType === "screenshot" 
+                              ? "bg-red-100 text-red-800 border-red-200" 
+                              : log.eventType === "unauthorized_action"
+                              ? "bg-orange-100 text-orange-800 border-orange-200"
+                              : log.eventType === "developer_shortcut"
+                              ? "bg-amber-100 text-amber-800 border-amber-200"
+                              : "bg-blue-100 text-blue-800 border-blue-200"
+                          }`}>
+                            {log.eventType?.replace('_', ' ')}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-700 max-w-xs truncate" title={log.details}>
+                          {log.details}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {log.ipAddress || "N/A"}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {formatDate(log.createdAt)}
                         </td>
                       </tr>
                     ))

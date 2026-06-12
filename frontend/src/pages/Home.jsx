@@ -303,30 +303,90 @@ const Home = () => {
                   <FiX className="w-5 h-5" />
                 </button>
               </div>
-              <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)] bg-gray-50">
-                {isImageFile(selectedFile.mimetype, selectedFile.originalName) ? (
-                  <div className="flex justify-center items-center min-h-[400px] bg-white rounded-lg p-4">
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)] bg-gray-50 select-none">
+                {selectedFile.pages && selectedFile.pages.length > 0 ? (
+                  <div className="flex flex-col items-center gap-6 select-none" style={{ userSelect: "none", WebkitUserSelect: "none" }}>
+                    {selectedFile.pages.map((pageFile, index) => (
+                      <div 
+                        key={index} 
+                        className="relative bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden max-w-4xl w-full p-2 select-none"
+                        style={{ userSelect: "none", WebkitUserSelect: "none" }}
+                        onContextMenu={(e) => e.preventDefault()}
+                      >
+                        {/* Dynamic Watermark Overlay */}
+                        <div 
+                          className="absolute inset-0 z-10 pointer-events-none grid grid-cols-2 grid-rows-3 select-none"
+                          style={{ 
+                            opacity: 0.08, 
+                            pointerEvents: "none", 
+                            userSelect: "none",
+                            WebkitUserSelect: "none"
+                          }}
+                        >
+                          {Array.from({ length: 6 }).map((_, i) => (
+                            <div 
+                              key={i} 
+                              className="flex items-center justify-center text-center font-bold text-gray-800 text-xs sm:text-sm select-none transform -rotate-[30deg] whitespace-nowrap p-4"
+                            >
+                              <div>
+                                <p>{user?.name}</p>
+                                <p className="text-[10px]">{user?.email}</p>
+                                <p className="text-[9px]">{new Date().toLocaleDateString()}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Page Image */}
+                        <img
+                          src={getFileUrl(pageFile)}
+                          alt={`Page ${index + 1}`}
+                          className="w-full h-auto select-none pointer-events-none"
+                          draggable="false"
+                          style={{ 
+                            WebkitUserDrag: "none", 
+                            userSelect: "none",
+                            pointerEvents: "none"
+                          }}
+                        />
+
+                        {/* Page Number Badge */}
+                        <div className="mt-2 text-center text-xs text-gray-400 font-semibold border-t border-gray-100 pt-2 select-none">
+                          Page {index + 1} of {selectedFile.pages.length}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : isImageFile(selectedFile.mimetype, selectedFile.originalName) ? (
+                  <div className="relative flex justify-center items-center min-h-[400px] bg-white rounded-lg p-4 select-none" onContextMenu={(e) => e.preventDefault()}>
+                    {/* Watermark for image */}
+                    <div 
+                      className="absolute inset-0 z-10 pointer-events-none grid grid-cols-2 grid-rows-3 select-none"
+                      style={{ opacity: 0.08 }}
+                    >
+                      {Array.from({ length: 6 }).map((_, i) => (
+                        <div key={i} className="flex items-center justify-center text-center font-bold text-gray-800 text-xs transform -rotate-[30deg] select-none">
+                          <div>
+                            <p>{user?.name}</p>
+                            <p className="text-[10px]">{user?.email}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                     <img
                       src={getFileUrl(selectedFile.fileUrl)}
                       alt={selectedFile.title}
-                      className="max-w-full max-h-[60vh] object-contain rounded-lg shadow-lg"
+                      className="max-w-full max-h-[60vh] object-contain rounded-lg shadow-lg select-none pointer-events-none"
+                      draggable="false"
+                      style={{ WebkitUserDrag: "none" }}
                       onError={(e) => {
                         console.error("Image load error:", getFileUrl(selectedFile.fileUrl));
                         e.target.src = 'https://via.placeholder.com/400x300?text=Image+Not+Found';
                       }}
                     />
                   </div>
-                ) : isPdfFile(selectedFile.mimetype, selectedFile.originalName) ? (
-                  <div className="bg-white rounded-lg overflow-hidden">
-                    <iframe
-                      src={`${getFileUrl(selectedFile.fileUrl)}#toolbar=1`}
-                      title={selectedFile.title}
-                      className="w-full h-[70vh] rounded-lg"
-                      frameBorder="0"
-                    ></iframe>
-                  </div>
                 ) : (
-                  <div className="text-center py-16 bg-white rounded-lg">
+                  <div className="text-center py-16 bg-white rounded-lg select-none">
                     <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
                       {getFileIcon(selectedFile.originalName || selectedFile.title, selectedFile.mimetype)}
                     </div>
@@ -339,25 +399,31 @@ const Home = () => {
                     <p className="text-sm text-gray-400 mb-6">
                       File size: {formatFileSize(selectedFile.size)}
                     </p>
-                    <div className="flex gap-3 justify-center">
-                      <a
-                        href={getFileUrl(selectedFile.fileUrl)}
-                        download
-                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
-                      >
-                        <FiDownload className="w-4 h-4" />
-                        Download File
-                      </a>
-                      <a
-                        href={getFileUrl(selectedFile.fileUrl)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
-                      >
-                        <FiEye className="w-4 h-4" />
-                        Open in New Tab
-                      </a>
-                    </div>
+                    {user?.role === "admin" ? (
+                      <div className="flex gap-3 justify-center">
+                        <a
+                          href={getFileUrl(selectedFile.fileUrl)}
+                          download
+                          className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                        >
+                          <FiDownload className="w-4 h-4" />
+                          Download File
+                        </a>
+                        <a
+                          href={getFileUrl(selectedFile.fileUrl)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-6 py-2.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                        >
+                          <FiEye className="w-4 h-4" />
+                          Open in New Tab
+                        </a>
+                      </div>
+                    ) : (
+                      <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 max-w-sm mx-auto font-semibold">
+                        🔒 Downloads are disabled for security reasons.
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

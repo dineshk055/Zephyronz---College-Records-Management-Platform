@@ -6,9 +6,9 @@ const fileSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    fileUrl: {
-      type: String,
-      required: true,
+    pages: {
+      type: [String],
+      default: [],
     },
     originalName: {
       type: String,
