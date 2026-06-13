@@ -13,6 +13,13 @@ export const logScreenshot = async (req, res) => {
     const userName = req.user ? req.user.name : "Unknown User";
     const userEmail = req.user ? req.user.email : "Unknown Email";
 
+    if (req.user && req.user.role === "admin") {
+      return res.status(201).json({
+        success: true,
+        msg: "Security event logging skipped for admin",
+      });
+    }
+
     const log = await SecurityLog.create({
       eventType: "screenshot",
       user: userId,
@@ -61,6 +68,13 @@ export const logActivity = async (req, res) => {
     const userId = req.user ? req.user._id : null;
     const userName = req.user ? req.user.name : "Unknown User";
     const userEmail = req.user ? req.user.email : "Unknown Email";
+
+    if (req.user && req.user.role === "admin") {
+      return res.status(201).json({
+        success: true,
+        msg: "Security event logging skipped for admin",
+      });
+    }
 
     const log = await SecurityLog.create({
       eventType: eventType || "suspicious_activity",

@@ -171,6 +171,44 @@ const AdminDashboard = () => {
     }
   }, [token]);
 
+  const handleDeleteLog = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this security log?")) return;
+    try {
+      const res = await axios.delete(
+        `${import.meta.env.VITE_API_URL}/api/admin/security-logs/${id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (res.data.success) {
+        toast.success(res.data.msg || "Security log deleted successfully");
+        fetchSecurityLogs();
+      } else {
+        toast.error(res.data.msg || "Failed to delete security log");
+      }
+    } catch (error) {
+      console.error("Error deleting security log:", error);
+      toast.error(error.response?.data?.msg || "Server error deleting log");
+    }
+  };
+
+  const handleDeleteAllLogs = async () => {
+    if (!window.confirm("Are you sure you want to delete ALL security logs? This action cannot be undone.")) return;
+    try {
+      const res = await axios.delete(
+        `${import.meta.env.VITE_API_URL}/api/admin/security-logs`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (res.data.success) {
+        toast.success(res.data.msg || "All security logs deleted successfully");
+        fetchSecurityLogs();
+      } else {
+        toast.error(res.data.msg || "Failed to delete all security logs");
+      }
+    } catch (error) {
+      console.error("Error deleting all security logs:", error);
+      toast.error(error.response?.data?.msg || "Server error deleting logs");
+    }
+  };
+
   // Fetch dashboard data
   useEffect(() => {
     if (token) {
@@ -684,9 +722,19 @@ const AdminDashboard = () => {
         {/* Activity Logs Tab */}
         {activeTab === "logs" && (
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden animate-fadeIn">
-            <div className="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4">
-              <h2 className="text-xl font-semibold text-white">Security & Activity Logs</h2>
-              <p className="text-red-100 text-sm">Monitor screenshot blocks, developer tool shortcuts, and window blurs</p>
+            <div className="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <h2 className="text-xl font-semibold text-white">Security & Activity Logs</h2>
+                <p className="text-red-100 text-sm">Monitor screenshot blocks, developer tool shortcuts, and window blurs</p>
+              </div>
+              {securityLogs.length > 0 && (
+                <button
+                  onClick={handleDeleteAllLogs}
+                  className="bg-white hover:bg-red-50 text-red-600 font-semibold py-2 px-4 rounded-xl transition-all shadow-md text-sm cursor-pointer"
+                >
+                  Delete All Logs
+                </button>
+              )}
             </div>
             
             <div className="overflow-x-auto">
@@ -698,12 +746,13 @@ const AdminDashboard = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP Address</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {securityLogs.length === 0 ? (
                     <tr>
-                      <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
+                      <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
                         No security logs found
                       </td>
                     </tr>
@@ -735,6 +784,15 @@ const AdminDashboard = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {formatDate(log.createdAt)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <button
+                            onClick={() => handleDeleteLog(log._id)}
+                            className="text-red-600 hover:text-red-900 font-semibold cursor-pointer"
+                            title="Delete this log"
+                          >
+                            Delete
+                          </button>
                         </td>
                       </tr>
                     ))

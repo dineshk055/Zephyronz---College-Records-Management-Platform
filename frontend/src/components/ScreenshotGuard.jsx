@@ -4,13 +4,13 @@ import { useAuth } from "../context/AuthContext";
 import { FiAlertTriangle } from "react-icons/fi";
 
 const ScreenshotGuard = () => {
-  const { isAuthenticated, token } = useAuth();
+  const { isAuthenticated, token, isAdmin } = useAuth();
   const [showWarning, setShowWarning] = useState(false);
   const [warningTitle, setWarningTitle] = useState("Security Warning");
   const [warningText, setWarningText] = useState("");
 
   useEffect(() => {
-    if (!isAuthenticated || !token) return;
+    if (!isAuthenticated || !token || isAdmin) return;
 
     const logSecurityEvent = async (eventType, details) => {
       try {
@@ -172,7 +172,7 @@ const ScreenshotGuard = () => {
       window.removeEventListener("contextmenu", handleContextMenu);
       window.removeEventListener("dragstart", handleDragStart);
     };
-  }, [isAuthenticated, token]);
+  }, [isAuthenticated, token, isAdmin]);
 
   if (!showWarning) return null;
 

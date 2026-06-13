@@ -10,7 +10,6 @@ import {
   FiCalendar,
   FiDownload,
   FiX,
-  FiFileText,
   FiImage,
   FiAlertCircle,
   FiGrid,
@@ -22,7 +21,7 @@ import {
   FiDatabase
 } from "react-icons/fi";
 import { FaFilePdf, FaRegFileAlt } from "react-icons/fa";
-import { MdOutlineCloudUpload, MdOutlineDashboardCustomize } from "react-icons/md";
+import { MdOutlineDashboardCustomize } from "react-icons/md";
 import { HiOutlineDocumentText } from "react-icons/hi";
 
 const Home = () => {
