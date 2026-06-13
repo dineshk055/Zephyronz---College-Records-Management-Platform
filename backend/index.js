@@ -117,8 +117,18 @@ io.on("connection", (socket) => {
   });
 });
 
-// Serve static files from uploads directory
-myapp.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Serve static files from uploads directory with production fallback
+myapp.use('/uploads', (req, res, next) => {
+  const filePath = path.join(__dirname, 'uploads', req.path);
+  if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+    res.sendFile(filePath);
+  } else {
+    // Redirect to production Render server as a fallback
+    const productionUrl = `https://zephyronz-college-records-management.onrender.com/uploads${req.path}`;
+    console.log(`Local file not found: ${req.path}. Redirecting to production: ${productionUrl}`);
+    res.redirect(productionUrl);
+  }
+});
 
 myapp.use("/api/auth", authRoutes);
 myapp.use("/api/users", userRoutes);
