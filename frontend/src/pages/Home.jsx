@@ -111,11 +111,13 @@ const Home = () => {
   const handleViewFile = (file) => {
     setSelectedFile(file);
     setIsModalOpen(true);
+    localStorage.setItem("active_document", JSON.stringify({ id: file._id, title: file.title }));
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedFile(null);
+    localStorage.removeItem("active_document");
   };
 
   const isImageFile = (mimetype, fileName) => {
@@ -220,51 +222,77 @@ const Home = () => {
                 key={file._id}
                 className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden group transform hover:-translate-y-1"
               >
-                {/* File Header */}
-                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 border-b border-gray-100">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                {/* File Preview Image */}
+                <div className="h-48 bg-gray-50 flex items-center justify-center overflow-hidden border-b border-gray-100 relative group-hover:opacity-95 transition-opacity">
+                  {file.pages && file.pages.length > 0 ? (
+                    <img
+                      src={getFileUrl(file.pages[0])}
+                      alt={file.title}
+                      className="w-full h-full object-cover object-top select-none pointer-events-none"
+                      draggable="false"
+                      style={{ userSelect: "none", WebkitUserSelect: "none" }}
+                    />
+                  ) : file.fileUrl && isImageFile(file.mimetype, file.originalName) ? (
+                    <img
+                      src={getFileUrl(file.fileUrl)}
+                      alt={file.title}
+                      className="w-full h-full object-cover object-top select-none pointer-events-none"
+                      draggable="false"
+                      style={{ userSelect: "none", WebkitUserSelect: "none" }}
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center p-6 text-center">
+                      <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-3">
                         {getFileIcon(file.originalName || file.title, file.mimetype)}
                       </div>
-                      <div className="flex-1">
-                        <h2 className="font-semibold text-gray-800 line-clamp-1 text-lg">
-                          {file.title}
-                        </h2>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {file.mimetype?.split('/').pop()?.toUpperCase() || 'FILE'} file
-                        </p>
-                      </div>
+                      <span className="text-xs text-gray-400 font-semibold uppercase">
+                        {file.mimetype?.split('/').pop() || 'File'}
+                      </span>
                     </div>
-                  </div>
+                  )}
+                  {/* Floating badge for pages count */}
+                  {file.pages && file.pages.length > 0 && (
+                    <span className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-full select-none">
+                      {file.pages.length} Page{file.pages.length > 1 ? 's' : ''}
+                    </span>
+                  )}
                 </div>
 
                 {/* File Body */}
-                <div className="p-4">
+                <div className="p-5">
+                  <div className="mb-4">
+                    <h3 className="font-bold text-gray-800 line-clamp-1 text-lg group-hover:text-indigo-600 transition-colors" title={file.title}>
+                      {file.title}
+                    </h3>
+                    <p className="text-xs text-gray-400 mt-1 capitalize font-medium">
+                      {file.mimetype?.split('/').pop()?.toUpperCase() || 'FILE'} file
+                    </p>
+                  </div>
+
                   {/* Uploader Info */}
-                  <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                    <FiUser className="w-4 h-4 text-indigo-500" />
+                  <div className="flex items-center gap-2 text-sm text-gray-600 mb-2.5">
+                    <FiUser className="w-4 h-4 text-indigo-500 flex-shrink-0" />
                     <span className="truncate">
                       Uploaded by: {file.uploadedBy?.name || "Admin"}
                     </span>
                   </div>
 
                   {/* Upload Date */}
-                  <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-                    <FiCalendar className="w-4 h-4" />
+                  <div className="flex items-center gap-2 text-sm text-gray-500 mb-2.5">
+                    <FiCalendar className="w-4 h-4 flex-shrink-0" />
                     <span>{formatDate(file.createdAt)}</span>
                   </div>
 
                   {/* File Size */}
                   <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-                    <FiFile className="w-4 h-4" />
+                    <FiFile className="w-4 h-4 flex-shrink-0" />
                     <span>{formatFileSize(file.size)}</span>
                   </div>
 
                   {/* View Button */}
                   <button
                     onClick={() => handleViewFile(file)}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 font-medium"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 font-medium shadow-md hover:shadow-lg"
                   >
                     <FiEye className="w-4 h-4" />
                     <span>View Document</span>
@@ -385,6 +413,29 @@ const Home = () => {
                       }}
                     />
                   </div>
+                ) : isPdfFile(selectedFile.mimetype, selectedFile.originalName) && selectedFile.fileUrl ? (
+                  <div className="relative bg-white rounded-lg overflow-hidden select-none" onContextMenu={(e) => e.preventDefault()}>
+                    {/* Watermark overlay on top of PDF iframe */}
+                    <div 
+                      className="absolute inset-0 z-10 pointer-events-none grid grid-cols-2 grid-rows-3 select-none"
+                      style={{ opacity: 0.08 }}
+                    >
+                      {Array.from({ length: 6 }).map((_, i) => (
+                        <div key={i} className="flex items-center justify-center text-center font-bold text-gray-800 text-xs transform -rotate-[30deg] select-none">
+                          <div>
+                            <p>{user?.name}</p>
+                            <p className="text-[10px]">{user?.email}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <iframe
+                      src={`${getFileUrl(selectedFile.fileUrl)}#toolbar=0`}
+                      title={selectedFile.title}
+                      className="w-full h-[70vh] rounded-lg relative z-0"
+                      frameBorder="0"
+                    ></iframe>
+                  </div>
                 ) : (
                   <div className="text-center py-16 bg-white rounded-lg select-none">
                     <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
@@ -399,7 +450,7 @@ const Home = () => {
                     <p className="text-sm text-gray-400 mb-6">
                       File size: {formatFileSize(selectedFile.size)}
                     </p>
-                    {user?.role === "admin" ? (
+                    {user?.role === "admin" && selectedFile.fileUrl ? (
                       <div className="flex gap-3 justify-center">
                         <a
                           href={getFileUrl(selectedFile.fileUrl)}
@@ -418,6 +469,10 @@ const Home = () => {
                           <FiEye className="w-4 h-4" />
                           Open in New Tab
                         </a>
+                      </div>
+                    ) : user?.role === "admin" ? (
+                      <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-xl p-4 max-w-sm mx-auto font-semibold text-center text-sm">
+                        Original document file is stored in image chunks. Use the page viewer above to read it.
                       </div>
                     ) : (
                       <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 max-w-sm mx-auto font-semibold">

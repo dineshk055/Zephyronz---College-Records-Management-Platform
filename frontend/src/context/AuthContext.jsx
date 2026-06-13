@@ -1,4 +1,4 @@
-/* eslint-disable react-refresh/only-export-components */
+/* eslint-disable react-refresh/only-export-components, react-hooks/set-state-in-effect */
 import { createContext, useState, useContext, useEffect } from "react";
 import axios from "axios";
 import { io } from "socket.io-client";

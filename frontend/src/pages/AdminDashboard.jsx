@@ -192,6 +192,9 @@ const AdminDashboard = () => {
       } else if (data.type === "screenshot" || data.type === "screenshot_attempt") {
         toast.error(`Security Warning: ${data.message}`, { icon: "📸", duration: 8000 });
         fetchSecurityLogs();
+      } else if (data.type === "download_attempt") {
+        toast.error(`Security Warning: ${data.message}`, { icon: "📥", duration: 8000 });
+        fetchSecurityLogs();
       } else if (data.type === "unauthorized_action") {
         toast.error(`Access Blocked: ${data.message}`, { icon: "🚫", duration: 8000 });
         fetchSecurityLogs();

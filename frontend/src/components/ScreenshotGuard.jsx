@@ -15,9 +15,19 @@ const ScreenshotGuard = () => {
     const logSecurityEvent = async (eventType, details) => {
       try {
         const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+        const activeDoc = localStorage.getItem("active_document");
+        let fullDetails = details;
+        if (activeDoc) {
+          try {
+            const doc = JSON.parse(activeDoc);
+            fullDetails = `${details} on document "${doc.title}" (ID: ${doc.id || doc._id})`;
+          } catch {
+            // ignore
+          }
+        }
         await axios.post(
           `${apiUrl}/api/security/log-activity`,
-          { eventType, details },
+          { eventType, details: fullDetails },
           { headers: { Authorization: `Bearer ${token}` } }
         );
       } catch (err) {
@@ -84,6 +94,17 @@ const ScreenshotGuard = () => {
         eventType = "developer_shortcut";
         displayMsg = "Viewing page source code is disabled for security reasons!";
       }
+      // 8. Ctrl + S (Save Page shortcut)
+      else if ((e.ctrlKey || e.metaKey) && (e.key === "S" || e.key === "s")) {
+        const activeDoc = localStorage.getItem("active_document");
+        if (activeDoc) {
+          e.preventDefault();
+          detected = true;
+          shortcutName = "Ctrl/Cmd + S (Save Shortcut)";
+          eventType = "download_attempt";
+          displayMsg = "Saving/downloading this document is disabled for security reasons!";
+        }
+      }
 
       if (detected) {
         setWarningTitle("Security Warning");
@@ -103,14 +124,53 @@ const ScreenshotGuard = () => {
       logSecurityEvent("suspicious_activity", "Window lost focus (window blur)");
     };
 
+    const handleCopy = (e) => {
+      const activeDoc = localStorage.getItem("active_document");
+      if (activeDoc) {
+        e.preventDefault();
+        setWarningTitle("Security Warning");
+        setWarningText("Copying document content is strictly prohibited!");
+        setShowWarning(true);
+        logSecurityEvent("download_attempt", "Copy blocked");
+      }
+    };
+
+    const handleContextMenu = (e) => {
+      const activeDoc = localStorage.getItem("active_document");
+      if (activeDoc) {
+        e.preventDefault();
+        setWarningTitle("Security Warning");
+        setWarningText("Right-clicks are disabled to protect document security.");
+        setShowWarning(true);
+        logSecurityEvent("download_attempt", "Right-click context menu blocked");
+      }
+    };
+
+    const handleDragStart = (e) => {
+      const activeDoc = localStorage.getItem("active_document");
+      if (activeDoc) {
+        e.preventDefault();
+        setWarningTitle("Security Warning");
+        setWarningText("Dragging document content is disabled for security reasons.");
+        setShowWarning(true);
+        logSecurityEvent("download_attempt", "Image dragging blocked");
+      }
+    };
+
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("blur", handleBlur);
+    window.addEventListener("copy", handleCopy);
+    window.addEventListener("contextmenu", handleContextMenu);
+    window.addEventListener("dragstart", handleDragStart);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("blur", handleBlur);
+      window.removeEventListener("copy", handleCopy);
+      window.removeEventListener("contextmenu", handleContextMenu);
+      window.removeEventListener("dragstart", handleDragStart);
     };
   }, [isAuthenticated, token]);
 
