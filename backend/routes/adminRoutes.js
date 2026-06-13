@@ -95,6 +95,35 @@ router.delete(
   }
 );
 
+// Delete multiple security logs (bulk delete)
+router.post(
+  "/security-logs/delete-bulk",
+  protect,
+  adminOnly,
+  async (req, res) => {
+    try {
+      const { ids } = req.body;
+      if (!Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({
+          success: false,
+          msg: "No log IDs provided for deletion",
+        });
+      }
+      await SecurityLog.deleteMany({ _id: { $in: ids } });
+      res.status(200).json({
+        success: true,
+        msg: `${ids.length} security logs deleted successfully`,
+      });
+    } catch (error) {
+      console.error("Error deleting bulk security logs:", error);
+      res.status(500).json({
+        success: false,
+        msg: "Server error",
+      });
+    }
+  }
+);
+
 export default router;
 
 // http://localhost:3000/api/admin/dashboard

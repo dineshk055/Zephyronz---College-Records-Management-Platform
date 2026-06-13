@@ -115,6 +115,7 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [activeTab, setActiveTab] = useState("upload");
   const [securityLogs, setSecurityLogs] = useState([]);
+  const [selectedLogIds, setSelectedLogIds] = useState([]);
   const [stats, setStats] = useState({
     totalFiles: 0,
     totalUsers: 0,
@@ -165,11 +166,48 @@ const AdminDashboard = () => {
       });
       if (res.data.success) {
         setSecurityLogs(res.data.logs || []);
+        setSelectedLogIds([]);
       }
     } catch (error) {
       console.error("Error fetching security logs:", error);
     }
   }, [token]);
+
+  const handleToggleSelectLog = (id) => {
+    setSelectedLogIds(prev => 
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleToggleSelectAllLogs = () => {
+    if (securityLogs.length === 0) return;
+    if (selectedLogIds.length === securityLogs.length) {
+      setSelectedLogIds([]);
+    } else {
+      setSelectedLogIds(securityLogs.map(log => log._id));
+    }
+  };
+
+  const handleDeleteSelectedLogs = async () => {
+    if (selectedLogIds.length === 0) return;
+    if (!window.confirm(`Are you sure you want to delete the ${selectedLogIds.length} selected security logs?`)) return;
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/admin/security-logs/delete-bulk`,
+        { ids: selectedLogIds },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (res.data.success) {
+        toast.success(res.data.msg || "Selected security logs deleted successfully");
+        fetchSecurityLogs();
+      } else {
+        toast.error(res.data.msg || "Failed to delete selected security logs");
+      }
+    } catch (error) {
+      console.error("Error deleting selected logs:", error);
+      toast.error(error.response?.data?.msg || "Server error deleting selected logs");
+    }
+  };
 
   const handleDeleteLog = async (id) => {
     if (!window.confirm("Are you sure you want to delete this security log?")) return;
@@ -727,20 +765,39 @@ const AdminDashboard = () => {
                 <h2 className="text-xl font-semibold text-white">Security & Activity Logs</h2>
                 <p className="text-red-100 text-sm">Monitor screenshot blocks, developer tool shortcuts, and window blurs</p>
               </div>
-              {securityLogs.length > 0 && (
-                <button
-                  onClick={handleDeleteAllLogs}
-                  className="bg-white hover:bg-red-50 text-red-600 font-semibold py-2 px-4 rounded-xl transition-all shadow-md text-sm cursor-pointer"
-                >
-                  Delete All Logs
-                </button>
-              )}
+              <div className="flex gap-2">
+                {selectedLogIds.length > 0 && (
+                  <button
+                    onClick={handleDeleteSelectedLogs}
+                    className="bg-red-700 hover:bg-red-800 text-white font-semibold py-2 px-4 rounded-xl transition-all shadow-md text-sm cursor-pointer border border-red-800"
+                  >
+                    Delete Selected ({selectedLogIds.length})
+                  </button>
+                )}
+                {securityLogs.length > 0 && (
+                  <button
+                    onClick={handleDeleteAllLogs}
+                    className="bg-white hover:bg-red-50 text-red-600 font-semibold py-2 px-4 rounded-xl transition-all shadow-md text-sm cursor-pointer"
+                  >
+                    Delete All Logs
+                  </button>
+                )}
+              </div>
             </div>
             
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
+                      <input
+                        type="checkbox"
+                        checked={securityLogs.length > 0 && selectedLogIds.length === securityLogs.length}
+                        onChange={handleToggleSelectAllLogs}
+                        className="rounded border-gray-300 text-red-600 focus:ring-red-500 cursor-pointer h-4 w-4"
+                        title="Select All Logs"
+                      />
+                    </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event Type</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
@@ -752,50 +809,61 @@ const AdminDashboard = () => {
                 <tbody className="divide-y divide-gray-200">
                   {securityLogs.length === 0 ? (
                     <tr>
-                      <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                      <td colSpan="7" className="px-6 py-12 text-center text-gray-500">
                         No security logs found
                       </td>
                     </tr>
                   ) : (
-                    securityLogs.map((log) => (
-                      <tr key={log._id} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <span className="text-gray-900 block font-semibold">{log.user?.name || "Visitor"}</span>
-                          <span className="text-gray-500 text-xs">{log.user?.email || "Anonymous"}</span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <span className={`px-2.5 py-1 text-xs rounded-full font-bold uppercase tracking-wider border ${
-                            log.eventType === "screenshot" 
-                              ? "bg-red-100 text-red-800 border-red-200" 
-                              : log.eventType === "unauthorized_action"
-                              ? "bg-orange-100 text-orange-800 border-orange-200"
-                              : log.eventType === "developer_shortcut"
-                              ? "bg-amber-100 text-amber-800 border-amber-200"
-                              : "bg-blue-100 text-blue-800 border-blue-200"
-                          }`}>
-                            {log.eventType?.replace('_', ' ')}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-700 max-w-xs truncate" title={log.details}>
-                          {log.details}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {log.ipAddress || "N/A"}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {formatDate(log.createdAt)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          <button
-                            onClick={() => handleDeleteLog(log._id)}
-                            className="text-red-600 hover:text-red-900 font-semibold cursor-pointer"
-                            title="Delete this log"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))
+                    securityLogs.map((log) => {
+                      const isSelected = selectedLogIds.includes(log._id);
+                      return (
+                        <tr key={log._id} className={`hover:bg-gray-50 transition-colors ${isSelected ? 'bg-red-50/30' : ''}`}>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 w-12">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => handleToggleSelectLog(log._id)}
+                              className="rounded border-gray-300 text-red-600 focus:ring-red-500 cursor-pointer h-4 w-4"
+                            />
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <span className="text-gray-900 block font-semibold">{log.user?.name || "Visitor"}</span>
+                            <span className="text-gray-500 text-xs">{log.user?.email || "Anonymous"}</span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm">
+                            <span className={`px-2.5 py-1 text-xs rounded-full font-bold uppercase tracking-wider border ${
+                              log.eventType === "screenshot" 
+                                ? "bg-red-100 text-red-800 border-red-200" 
+                                : log.eventType === "unauthorized_action"
+                                ? "bg-orange-100 text-orange-800 border-orange-200"
+                                : log.eventType === "developer_shortcut"
+                                ? "bg-amber-100 text-amber-800 border-amber-200"
+                                : "bg-blue-100 text-blue-800 border-blue-200"
+                            }`}>
+                              {log.eventType?.replace('_', ' ')}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-700 max-w-xs truncate" title={log.details}>
+                            {log.details}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {log.ipAddress || "N/A"}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {formatDate(log.createdAt)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <button
+                              onClick={() => handleDeleteLog(log._id)}
+                              className="text-red-600 hover:text-red-900 font-semibold cursor-pointer"
+                              title="Delete this log"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>
