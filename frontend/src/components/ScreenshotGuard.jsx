@@ -114,16 +114,6 @@ const ScreenshotGuard = () => {
       }
     };
 
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden") {
-        logSecurityEvent("suspicious_activity", "Tab switched (document hidden)");
-      }
-    };
-
-    const handleBlur = () => {
-      logSecurityEvent("suspicious_activity", "Window lost focus (window blur)");
-    };
-
     const handleCopy = (e) => {
       const activeDoc = localStorage.getItem("active_document");
       if (activeDoc) {
@@ -158,16 +148,12 @@ const ScreenshotGuard = () => {
     };
 
     window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("blur", handleBlur);
     window.addEventListener("copy", handleCopy);
     window.addEventListener("contextmenu", handleContextMenu);
     window.addEventListener("dragstart", handleDragStart);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("blur", handleBlur);
       window.removeEventListener("copy", handleCopy);
       window.removeEventListener("contextmenu", handleContextMenu);
       window.removeEventListener("dragstart", handleDragStart);

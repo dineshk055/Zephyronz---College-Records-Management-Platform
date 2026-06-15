@@ -34,19 +34,14 @@ export const uploadFile = async (req, res) => {
 
         pageFileNames = pngPages.map(page => page.name);
         
-        // Delete the original PDF file from the disk immediately
+        // Delete the original PDF file from the disk immediately since conversion succeeded
         if (fs.existsSync(filePath)) {
           fs.unlinkSync(filePath);
         }
       } catch (conversionError) {
-        console.error("PDF to PNG conversion error:", conversionError);
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
-        return res.status(500).json({
-          success: false,
-          msg: "Failed to process PDF file. Make sure it is a valid PDF.",
-        });
+        console.error("PDF to PNG conversion error, falling back to original PDF:", conversionError);
+        // Fall back: do not delete the original PDF and keep pageFileNames empty.
+        // The frontend will fall back to using the PDF fileUrl in the iframe.
       }
     } else {
       // If it's already an image or another document, store its file name directly in the pages array
@@ -55,6 +50,7 @@ export const uploadFile = async (req, res) => {
 
     const newFile = await File.create({
       title: req.body.title,
+      fileUrl: req.file.filename,
       pages: pageFileNames,
       originalName: req.file.originalname,
       size: req.file.size,
@@ -119,6 +115,14 @@ export const deleteFile = async (req, res) => {
           fs.unlinkSync(filePath);
         }
       });
+    }
+
+    // Delete physical original file from uploads folder if it exists and isn't deleted in pages loop
+    if (file.fileUrl) {
+      const originalFilePath = path.join(uploadDir, file.fileUrl);
+      if (fs.existsSync(originalFilePath) && (!file.pages || !file.pages.includes(file.fileUrl))) {
+        fs.unlinkSync(originalFilePath);
+      }
     }
 
     await file.deleteOne();

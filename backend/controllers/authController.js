@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { sendRegistrationEmail } from "../utils/notificationService.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -42,6 +43,11 @@ export const registerUser = async (req, res) => {
       role,
       isApproved,
       status,
+    });
+
+    // Send email notification (asynchronously, does not block register response)
+    sendRegistrationEmail({ name: user.name, email: user.email }).catch(err => {
+      console.error("Async registration email error:", err);
     });
 
     // Emit real-time notification to admin if it's a new user registration
