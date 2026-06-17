@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
   FiFile,
@@ -36,7 +37,15 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [failedImages, setFailedImages] = useState({});
   const itemsPerPage = 9;
+
+  const handleImageError = (fileId, index) => {
+    setFailedImages(prev => ({
+      ...prev,
+      [`${fileId}-${index}`]: true
+    }));
+  };
 
   // fetch files
   const fetchFiles = useCallback(async () => {
@@ -384,25 +393,29 @@ const Home = () => {
               >
                 {/* Preview Area */}
                 <div className="relative h-52 bg-gradient-to-br from-slate-50 to-indigo-50 flex items-center justify-center overflow-hidden">
-                  {file.pages && file.pages.length > 0 ? (
+                  {file.pages && file.pages.length > 0 && !failedImages[`${file._id}-0`] ? (
                     <img
                       src={getFileUrl(file.pages[0])}
                       alt={file.title}
                       className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                       draggable="false"
+                      onError={() => handleImageError(file._id, 0)}
                     />
-                  ) : file.fileUrl && isImageFile(file.mimetype, file.originalName) ? (
+                  ) : file.fileUrl && isImageFile(file.mimetype, file.originalName) && !failedImages[`${file._id}-0`] ? (
                     <img
                       src={getFileUrl(file.fileUrl)}
                       alt={file.title}
                       className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                       draggable="false"
+                      onError={() => handleImageError(file._id, 0)}
                     />
                   ) : (
-                    <div className="flex flex-col items-center">
-                      {getFileIcon(file.originalName || file.title, file.mimetype, "lg")}
-                      <span className="mt-2 text-xs text-slate-400 font-medium uppercase">
-                        {file.mimetype?.split('/').pop() || 'File'}
+                    <div className="flex flex-col items-center p-4 text-center">
+                      <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-2 text-slate-400">
+                        {getFileIcon(file.originalName || file.title, file.mimetype, "md")}
+                      </div>
+                      <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">
+                        {failedImages[`${file._id}-0`] ? 'Content Missing (404)' : (file.mimetype?.split('/').pop() || 'File')}
                       </span>
                     </div>
                   )}
@@ -602,12 +615,21 @@ const Home = () => {
                             </div>
                           ))}
                         </div>
-                        <img
-                          src={getFileUrl(pageFile)}
-                          alt={`Page ${index + 1}`}
-                          className="w-full h-auto"
-                          draggable="false"
-                        />
+                        {failedImages[`${selectedFile._id}-${index}`] ? (
+                          <div className="flex flex-col items-center justify-center p-12 bg-slate-50 text-slate-500 text-center select-none w-full">
+                            <FiAlertCircle className="w-10 h-10 text-amber-500 mb-2" />
+                            <p className="font-semibold text-sm">Page {index + 1} Content Missing</p>
+                            <p className="text-xs text-slate-400 mt-1">This page file does not exist on the server filesystem.</p>
+                          </div>
+                        ) : (
+                          <img
+                            src={getFileUrl(pageFile)}
+                            alt={`Page ${index + 1}`}
+                            className="w-full h-auto"
+                            draggable="false"
+                            onError={() => handleImageError(selectedFile._id, index)}
+                          />
+                        )}
                         <div className="mt-3 text-center text-xs text-slate-400 font-semibold border-t border-slate-100 pt-3">
                           Page {index + 1} of {selectedFile.pages.length}
                         </div>
@@ -629,16 +651,21 @@ const Home = () => {
                         </div>
                       ))}
                     </div>
-                    <img
-                      src={getFileUrl(selectedFile.fileUrl)}
-                      alt={selectedFile.title}
-                      className="max-w-full max-h-[60vh] object-contain rounded-xl shadow-lg"
-                      draggable="false"
-                      onError={(e) => {
-                        console.error("Image load error:", getFileUrl(selectedFile.fileUrl));
-                        e.target.src = 'https://via.placeholder.com/400x300?text=Image+Not+Found';
-                      }}
-                    />
+                    {failedImages[`${selectedFile._id}-0`] ? (
+                      <div className="flex flex-col items-center justify-center p-12 text-slate-500 text-center select-none">
+                        <FiAlertCircle className="w-12 h-12 text-amber-500 mb-3" />
+                        <h4 className="font-bold text-slate-700 text-lg mb-1">Image Content Missing</h4>
+                        <p className="text-sm text-slate-400">The file has been deleted or is unavailable in server storage.</p>
+                      </div>
+                    ) : (
+                      <img
+                        src={getFileUrl(selectedFile.fileUrl)}
+                        alt={selectedFile.title}
+                        className="max-w-full max-h-[60vh] object-contain rounded-xl shadow-lg"
+                        draggable="false"
+                        onError={() => handleImageError(selectedFile._id, 0)}
+                      />
+                    )}
                   </div>
                 ) : isPdfFile(selectedFile.mimetype, selectedFile.originalName) && selectedFile.fileUrl ? (
                   <div className="relative bg-white rounded-2xl overflow-hidden" onContextMenu={(e) => e.preventDefault()}>
@@ -732,6 +759,61 @@ const Home = () => {
           </div>
         </div>
       )}
+
+      {/* Premium Footer */}
+      <footer className="bg-slate-900 border-t border-slate-800 text-slate-400 py-12 mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            <div className="space-y-4 col-span-1 md:col-span-2">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                  Z
+                </div>
+                <span className="text-lg font-bold text-slate-100">Zephyronz</span>
+              </div>
+              <p className="text-sm text-slate-500 leading-relaxed max-w-sm">
+                Secure and state-of-the-art College Records Management Platform. Engineered for absolute file safety and granular control over document viewing permissions.
+              </p>
+            </div>
+            
+            <div>
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-4">Platform</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link to="/home" className="hover:text-indigo-400 transition-colors">Documents</Link></li>
+                <li><Link to="/profile" className="hover:text-indigo-400 transition-colors">Profile Card</Link></li>
+                {user?.role === "admin" && (
+                  <li><Link to="/admin" className="hover:text-indigo-400 transition-colors">Admin Panel</Link></li>
+                )}
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-4">Security</h4>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                  <span>Screenshot Shield Active</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                  <span>Watermarked Previews</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          
+          <hr className="border-slate-800 my-8" />
+          
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+            <p>&copy; {new Date().getFullYear()} Zephyronz. All rights reserved.</p>
+            <div className="flex gap-4">
+              <a href="#" className="hover:text-slate-400 transition-colors">Privacy Policy</a>
+              <a href="#" className="hover:text-slate-400 transition-colors">Terms of Service</a>
+              <a href="#" className="hover:text-slate-400 transition-colors">Support</a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

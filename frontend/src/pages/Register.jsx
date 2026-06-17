@@ -36,12 +36,12 @@ const Register = () => {
   // validate form
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.name) {
+    if (!formData.name.trim()) {
       newErrors.name = "Name is required";
     } else if (formData.name.length < 3) {
       newErrors.name = "Name must be at least 3 characters";
     }
-    if (!formData.email) {
+    if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email is invalid";
@@ -132,18 +132,22 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100 flex items-center justify-center px-4 py-8">
-      <div className="bg-white/95 backdrop-blur-sm shadow-2xl rounded-2xl w-full max-w-md p-8 transform transition-all duration-300 hover:shadow-3xl">
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-indigo-950 to-slate-950 flex items-center justify-center px-4 py-8">
+      {/* Background ambient glows */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div className="relative backdrop-blur-xl bg-slate-900/60 border border-slate-800 shadow-[0_0_50px_rgba(99,102,241,0.15)] rounded-3xl p-8 md:p-10 w-full max-w-md transform transition-all duration-300 hover:shadow-[0_0_60px_rgba(99,102,241,0.25)]">
         
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full mb-4 shadow-lg">
-            <FiUserPlus className="w-10 h-10 text-white" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 rounded-2xl mb-4 shadow-lg shadow-indigo-500/25">
+            <FiUserPlus className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-extrabold bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200 bg-clip-text text-transparent">
             Create Account
           </h1>
-          <p className="text-gray-500 mt-2">Join us and start your journey</p>
+          <p className="text-slate-400 mt-2 text-sm">Join us and access secure records</p>
         </div>
 
         {/* Form */}
@@ -151,152 +155,161 @@ const Register = () => {
           
           {/* Name Field */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
               Full Name
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FiUser className="h-5 w-5 text-gray-400" />
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <FiUser className="h-5 w-5 text-slate-500" />
               </div>
               <input
                 type="text"
                 name="name"
-                placeholder="Enter your full name"
+                placeholder="Enter your name"
                 value={formData.name}
                 onChange={handleChange}
-                className={`w-full pl-10 pr-3 py-2.5 border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200`}
+                className={`w-full bg-slate-950/40 border ${errors.name ? 'border-red-500/50' : 'border-slate-800'} rounded-2xl pl-11 pr-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition duration-200`}
+                disabled={loading || otpLoading}
               />
             </div>
             {errors.name && (
-              <p className="mt-1 text-sm text-red-500">{errors.name}</p>
+              <p className="mt-1.5 text-xs text-red-400 font-medium">{errors.name}</p>
             )}
           </div>
 
           {/* Email Field */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
               Email Address
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FiMail className="h-5 w-5 text-gray-400" />
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <FiMail className="h-5 w-5 text-slate-500" />
               </div>
               <input
                 type="email"
                 name="email"
-                placeholder="Enter your email"
+                placeholder="name@example.com"
                 value={formData.email}
                 onChange={handleChange}
-                className={`w-full pl-10 pr-3 py-2.5 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200`}
+                className={`w-full bg-slate-950/40 border ${errors.email ? 'border-red-500/50' : 'border-slate-800'} rounded-2xl pl-11 pr-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition duration-200`}
+                disabled={loading || otpLoading || otpSent}
               />
             </div>
             {errors.email && (
-              <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+              <p className="mt-1.5 text-xs text-red-400 font-medium">{errors.email}</p>
             )}
           </div>
 
           {/* Password Field */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
               Password
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FiLock className="h-5 w-5 text-gray-400" />
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <FiLock className="h-5 w-5 text-slate-500" />
               </div>
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
-                placeholder="Create a password"
+                placeholder="••••••••"
                 value={formData.password}
                 onChange={handleChange}
-                className={`w-full pl-10 pr-12 py-2.5 border ${errors.password ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200`}
+                className={`w-full bg-slate-950/40 border ${errors.password ? 'border-red-500/50' : 'border-slate-800'} rounded-2xl pl-11 pr-12 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition duration-200`}
+                disabled={loading || otpLoading || otpSent}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-500 hover:text-slate-300 transition-colors"
+                disabled={otpSent}
               >
                 {showPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
               </button>
             </div>
             {errors.password && (
-              <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+              <p className="mt-1.5 text-xs text-red-400 font-medium">{errors.password}</p>
             )}
           </div>
 
           {/* Confirm Password Field */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
               Confirm Password
             </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FiLock className="h-5 w-5 text-gray-400" />
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <FiLock className="h-5 w-5 text-slate-500" />
               </div>
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 name="confirmPassword"
-                placeholder="Confirm your password"
+                placeholder="••••••••"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className={`w-full pl-10 pr-12 py-2.5 border ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200`}
+                className={`w-full bg-slate-950/40 border ${errors.confirmPassword ? 'border-red-500/50' : 'border-slate-800'} rounded-2xl pl-11 pr-12 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition duration-200`}
+                disabled={loading || otpLoading || otpSent}
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-500 hover:text-slate-300 transition-colors"
+                disabled={otpSent}
               >
                 {showConfirmPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
               </button>
             </div>
             {errors.confirmPassword && (
-              <p className="mt-1 text-sm text-red-500">{errors.confirmPassword}</p>
+              <p className="mt-1.5 text-xs text-red-400 font-medium">{errors.confirmPassword}</p>
             )}
           </div>
 
           {/* OTP Field (Only shown if OTP is sent) */}
           {otpSent && (
-            <div className="animate-in fade-in duration-300 space-y-2">
+            <div className="animate-in fade-in duration-300 space-y-3">
               <div className="flex justify-between items-center">
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
                   Verification Code (OTP)
                 </label>
                 <button
                   type="button"
                   onClick={handleSendOtp}
                   disabled={otpLoading}
-                  className="text-xs text-blue-600 hover:text-blue-700 font-semibold focus:outline-none disabled:opacity-50"
+                  className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold focus:outline-none disabled:opacity-50 transition-colors"
                 >
                   {otpLoading ? "Resending..." : "Resend Code"}
                 </button>
               </div>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiShield className="h-5 w-5 text-gray-400" />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <FiShield className="h-5 w-5 text-slate-500" />
                 </div>
                 <input
                   type="text"
                   name="otp"
                   maxLength={6}
-                  placeholder="Enter 6-digit verification code"
+                  placeholder="Enter 6-digit code"
                   value={formData.otp}
                   onChange={handleChange}
-                  className={`w-full pl-10 pr-3 py-2.5 border ${errors.otp ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-center tracking-[4px] font-semibold`}
+                  className={`w-full bg-slate-950/40 border ${errors.otp ? 'border-red-500/50' : 'border-slate-800'} rounded-2xl pl-11 pr-4 py-3.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition duration-200 text-center tracking-[4px] font-semibold text-lg`}
                 />
               </div>
               {errors.otp && (
-                <p className="mt-1 text-sm text-red-500">{errors.otp}</p>
+                <p className="mt-1.5 text-xs text-red-400 font-medium">{errors.otp}</p>
               )}
 
               {/* Developer Notice for Local Testing */}
               {developerOtp && (
-                <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-3.5 text-xs font-medium animate-in slide-in-from-top duration-300">
-                  <div className="flex gap-2">
-                    <span className="text-sm">⚙️</span>
+                <div className="bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded-2xl p-4 text-xs font-medium animate-in slide-in-from-top duration-300 leading-relaxed">
+                  <div className="flex gap-3">
+                    <span className="text-base">⚙️</span>
                     <div>
-                      <p className="font-semibold text-amber-900">Developer Testing Notice</p>
-                      <p className="mt-0.5 text-amber-700">SMTP settings are not configured in your backend `.env` file. For testing, please use verification code: <span className="font-bold text-amber-955 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-300 tracking-[1px] font-mono text-sm">{developerOtp}</span></p>
+                      <p className="font-semibold text-amber-200">Developer Testing Mode</p>
+                      <p className="mt-1 text-slate-400">
+                        SMTP server is not configured in your backend `.env`. Please verify your registration using this code: 
+                        <span className="ml-1.5 font-bold text-amber-200 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-500/30 tracking-[1.5px] font-mono text-sm">{developerOtp}</span>
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -308,7 +321,7 @@ const Register = () => {
           <button
             type="submit"
             disabled={loading || otpLoading}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-md hover:shadow-lg"
+            className="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white font-semibold py-3.5 rounded-2xl shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all duration-200 transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             {loading || otpLoading ? (
               <span className="flex items-center justify-center gap-2">
@@ -316,7 +329,7 @@ const Register = () => {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                {otpLoading ? "Sending Code..." : loading ? "Verifying & Registering..." : "Processing..."}
+                {otpLoading ? "Sending Verification..." : loading ? "Registering Account..." : "Processing..."}
               </span>
             ) : otpSent ? (
               "Verify OTP & Register"
@@ -330,29 +343,29 @@ const Register = () => {
         {/* Divider */}
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
+            <div className="w-full border-t border-slate-800"></div>
           </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">Already have an account?</span>
+          <div className="relative flex justify-center text-xs uppercase tracking-wider">
+            <span className="px-3 bg-slate-900/60 text-slate-500 font-semibold">Already registered?</span>
           </div>
         </div>
 
-        {/* Login Link */}
+        {/* Sign In Link */}
         <Link
           to="/login"
-          className="block text-center w-full bg-gray-50 hover:bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold transition-all duration-200 border border-gray-300 hover:border-blue-400"
+          className="block text-center w-full bg-slate-950/20 hover:bg-slate-950/40 text-slate-300 py-3.5 rounded-2xl font-semibold transition-all duration-200 border border-slate-800 hover:border-indigo-500/50 text-sm"
         >
           Sign In Here
         </Link>
 
         {/* Terms and Conditions */}
-        <p className="text-center text-xs text-gray-500 mt-6">
-          By creating an account, you agree to our{' '}
-          <a href="#" className="text-blue-600 hover:text-blue-700 font-medium">
+        <p className="text-center text-xs text-slate-500 mt-6 leading-relaxed">
+          By signing up, you agree to our{' '}
+          <a href="#" className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
             Terms of Service
           </a>{' '}
           and{' '}
-          <a href="#" className="text-blue-600 hover:text-blue-700 font-medium">
+          <a href="#" className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
             Privacy Policy
           </a>
         </p>
