@@ -30,12 +30,12 @@ const VerifyOtp = () => {
   // If no registration data is present, prompt redirection
   if (!email || !name || !password) {
     return (
-      <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-indigo-950 to-slate-950 flex items-center justify-center px-4">
-        <div className="backdrop-blur-xl bg-slate-900/60 border border-slate-800 p-8 rounded-3xl max-w-md w-full text-center shadow-xl">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center px-4">
+        <div className="backdrop-blur-xl bg-white/80 border border-blue-100 p-8 rounded-3xl max-w-md w-full text-center shadow-xl">
           <FiAlertTriangle className="w-16 h-16 text-amber-500 mx-auto mb-4 animate-pulse" />
-          <h2 className="text-2xl font-bold text-slate-200 mb-2">Invalid Session</h2>
-          <p className="text-slate-400 text-sm mb-6">We could not find any active registration session. Please fill in your details first.</p>
-          <Link to="/register" className="inline-flex items-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-all">
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Invalid Session</h2>
+          <p className="text-gray-500 text-sm mb-6">We could not find any active registration session. Please fill in your details first.</p>
+          <Link to="/register" className="inline-flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-all">
             <FiArrowLeft className="w-4 h-4" />
             <span>Go to Register</span>
           </Link>
@@ -112,26 +112,26 @@ const VerifyOtp = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-indigo-950 to-slate-950 flex items-center justify-center px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50 px-4 py-8">
       {/* Background ambient glows */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-200/40 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-300/30 rounded-full blur-3xl pointer-events-none"></div>
 
-      <div className="relative backdrop-blur-xl bg-slate-900/60 border border-slate-800 shadow-[0_0_50px_rgba(99,102,241,0.15)] rounded-3xl p-8 md:p-10 w-full max-w-md transform transition-all duration-300 hover:shadow-[0_0_60px_rgba(99,102,241,0.25)]">
+      <div className="relative backdrop-blur-xl bg-white/80 border border-blue-100 shadow-[0_0_50px_rgba(59,130,246,0.15)] rounded-3xl p-8 md:p-10 w-full max-w-md transform transition-all duration-300 hover:shadow-[0_0_60px_rgba(59,130,246,0.25)]">
         
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 rounded-2xl mb-4 shadow-lg shadow-indigo-500/25">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-tr from-blue-600 via-blue-500 to-blue-700 rounded-2xl mb-4 shadow-lg shadow-blue-500/25">
             <FiShield className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-extrabold bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-extrabold text-gray-800">
             Verify Email
           </h1>
-          <p className="text-slate-400 mt-2 text-sm">We've sent a 6-digit code to <span className="text-slate-200 font-semibold">{email}</span></p>
+          <p className="text-gray-500 mt-2 text-sm">We've sent a 6-digit code to <span className="text-gray-800 font-semibold">{email}</span></p>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 text-red-300 rounded-2xl text-sm font-medium animate-in fade-in duration-200 leading-relaxed">
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-2xl text-sm font-medium animate-in fade-in duration-200 leading-relaxed">
             {error}
           </div>
         )}
@@ -139,7 +139,7 @@ const VerifyOtp = () => {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 text-center">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-2 text-center">
               Enter Verification Code
             </label>
             <input
@@ -149,7 +149,7 @@ const VerifyOtp = () => {
               placeholder="000000"
               value={otp}
               onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-              className="w-full bg-slate-950/40 border border-slate-800 rounded-2xl py-3.5 text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition duration-200 text-center tracking-[8px] font-bold text-2xl"
+              className="w-full bg-white border border-gray-300 rounded-2xl py-3.5 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition duration-200 text-center tracking-[8px] font-bold text-2xl"
               disabled={loading}
               autoFocus
             />
@@ -163,8 +163,8 @@ const VerifyOtp = () => {
               disabled={cooldown > 0 || resendLoading}
               className={`font-semibold focus:outline-none transition-colors ${
                 cooldown > 0 
-                  ? "text-slate-500 cursor-not-allowed" 
-                  : "text-indigo-400 hover:text-indigo-300"
+                  ? "text-gray-400 cursor-not-allowed" 
+                  : "text-blue-600 hover:text-blue-700"
               }`}
             >
               {resendLoading 
@@ -178,14 +178,14 @@ const VerifyOtp = () => {
 
           {/* Developer Notice for Local Testing */}
           {developerOtp && (
-            <div className="bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded-2xl p-4 text-xs font-medium animate-in slide-in-from-top duration-300 leading-relaxed">
+            <div className="bg-amber-50 border border-amber-200 text-amber-700 rounded-2xl p-4 text-xs font-medium animate-in slide-in-from-top duration-300 leading-relaxed">
               <div className="flex gap-3">
                 <span className="text-base">⚙️</span>
                 <div>
-                  <p className="font-semibold text-amber-200">Developer Testing Mode</p>
-                  <p className="mt-1 text-slate-400">
+                  <p className="font-semibold text-amber-800">Developer Testing Mode</p>
+                  <p className="mt-1 text-gray-600">
                     SMTP server is not configured in your backend `.env`. Please verify your registration using this code: 
-                    <span className="ml-1.5 font-bold text-amber-200 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-500/30 tracking-[1.5px] font-mono text-sm">{developerOtp}</span>
+                    <span className="ml-1.5 font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300 tracking-[1.5px] font-mono text-sm">{developerOtp}</span>
                   </p>
                 </div>
               </div>
@@ -196,7 +196,7 @@ const VerifyOtp = () => {
           <button
             type="submit"
             disabled={loading || resendLoading}
-            className="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white font-semibold py-3.5 rounded-2xl shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all duration-200 transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 text-sm"
+            className="w-full bg-gradient-to-r from-blue-600 via-blue-500 to-blue-700 hover:from-blue-700 hover:via-blue-600 hover:to-blue-800 text-white font-semibold py-3.5 rounded-2xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all duration-200 transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 text-sm"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
@@ -212,8 +212,8 @@ const VerifyOtp = () => {
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-slate-800/80 text-center">
-          <Link to="/register" className="text-xs text-slate-500 hover:text-slate-400 transition-colors font-semibold uppercase tracking-wider">
+        <div className="mt-8 pt-6 border-t border-gray-200 text-center">
+          <Link to="/register" className="text-xs text-gray-500 hover:text-gray-700 transition-colors font-semibold uppercase tracking-wider">
             ← Back to Registration
           </Link>
         </div>
