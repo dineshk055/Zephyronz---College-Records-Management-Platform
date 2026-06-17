@@ -1,11 +1,32 @@
 import User from "../models/User.js";
+import OTP from "../models/OTP.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { sendRegistrationEmail } from "../utils/notificationService.js";
+import { sendRegistrationEmail, sendOtpEmail } from "../utils/notificationService.js";
 
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, otp } = req.body;
+
+    // check empty fields
+    if (!name || !email || !password || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Please fill all fields, including the verification OTP code.",
+      });
+    }
+
+    // verify OTP
+    const otpRecord = await OTP.findOne({ email: email.toLowerCase(), otp });
+    if (!otpRecord) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired verification code",
+      });
+    }
+
+    // delete OTP once verified (single-use)
+    await OTP.deleteOne({ _id: otpRecord._id });
 
     // check existing user
     const existingUser = await User.findOne({ email });
@@ -172,6 +193,45 @@ export const login = async (req, res) => {
     return res.status(500).json({
       success: false,
       msg: "Server error",
+    });
+  }
+};
+
+export const sendOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email is required" });
+    }
+
+    // check existing user
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: "User already exists" });
+    }
+
+    // generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // save OTP to DB (upsert if exists)
+    await OTP.findOneAndUpdate(
+      { email: email.toLowerCase() },
+      { otp, createdAt: new Date() },
+      { upsert: true, new: true }
+    );
+
+    // send OTP email
+    await sendOtpEmail(email.toLowerCase(), otp);
+
+    res.status(200).json({
+      success: true,
+      message: "OTP sent successfully to your email",
+    });
+  } catch (error) {
+    console.error("Error sending OTP:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to send OTP",
     });
   }
 };

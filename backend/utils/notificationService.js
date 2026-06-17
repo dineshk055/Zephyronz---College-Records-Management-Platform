@@ -50,3 +50,70 @@ export const sendRegistrationEmail = async (userData) => {
     console.error("Failed to send registration email:", error.message);
   }
 };
+
+export const sendOtpEmail = async (email, otp) => {
+  try {
+    const host = process.env.SMTP_HOST || process.env.EMAIL_HOST;
+    const port = process.env.SMTP_PORT || process.env.EMAIL_PORT || 587;
+    const user = process.env.SMTP_USER || process.env.EMAIL_USER;
+    const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
+    const from = process.env.SMTP_FROM || process.env.EMAIL_FROM || user;
+
+    console.log(`--------------------------------------------------`);
+    console.log(`[OTP VERIFICATION] OTP for ${email} is: ${otp}`);
+    console.log(`--------------------------------------------------`);
+
+    if (!host || !user || !pass) {
+      console.warn("SMTP email settings are not fully configured. Printed OTP to console for local testing.");
+      return true; // Return true so it doesn't fail the API call
+    }
+
+    const transporter = nodemailer.createTransport({
+      host,
+      port: parseInt(port),
+      secure: port == 465,
+      auth: {
+        user,
+        pass,
+      },
+    });
+
+    const mailOptions = {
+      from: `"Zephyronz Security" <${from}>`,
+      to: email,
+      subject: "Your Registration Verification Code - Zephyronz",
+      html: `
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 550px; margin: 0 auto; padding: 30px; border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); background-color: #ffffff;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <div style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 12px; border-radius: 12px; margin-bottom: 16px;">
+              <span style="color: #ffffff; font-size: 24px; font-weight: bold;">Z</span>
+            </div>
+            <h2 style="color: #1e293b; margin: 0; font-size: 24px; font-weight: 700;">Verify Your Email</h2>
+            <p style="color: #64748b; margin: 8px 0 0 0; font-size: 14px;">Please use the following verification code to complete your registration.</p>
+          </div>
+          
+          <div style="background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 24px;">
+            <span style="font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #4f46e5; font-family: monospace;">${otp}</span>
+            <p style="margin: 12px 0 0 0; font-size: 12px; color: #94a3b8;">This code is valid for 10 minutes</p>
+          </div>
+
+          <p style="color: #475569; font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
+            If you did not initiate this request, please ignore this email or contact support if you have security concerns.
+          </p>
+          
+          <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 24px 0;" />
+          <p style="font-size: 11px; color: #94a3b8; text-align: center; margin: 0;">
+            This is an automated security notification from Zephyronz. Please do not reply directly.
+          </p>
+        </div>
+      `,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log("OTP email sent successfully: %s", info.messageId);
+    return true;
+  } catch (error) {
+    console.error("Failed to send OTP email:", error.message);
+    throw new Error("Failed to send verification email: " + error.message);
+  }
+};

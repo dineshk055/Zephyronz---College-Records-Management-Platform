@@ -123,10 +123,18 @@ myapp.use('/uploads', (req, res, next) => {
   if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
     res.sendFile(filePath);
   } else {
-    // Redirect to production Render server as a fallback
-    const productionUrl = `https://zephyronz-college-records-management.onrender.com/uploads${req.path}`;
-    console.log(`Local file not found: ${req.path}. Redirecting to production: ${productionUrl}`);
-    res.redirect(productionUrl);
+    // Only redirect to production if we are NOT already on the production server to avoid infinite redirect loops
+    const host = req.headers.host || "";
+    const isProductionHost = host.includes("onrender.com") || host.includes("zephyronz");
+    
+    if (!isProductionHost) {
+      const productionUrl = `https://zephyronz-college-records-management.onrender.com/uploads${req.path}`;
+      console.log(`Local file not found: ${req.path}. Redirecting to production: ${productionUrl}`);
+      return res.redirect(productionUrl);
+    }
+    
+    console.log(`File not found: ${req.path} (already on production, skipping redirect)`);
+    res.status(404).json({ success: false, message: "File not found" });
   }
 });
 
