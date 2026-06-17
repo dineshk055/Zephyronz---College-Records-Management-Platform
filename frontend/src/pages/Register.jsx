@@ -18,6 +18,7 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
+  const [developerOtp, setDeveloperOtp] = useState("");
   const [errors, setErrors] = useState({});
 
   // handle input change
@@ -75,6 +76,11 @@ const Register = () => {
       );
       if (response.data.success) {
         setOtpSent(true);
+        if (response.data.testOtp) {
+          setDeveloperOtp(response.data.testOtp);
+        } else {
+          setDeveloperOtp("");
+        }
         toast.success("Verification code sent to your email!");
       }
     } catch (error) {
@@ -281,6 +287,19 @@ const Register = () => {
               </div>
               {errors.otp && (
                 <p className="mt-1 text-sm text-red-500">{errors.otp}</p>
+              )}
+
+              {/* Developer Notice for Local Testing */}
+              {developerOtp && (
+                <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-3.5 text-xs font-medium animate-in slide-in-from-top duration-300">
+                  <div className="flex gap-2">
+                    <span className="text-sm">⚙️</span>
+                    <div>
+                      <p className="font-semibold text-amber-900">Developer Testing Notice</p>
+                      <p className="mt-0.5 text-amber-700">SMTP settings are not configured in your backend `.env` file. For testing, please use verification code: <span className="font-bold text-amber-955 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-300 tracking-[1px] font-mono text-sm">{developerOtp}</span></p>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
           )}

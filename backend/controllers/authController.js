@@ -223,9 +223,19 @@ export const sendOtp = async (req, res) => {
     // send OTP email
     await sendOtpEmail(email.toLowerCase(), otp);
 
+    // If SMTP is not fully configured, provide a test OTP back to frontend in non-production
+    let testOtp = null;
+    const host = process.env.SMTP_HOST || process.env.EMAIL_HOST;
+    const user = process.env.SMTP_USER || process.env.EMAIL_USER;
+    const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
+    if ((!host || !user || !pass) && process.env.NODE_ENV !== 'production') {
+      testOtp = otp;
+    }
+
     res.status(200).json({
       success: true,
       message: "OTP sent successfully to your email",
+      testOtp,
     });
   } catch (error) {
     console.error("Error sending OTP:", error);
