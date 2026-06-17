@@ -17,11 +17,31 @@ export const registerUser = async (req, res) => {
     }
 
     // verify OTP
-    const otpRecord = await OTP.findOne({ email: email.toLowerCase(), otp });
+    const otpRecord = await OTP.findOne({ email: email.toLowerCase() });
     if (!otpRecord) {
       return res.status(400).json({
         success: false,
-        message: "Invalid or expired verification code",
+        message: "Invalid or expired verification code. Please request a new one.",
+      });
+    }
+
+    // check brute force and value
+    if (otpRecord.otp !== otp) {
+      otpRecord.attempts += 1;
+      await otpRecord.save();
+      
+      const remaining = 5 - otpRecord.attempts;
+      if (remaining <= 0) {
+        await OTP.deleteOne({ _id: otpRecord._id });
+        return res.status(400).json({
+          success: false,
+          message: "Too many failed attempts. Verification code has been invalidated. Please request a new one.",
+        });
+      }
+      
+      return res.status(400).json({
+        success: false,
+        message: `Incorrect verification code. ${remaining} attempts remaining.`,
       });
     }
 
@@ -213,10 +233,10 @@ export const sendOtp = async (req, res) => {
     // generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // save OTP to DB (upsert if exists)
+    // save OTP to DB (upsert if exists, reset attempts)
     await OTP.findOneAndUpdate(
       { email: email.toLowerCase() },
-      { otp, createdAt: new Date() },
+      { otp, attempts: 0, createdAt: new Date() },
       { upsert: true, new: true }
     );
 

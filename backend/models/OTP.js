@@ -12,10 +12,14 @@ const otpSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    attempts: {
+      type: Number,
+      default: 0,
+    },
     createdAt: {
       type: Date,
       default: Date.now,
-      expires: 600, // 10 minutes in seconds (MongoDB expects seconds for TTL index, but mongoose expires property takes seconds: 600 seconds = 10 minutes)
+      expires: 300, // 5 minutes (300 seconds)
     },
   }
 );

@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import VerifyOtp from "../pages/VerifyOtp";
 import Home from "../pages/Home";
 import AdminDashboard from "../pages/AdminDashboard";
 
@@ -19,6 +20,7 @@ const AppRoutes = () => {
       {/* public routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/verify-otp" element={<VerifyOtp />} />
 
       {/* user protected */}
       <Route
