@@ -14,6 +14,10 @@ const fileSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    pagesData: {
+      type: [String],
+      default: [],
+    },
     originalName: {
       type: String,
       default: "",

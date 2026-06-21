@@ -25,33 +25,63 @@ const isImageFile = (file) => {
 const FilePreviewModal = ({ file, onClose }) => {
   if (!file) return null;
   
+  const getPageUrl = (page) => {
+    let cleanPath = page.replace(/^\/?uploads\//, '');
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+    return `${apiUrl}/uploads/${cleanPath}`;
+  };
+
   const fileUrl = getFileUrl(file);
   const isImage = isImageFile(file);
   
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-auto" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 backdrop-blur-sm animate-fade-in" onClick={onClose}>
+      <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl transition-all border border-slate-100" onClick={e => e.stopPropagation()}>
         <div className="p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-bold">{file.title}</h3>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <div className="flex justify-between items-center mb-6 border-b pb-4">
+            <div>
+              <h3 className="text-2xl font-bold text-slate-800">{file.title}</h3>
+              <p className="text-sm text-slate-500 mt-1">Uploaded File Preview</p>
+            </div>
+            <button onClick={onClose} className="text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 p-2.5 rounded-full transition-all">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
-          {isImage && fileUrl ? (
-            <img src={fileUrl} alt={file.title} className="w-full rounded-lg" />
-          ) : (
-            <div className="text-center p-8">
-              <p className="text-gray-600">Preview not available for this file type</p>
-              {fileUrl && (
-                <a href={fileUrl} download className="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-                  Download File
-                </a>
-              )}
-            </div>
-          )}
+          
+          <div className="flex flex-col items-center gap-6">
+            {file.pagesData && file.pagesData.length > 0 ? (
+              file.pagesData.map((page, index) => (
+                <div key={index} className="relative border border-slate-200 rounded-2xl overflow-hidden max-w-full bg-slate-50 shadow-md">
+                  <img src={page} alt={`Page ${index + 1}`} className="w-full h-auto max-h-[70vh] object-contain" />
+                  <div className="text-center text-xs text-slate-500 font-semibold py-2.5 border-t bg-white">
+                    Page {index + 1} of {file.pagesData.length}
+                  </div>
+                </div>
+              ))
+            ) : file.pages && file.pages.length > 0 ? (
+              file.pages.map((page, index) => (
+                <div key={index} className="relative border border-slate-200 rounded-2xl overflow-hidden max-w-full bg-slate-50 shadow-md">
+                  <img src={getPageUrl(page)} alt={`Page ${index + 1}`} className="w-full h-auto max-h-[70vh] object-contain" />
+                  <div className="text-center text-xs text-slate-500 font-semibold py-2.5 border-t bg-white">
+                    Page {index + 1} of {file.pages.length}
+                  </div>
+                </div>
+              ))
+            ) : isImage && fileUrl ? (
+              <img src={fileUrl} alt={file.title} className="w-full max-h-[70vh] object-contain rounded-2xl shadow-md border border-slate-100" />
+            ) : (
+              <div className="text-center p-8 bg-slate-50 rounded-2xl border border-slate-100 max-w-md w-full">
+                <p className="text-slate-600 font-semibold mb-2">Preview not available for this file type</p>
+                {fileUrl && (
+                  <a href={fileUrl} download className="mt-4 inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-2.5 rounded-xl hover:bg-indigo-700 font-medium transition-all shadow-md">
+                    Download File
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

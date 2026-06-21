@@ -393,7 +393,14 @@ const Home = () => {
               >
                 {/* Preview Area */}
                 <div className="relative h-52 bg-gradient-to-br from-slate-50 to-indigo-50 flex items-center justify-center overflow-hidden">
-                  {file.pages && file.pages.length > 0 && !failedImages[`${file._id}-0`] ? (
+                  {file.pagesData && file.pagesData.length > 0 ? (
+                    <img
+                      src={file.pagesData[0]}
+                      alt={file.title}
+                      className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                      draggable="false"
+                    />
+                  ) : file.pages && file.pages.length > 0 && !failedImages[`${file._id}-0`] ? (
                     <img
                       src={getFileUrl(file.pages[0])}
                       alt={file.title}
@@ -421,9 +428,9 @@ const Home = () => {
                   )}
                   
                   {/* Badges */}
-                  {file.pages && file.pages.length > 0 && (
+                  {((file.pagesData && file.pagesData.length > 0) || (file.pages && file.pages.length > 0)) && (
                     <span className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-full">
-                      {file.pages.length} {file.pages.length === 1 ? 'Page' : 'Pages'}
+                      {file.pagesData && file.pagesData.length > 0 ? file.pagesData.length : file.pages.length} {(file.pagesData && file.pagesData.length > 0 ? file.pagesData.length : file.pages.length) === 1 ? 'Page' : 'Pages'}
                     </span>
                   )}
                   
@@ -590,7 +597,44 @@ const Home = () => {
               
               {/* Modal Body */}
               <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)] bg-slate-50">
-                {selectedFile.pages && selectedFile.pages.length > 0 ? (
+                {selectedFile.pagesData && selectedFile.pagesData.length > 0 ? (
+                  <div className="flex flex-col items-center gap-6">
+                    {selectedFile.pagesData.map((pageData, index) => (
+                      <div 
+                        key={index} 
+                        className="relative bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden max-w-4xl w-full"
+                        onContextMenu={(e) => e.preventDefault()}
+                      >
+                        <div 
+                          className="absolute inset-0 pointer-events-none grid grid-cols-2 grid-rows-3"
+                          style={{ opacity: 0.05 }}
+                        >
+                          {Array.from({ length: 6 }).map((_, i) => (
+                            <div 
+                              key={i} 
+                              className="flex items-center justify-center text-center font-bold text-slate-800 text-sm transform -rotate-[30deg]"
+                            >
+                              <div>
+                                <p>{user?.name}</p>
+                                <p className="text-xs">{user?.email}</p>
+                                <p className="text-[10px]">{new Date().toLocaleDateString()}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <img
+                          src={pageData}
+                          alt={`Page ${index + 1}`}
+                          className="w-full h-auto"
+                          draggable="false"
+                        />
+                        <div className="mt-3 text-center text-xs text-slate-400 font-semibold border-t border-slate-100 pt-3">
+                          Page {index + 1} of {selectedFile.pagesData.length}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : selectedFile.pages && selectedFile.pages.length > 0 ? (
                   <div className="flex flex-col items-center gap-6">
                     {selectedFile.pages.map((pageFile, index) => (
                       <div 

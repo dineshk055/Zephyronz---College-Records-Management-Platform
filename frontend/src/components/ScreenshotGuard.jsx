@@ -147,16 +147,59 @@ const ScreenshotGuard = () => {
       }
     };
 
+    const handleWindowBlur = () => {
+      const activeDoc = localStorage.getItem("active_document");
+      if (activeDoc) {
+        setWarningTitle("Security Alert");
+        setWarningText("Screen capture overlay or window blur detected while document is open! This activity has been reported.");
+        setShowWarning(true);
+        logSecurityEvent("screenshot", "Window lost focus (possible screenshot or screen capture overlay)");
+      }
+    };
+
+    const handleBeforePrint = () => {
+      const activeDoc = localStorage.getItem("active_document");
+      if (activeDoc) {
+        setWarningTitle("Security Violation");
+        setWarningText("Printing or saving this secure page to PDF is strictly prohibited!");
+        setShowWarning(true);
+        logSecurityEvent("unauthorized_print", "Print action triggered (blocked via print media)");
+      }
+    };
+
+    // Inject print blocking CSS
+    const styleEl = document.createElement("style");
+    styleEl.innerHTML = `
+      @media print {
+        body {
+          display: none !important;
+        }
+      }
+      /* Prevent selection and drag on images */
+      img {
+        user-select: none !important;
+        -webkit-user-drag: none !important;
+      }
+    `;
+    document.head.appendChild(styleEl);
+
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("copy", handleCopy);
     window.addEventListener("contextmenu", handleContextMenu);
     window.addEventListener("dragstart", handleDragStart);
+    window.addEventListener("blur", handleWindowBlur);
+    window.addEventListener("beforeprint", handleBeforePrint);
 
     return () => {
+      if (document.head.contains(styleEl)) {
+        document.head.removeChild(styleEl);
+      }
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("copy", handleCopy);
       window.removeEventListener("contextmenu", handleContextMenu);
       window.removeEventListener("dragstart", handleDragStart);
+      window.removeEventListener("blur", handleWindowBlur);
+      window.removeEventListener("beforeprint", handleBeforePrint);
     };
   }, [isAuthenticated, token, isAdmin]);
 
