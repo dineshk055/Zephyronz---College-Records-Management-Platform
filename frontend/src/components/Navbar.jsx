@@ -39,13 +39,16 @@ const Navbar = () => {
             {/* Logo Section */}
             <Link 
               to="/" 
-              className="flex items-center space-x-2 group"
+              className="flex items-center space-x-3 group"
             >
-              <div className="relative">
-                <div className="absolute inset-0 bg-blue-400 rounded-full blur opacity-75 group-hover:opacity-100 transition-opacity"></div>
-                <FiLock className="relative w-8 h-8 text-blue-600 group-hover:scale-110 transition-transform" />
+              <div className="relative w-10 h-10 md:w-11 md:h-11 rounded-xl overflow-hidden shadow-md group-hover:shadow-indigo-500/20 border border-slate-200 transition-all duration-300 transform group-hover:scale-105">
+                <img 
+                  src="/pwa-192x192.png" 
+                  alt="Zephyronz Emblem" 
+                  className="w-full h-full object-cover"
+                />
               </div>
-              <span className="text-xl md:text-2xl font-bold text-gray-800">
+              <span className="text-xl md:text-2xl font-extrabold bg-gradient-to-r from-indigo-700 to-purple-700 bg-clip-text text-transparent group-hover:from-indigo-600 group-hover:to-purple-655 transition-all duration-300">
                 Zephyronz
               </span>
             </Link>
@@ -57,21 +60,21 @@ const Navbar = () => {
                 <>
                   <Link
                     to="/"
-                    className="px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-all duration-200 flex items-center gap-2"
+                    className="px-4 py-2 text-gray-700 hover:text-indigo-650 hover:bg-indigo-50/50 rounded-lg transition-all duration-200 flex items-center gap-2"
                   >
                     <FiHome className="w-4 h-4" />
                     <span>Home</span>
                   </Link>
                   <Link
                     to="/login"
-                    className="px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-all duration-200 flex items-center gap-2"
+                    className="px-4 py-2 text-gray-700 hover:text-indigo-650 hover:bg-indigo-50/50 rounded-lg transition-all duration-200 flex items-center gap-2"
                   >
                     <FiLogIn className="w-4 h-4" />
                     <span>Login</span>
                   </Link>
                   <Link
                     to="/register"
-                    className="ml-2 px-5 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center gap-2"
+                    className="ml-2 px-5 py-2 bg-gradient-to-r from-indigo-600 to-purple-650 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center gap-2"
                   >
                     <FiUserPlus className="w-4 h-4" />
                     <span>Register</span>
@@ -82,7 +85,7 @@ const Navbar = () => {
                 <>
                   <Link
                     to="/home"
-                    className="px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-all duration-200 flex items-center gap-2"
+                    className="px-4 py-2 text-gray-700 hover:text-indigo-650 hover:bg-indigo-50/50 rounded-lg transition-all duration-200 flex items-center gap-2"
                   >
                     <FiHome className="w-4 h-4" />
                     <span>Home</span>
@@ -105,7 +108,7 @@ const Navbar = () => {
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                       className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all duration-200"
                     >
-                      <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                      <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
                         <span className="text-white text-sm font-semibold">
                           {user?.name?.charAt(0).toUpperCase() || "U"}
                         </span>
@@ -171,7 +174,7 @@ const Navbar = () => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-gray-100 focus:outline-none transition-colors"
+              className="md:hidden p-2 rounded-lg text-gray-600 hover:text-indigo-650 hover:bg-indigo-50/55 focus:outline-none transition-colors"
             >
               <div className="w-6 h-5 flex flex-col justify-between">
                 <span className={`w-full h-0.5 bg-current transform transition-all duration-300 ${isMenuOpen ? "rotate-45 translate-y-2" : ""}`}></span>
@@ -192,7 +195,7 @@ const Navbar = () => {
                 <Link
                   to="/"
                   onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-indigo-655 hover:bg-indigo-50/50 rounded-lg transition-colors"
                 >
                   <FiHome className="w-5 h-5" />
                   <span>Home</span>
@@ -200,7 +203,7 @@ const Navbar = () => {
                 <Link
                   to="/login"
                   onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-indigo-655 hover:bg-indigo-50/50 rounded-lg transition-colors"
                 >
                   <FiLogIn className="w-5 h-5" />
                   <span>Login</span>
@@ -208,7 +211,7 @@ const Navbar = () => {
                 <Link
                   to="/register"
                   onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-650 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-colors"
                 >
                   <FiUserPlus className="w-5 h-5" />
                   <span>Register</span>
@@ -217,9 +220,9 @@ const Navbar = () => {
             ) : (
               <>
                 {/* Mobile User Info */}
-                <div className="px-4 py-3 mb-2 border-b border-gray-200 bg-gray-50 rounded-lg">
+                <div className="px-4 py-3 mb-2 border-b border-gray-200 bg-gray-55 rounded-lg">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
                       <span className="text-white font-semibold text-lg">
                         {user?.name?.charAt(0).toUpperCase() || "U"}
                       </span>
@@ -237,7 +240,7 @@ const Navbar = () => {
                 <Link
                   to="/home"
                   onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-indigo-655 hover:bg-indigo-50/50 rounded-lg transition-colors"
                 >
                   <FiHome className="w-5 h-5" />
                   <span>Home</span>
@@ -248,7 +251,7 @@ const Navbar = () => {
                   <Link
                     to="/admin"
                     onClick={() => setIsMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors"
+                    className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-650 hover:to-pink-655 transition-colors"
                   >
                     <FiShield className="w-5 h-5" />
                     <span>Admin Dashboard</span>
@@ -258,7 +261,7 @@ const Navbar = () => {
                 <Link
                   to="/profile"
                   onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-indigo-655 hover:bg-indigo-50/50 rounded-lg transition-colors"
                 >
                   <FiUser className="w-5 h-5" />
                   <span>Profile Settings</span>
@@ -266,7 +269,7 @@ const Navbar = () => {
                 
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-red-650 hover:bg-red-50 rounded-lg transition-colors"
                 >
                   <FiLogOut className="w-5 h-5" />
                   <span>Logout</span>

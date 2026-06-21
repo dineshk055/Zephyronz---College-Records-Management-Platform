@@ -94,25 +94,29 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950 relative overflow-hidden px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-slate-50 to-purple-50 relative overflow-hidden px-4 py-8">
       {/* Background ambient glows */}
-      <div className="absolute -top-12 -left-12 w-96 h-96 bg-indigo-550/10 rounded-full blur-[100px] pointer-events-none"></div>
-      <div className="absolute -bottom-12 -right-12 w-96 h-96 bg-purple-550/10 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute -top-12 -left-12 w-96 h-96 bg-indigo-350/10 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute -bottom-12 -right-12 w-96 h-96 bg-purple-350/10 rounded-full blur-[100px] pointer-events-none"></div>
 
-      <div className="relative backdrop-blur-xl bg-slate-900/40 border border-slate-800/80 shadow-[0_0_50px_rgba(99,102,241,0.08)] rounded-3xl p-8 md:p-10 w-full max-w-md transform transition-all duration-300 hover:shadow-[0_0_65px_rgba(99,102,241,0.18)]">
+      <div className="relative backdrop-blur-xl bg-white/70 border border-white/60 shadow-[0_0_50px_rgba(99,102,241,0.05)] rounded-3xl p-8 md:p-10 w-full max-w-md transform transition-all duration-300 hover:shadow-[0_0_65px_rgba(99,102,241,0.1)]">
         
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-650 rounded-2xl mb-4 shadow-lg shadow-indigo-500/20">
-            <FiLogIn className="w-8 h-8 text-white" />
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-4 shadow-lg shadow-indigo-500/10 border border-slate-200/50 bg-white overflow-hidden transform hover:scale-105 transition-transform duration-300">
+            <img 
+              src="/pwa-512x512.png" 
+              alt="Zephyronz Emblem" 
+              className="w-full h-full object-cover"
+            />
           </div>
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-white via-indigo-100 to-slate-200 bg-clip-text text-transparent">
+          <h2 className="text-3xl font-extrabold text-slate-800">
             Welcome Back
           </h2>
-          <p className="text-slate-400 mt-2 text-sm">Please login to access your secure records</p>
+          <p className="text-slate-500 mt-2 text-sm font-medium">Please login to access your secure records</p>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-950/40 border border-red-800/30 text-red-400 rounded-2xl text-sm font-medium animate-in fade-in duration-200 leading-relaxed">
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-650 rounded-2xl text-sm font-semibold animate-in fade-in duration-200 leading-relaxed">
             {error}
           </div>
         )}
@@ -120,12 +124,12 @@ const Login = () => {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Email field */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
               Email Address
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <FiMail className="h-5 w-5 text-slate-500" />
+                <FiMail className="h-5 w-5 text-slate-400" />
               </div>
               <input
                 type="email"
@@ -133,7 +137,7 @@ const Login = () => {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="name@example.com"
-                className="w-full bg-slate-950/40 border border-slate-800/80 rounded-2xl pl-11 pr-4 py-3.5 text-slate-100 placeholder-slate-650 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all duration-200"
+                className="w-full bg-white border border-slate-200 rounded-2xl pl-11 pr-4 py-3.5 text-slate-850 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
                 disabled={loading}
               />
             </div>
@@ -141,12 +145,12 @@ const Login = () => {
 
           {/* Password field */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
               Password
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <FiLock className="h-5 w-5 text-slate-500" />
+                <FiLock className="h-5 w-5 text-slate-400" />
               </div>
               <input
                 type={showPassword ? "text" : "password"}
@@ -154,13 +158,13 @@ const Login = () => {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="••••••••"
-                className="w-full bg-slate-950/40 border border-slate-800/80 rounded-2xl pl-11 pr-12 py-3.5 text-slate-100 placeholder-slate-650 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all duration-200"
+                className="w-full bg-white border border-slate-200 rounded-2xl pl-11 pr-12 py-3.5 text-slate-850 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
                 disabled={loading}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-500 hover:text-slate-300 transition-colors"
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
               >
                 {showPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
               </button>
@@ -171,7 +175,7 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold py-3.5 rounded-2xl shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/35 transition-all duration-300 transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="w-full bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-650 text-white font-semibold py-3.5 rounded-2xl shadow-lg shadow-indigo-500/15 hover:shadow-indigo-500/25 transition-all duration-300 transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
@@ -188,17 +192,17 @@ const Login = () => {
         </form>
 
         <div className="mt-8 text-center">
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-slate-500">
             Don't have an account?{" "}
-            <Link to="/register" className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors">
+            <Link to="/register" className="text-indigo-600 hover:text-indigo-700 font-semibold transition-colors">
               Create an account
             </Link>
           </p>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-slate-800/80 text-center">
+        <div className="mt-8 pt-6 border-t border-slate-200 text-center">
           <p className="text-xs text-slate-500">
-            Demo Administrator: <span className="text-indigo-400/80 font-mono">admin@example.com</span> / <span className="text-indigo-400/80 font-mono">password123</span>
+            Demo Administrator: <span className="text-indigo-600/80 font-mono">admin@example.com</span> / <span className="text-indigo-600/80 font-mono">password123</span>
           </p>
         </div>
       </div>
