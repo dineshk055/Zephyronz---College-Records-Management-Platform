@@ -1,16 +1,35 @@
+import { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
 import AppRoutes from "./routes/AppRoutes";
 import { Toaster } from "react-hot-toast";
 import ScreenshotGuard from "./components/ScreenshotGuard";
+import SplashScreen from "./components/SplashScreen";
+import { useTheme } from "./context/ThemeContext";
 
 function App() {
+  const [showSplash, setShowSplash] = useState(true);
+  const { theme } = useTheme();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2500); // 2.5 seconds splash screen
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (showSplash) {
+    return <SplashScreen />;
+  }
+
   return (
-    <>
+    <div className={`theme-transition min-h-screen ${theme === "dark" ? "dark bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-800"}`}>
       <ScreenshotGuard />
       <Navbar />
-      <AppRoutes />
+      <div className="animate-fade-in">
+        <AppRoutes />
+      </div>
       <Toaster position="top-right" />
-    </>
+    </div>
   );
 }
 

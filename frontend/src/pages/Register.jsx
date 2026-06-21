@@ -96,12 +96,12 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-slate-50 to-purple-50 relative overflow-hidden px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-slate-50 to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 relative overflow-hidden px-4 py-8">
       {/* Background ambient glows */}
-      <div className="absolute -top-12 -left-12 w-96 h-96 bg-indigo-350/10 rounded-full blur-[100px] pointer-events-none"></div>
-      <div className="absolute -bottom-12 -right-12 w-96 h-96 bg-purple-350/10 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute -top-12 -left-12 w-96 h-96 bg-indigo-350/10 dark:bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute -bottom-12 -right-12 w-96 h-96 bg-purple-350/10 dark:bg-purple-500/5 rounded-full blur-[100px] pointer-events-none"></div>
 
-      <div className="relative backdrop-blur-xl bg-white/70 border border-white/60 shadow-[0_0_50px_rgba(99,102,241,0.05)] rounded-3xl p-8 md:p-10 w-full max-w-md transform transition-all duration-300 hover:shadow-[0_0_65px_rgba(99,102,241,0.1)]">
+      <div className="relative backdrop-blur-xl bg-white/70 dark:bg-slate-900/40 border border-white/60 dark:border-slate-800/40 shadow-[0_0_50px_rgba(99,102,241,0.05)] rounded-3xl p-8 md:p-10 w-full max-w-md transform transition-all duration-300 hover:shadow-[0_0_65px_rgba(99,102,241,0.1)]">
         
         {/* Header */}
         <div className="text-center mb-8">
@@ -112,10 +112,10 @@ const Register = () => {
               className="w-full h-full object-cover"
             />
           </div>
-          <h1 className="text-3xl font-extrabold text-slate-800">
+          <h1 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100">
             Create Account
           </h1>
-          <p className="text-slate-500 mt-2 text-sm font-medium">Join us and access secure records</p>
+          <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm font-medium">Join us and access secure records</p>
         </div>
 
         {/* Form */}
@@ -123,12 +123,12 @@ const Register = () => {
           
           {/* Name Field */}
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
               Full Name
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <FiUser className="h-5 w-5 text-slate-400" />
+                <FiUser className="h-5 w-5 text-slate-400 dark:text-slate-500" />
               </div>
               <input
                 type="text"
@@ -136,7 +136,7 @@ const Register = () => {
                 placeholder="Enter your name"
                 value={formData.name}
                 onChange={handleChange}
-                className={`w-full bg-white border ${errors.name ? 'border-red-500/50' : 'border-slate-200'} rounded-2xl pl-11 pr-4 py-3 text-slate-850 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition duration-200`}
+                className={`w-full bg-white dark:bg-slate-950/65 border ${errors.name ? 'border-red-500/50' : 'border-slate-200 dark:border-slate-800'} rounded-2xl pl-11 pr-4 py-3 text-slate-850 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition duration-200`}
                 disabled={loading}
               />
             </div>
@@ -147,12 +147,12 @@ const Register = () => {
 
           {/* Email Field */}
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
               Email Address
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <FiMail className="h-5 w-5 text-slate-400" />
+                <FiMail className="h-5 w-5 text-slate-400 dark:text-slate-500" />
               </div>
               <input
                 type="email"
@@ -160,7 +160,7 @@ const Register = () => {
                 placeholder="name@example.com"
                 value={formData.email}
                 onChange={handleChange}
-                className={`w-full bg-white border ${errors.email ? 'border-red-500/50' : 'border-slate-200'} rounded-2xl pl-11 pr-4 py-3 text-slate-850 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition duration-200`}
+                className={`w-full bg-white dark:bg-slate-950/65 border ${errors.email ? 'border-red-500/50' : 'border-slate-200 dark:border-slate-800'} rounded-2xl pl-11 pr-4 py-3 text-slate-850 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition duration-200`}
                 disabled={loading}
               />
             </div>
@@ -171,12 +171,12 @@ const Register = () => {
 
           {/* Password Field */}
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
               Password
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <FiLock className="h-5 w-5 text-slate-400" />
+                <FiLock className="h-5 w-5 text-slate-400 dark:text-slate-500" />
               </div>
               <input
                 type={showPassword ? "text" : "password"}
@@ -184,7 +184,7 @@ const Register = () => {
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={handleChange}
-                className={`w-full bg-white border ${errors.password ? 'border-red-500/50' : 'border-slate-200'} rounded-2xl pl-11 pr-12 py-3 text-slate-850 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition duration-200`}
+                className={`w-full bg-white dark:bg-slate-950/65 border ${errors.password ? 'border-red-500/50' : 'border-slate-200 dark:border-slate-800'} rounded-2xl pl-11 pr-12 py-3 text-slate-850 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition duration-200`}
                 disabled={loading}
               />
               <button
@@ -202,12 +202,12 @@ const Register = () => {
 
           {/* Confirm Password */}
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
               Confirm Password
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <FiLock className="h-5 w-5 text-slate-400" />
+                <FiLock className="h-5 w-5 text-slate-400 dark:text-slate-500" />
               </div>
               <input
                 type={showConfirmPassword ? "text" : "password"}
@@ -215,7 +215,7 @@ const Register = () => {
                 placeholder="••••••••"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className={`w-full bg-white border ${errors.confirmPassword ? 'border-red-500/50' : 'border-slate-200'} rounded-2xl pl-11 pr-12 py-3 text-slate-850 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition duration-200`}
+                className={`w-full bg-white dark:bg-slate-950/65 border ${errors.confirmPassword ? 'border-red-500/50' : 'border-slate-200 dark:border-slate-800'} rounded-2xl pl-11 pr-12 py-3 text-slate-850 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition duration-205`}
                 disabled={loading}
               />
               <button
@@ -255,29 +255,29 @@ const Register = () => {
         {/* Divider */}
         <div className="relative my-5">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-200"></div>
+            <div className="w-full border-t border-slate-200 dark:border-slate-800"></div>
           </div>
           <div className="relative flex justify-center text-xs uppercase tracking-wider">
-            <span className="px-3 bg-white text-slate-500 font-bold">Already registered?</span>
+            <span className="px-3 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 font-bold">Already registered?</span>
           </div>
         </div>
 
         {/* Sign In Link */}
         <Link
           to="/login"
-          className="block text-center w-full bg-slate-50 hover:bg-slate-100 text-slate-700 py-3.5 rounded-2xl font-semibold transition-all duration-200 border border-slate-200 hover:border-indigo-500/50 text-sm"
+          className="block text-center w-full bg-slate-50 dark:bg-slate-950/65 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-705 dark:text-slate-350 py-3.5 rounded-2xl font-semibold transition-all duration-200 border border-slate-200 dark:border-slate-800 hover:border-indigo-500/50 dark:hover:border-indigo-500/50 text-sm"
         >
           Sign In Here
         </Link>
 
         {/* Terms and Conditions */}
-        <p className="text-center text-xs text-slate-500 mt-5 leading-relaxed">
+        <p className="text-center text-xs text-slate-500 dark:text-slate-400 mt-5 leading-relaxed">
           By signing up, you agree to our{' '}
-          <a href="#" className="text-indigo-650 hover:text-indigo-755 font-semibold transition-colors">
+          <a href="#" className="text-indigo-650 dark:text-indigo-400 hover:text-indigo-755 dark:hover:text-indigo-305 font-semibold transition-colors">
             Terms of Service
           </a>{' '}
           and{' '}
-          <a href="#" className="text-indigo-650 hover:text-indigo-755 font-semibold transition-colors">
+          <a href="#" className="text-indigo-650 dark:text-indigo-400 hover:text-indigo-755 dark:hover:text-indigo-305 font-semibold transition-colors">
             Privacy Policy
           </a>
         </p>

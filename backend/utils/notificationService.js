@@ -117,3 +117,70 @@ export const sendOtpEmail = async (email, otp) => {
     return false;
   }
 };
+
+export const sendPasswordResetOtpEmail = async (email, otp) => {
+  try {
+    const host = process.env.SMTP_HOST || process.env.EMAIL_HOST;
+    const port = process.env.SMTP_PORT || process.env.EMAIL_PORT || 587;
+    const user = process.env.SMTP_USER || process.env.EMAIL_USER;
+    const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
+    const from = process.env.SMTP_FROM || process.env.EMAIL_FROM || user;
+
+    console.log(`--------------------------------------------------`);
+    console.log(`[PASSWORD RESET] OTP for ${email} is: ${otp}`);
+    console.log(`--------------------------------------------------`);
+
+    if (!host || !user || !pass) {
+      console.warn("SMTP email settings are not fully configured. Printed password reset OTP to console for local testing.");
+      return true;
+    }
+
+    const transporter = nodemailer.createTransport({
+      host,
+      port: parseInt(port),
+      secure: port == 465,
+      auth: {
+        user,
+        pass,
+      },
+    });
+
+    const mailOptions = {
+      from: `"Zephyronz Security" <${from}>`,
+      to: email,
+      subject: "Password Reset Verification Code - Zephyronz",
+      html: `
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 550px; margin: 0 auto; padding: 30px; border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); background-color: #ffffff;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <div style="display: inline-block; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding: 12px; border-radius: 12px; margin-bottom: 16px;">
+              <span style="color: #ffffff; font-size: 24px; font-weight: bold;">Z</span>
+            </div>
+            <h2 style="color: #1e293b; margin: 0; font-size: 24px; font-weight: 700;">Reset Your Password</h2>
+            <p style="color: #64748b; margin: 8px 0 0 0; font-size: 14px;">Please use the following verification code to reset your account password.</p>
+          </div>
+          
+          <div style="background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 24px;">
+            <span style="font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #dc2626; font-family: monospace;">${otp}</span>
+            <p style="margin: 12px 0 0 0; font-size: 12px; color: #94a3b8;">This code is valid for 5 minutes</p>
+          </div>
+
+          <p style="color: #475569; font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
+            If you did not request a password reset, please change your password immediately or contact support as someone may be trying to access your account.
+          </p>
+          
+          <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 24px 0;" />
+          <p style="font-size: 11px; color: #94a3b8; text-align: center; margin: 0;">
+            This is an automated security notification from Zephyronz. Please do not reply directly.
+          </p>
+        </div>
+      `,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Password reset OTP email sent successfully: %s", info.messageId);
+    return true;
+  } catch (error) {
+    console.error("Failed to send password reset OTP email, falling back to test OTP:", error.message);
+    return false;
+  }
+};

@@ -94,12 +94,12 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-slate-50 to-purple-50 relative overflow-hidden px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-slate-50 to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 relative overflow-hidden px-4 py-8">
       {/* Background ambient glows */}
-      <div className="absolute -top-12 -left-12 w-96 h-96 bg-indigo-350/10 rounded-full blur-[100px] pointer-events-none"></div>
-      <div className="absolute -bottom-12 -right-12 w-96 h-96 bg-purple-350/10 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute -top-12 -left-12 w-96 h-96 bg-indigo-350/10 dark:bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute -bottom-12 -right-12 w-96 h-96 bg-purple-350/10 dark:bg-purple-500/5 rounded-full blur-[100px] pointer-events-none"></div>
 
-      <div className="relative backdrop-blur-xl bg-white/70 border border-white/60 shadow-[0_0_50px_rgba(99,102,241,0.05)] rounded-3xl p-8 md:p-10 w-full max-w-md transform transition-all duration-300 hover:shadow-[0_0_65px_rgba(99,102,241,0.1)]">
+      <div className="relative backdrop-blur-xl bg-white/70 dark:bg-slate-900/40 border border-white/60 dark:border-slate-800/40 shadow-[0_0_50px_rgba(99,102,241,0.05)] rounded-3xl p-8 md:p-10 w-full max-w-md transform transition-all duration-300 hover:shadow-[0_0_65px_rgba(99,102,241,0.1)]">
         
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-4 shadow-lg shadow-indigo-500/10 border border-slate-200/50 bg-white overflow-hidden transform hover:scale-105 transition-transform duration-300">
@@ -109,10 +109,10 @@ const Login = () => {
               className="w-full h-full object-cover"
             />
           </div>
-          <h2 className="text-3xl font-extrabold text-slate-800">
+          <h2 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100">
             Welcome Back
           </h2>
-          <p className="text-slate-500 mt-2 text-sm font-medium">Please login to access your secure records</p>
+          <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm font-medium">Please login to access your secure records</p>
         </div>
 
         {error && (
@@ -124,12 +124,12 @@ const Login = () => {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Email field */}
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
               Email Address
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <FiMail className="h-5 w-5 text-slate-400" />
+                <FiMail className="h-5 w-5 text-slate-400 dark:text-slate-500" />
               </div>
               <input
                 type="email"
@@ -137,7 +137,7 @@ const Login = () => {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="name@example.com"
-                className="w-full bg-white border border-slate-200 rounded-2xl pl-11 pr-4 py-3.5 text-slate-850 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
+                className="w-full bg-white dark:bg-slate-950/65 border border-slate-200 dark:border-slate-800 rounded-2xl pl-11 pr-4 py-3.5 text-slate-850 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
                 disabled={loading}
               />
             </div>
@@ -145,12 +145,12 @@ const Login = () => {
 
           {/* Password field */}
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
               Password
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <FiLock className="h-5 w-5 text-slate-400" />
+                <FiLock className="h-5 w-5 text-slate-400 dark:text-slate-500" />
               </div>
               <input
                 type={showPassword ? "text" : "password"}
@@ -158,7 +158,7 @@ const Login = () => {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="••••••••"
-                className="w-full bg-white border border-slate-200 rounded-2xl pl-11 pr-12 py-3.5 text-slate-850 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
+                className="w-full bg-white dark:bg-slate-950/65 border border-slate-200 dark:border-slate-800 rounded-2xl pl-11 pr-12 py-3.5 text-slate-850 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
                 disabled={loading}
               />
               <button
@@ -192,17 +192,17 @@ const Login = () => {
         </form>
 
         <div className="mt-8 text-center">
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-slate-550 dark:text-slate-400">
             Don't have an account?{" "}
-            <Link to="/register" className="text-indigo-600 hover:text-indigo-700 font-semibold transition-colors">
+            <Link to="/register" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold transition-colors">
               Create an account
             </Link>
           </p>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-slate-200 text-center">
-          <p className="text-xs text-slate-500">
-            Demo Administrator: <span className="text-indigo-600/80 font-mono">admin@example.com</span> / <span className="text-indigo-600/80 font-mono">password123</span>
+        <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800 text-center">
+          <p className="text-xs text-slate-500 dark:text-slate-450">
+            Demo Administrator: <span className="text-indigo-600/80 dark:text-indigo-400/80 font-mono">admin@example.com</span> / <span className="text-indigo-600/80 dark:text-indigo-400/80 font-mono">password123</span>
           </p>
         </div>
       </div>

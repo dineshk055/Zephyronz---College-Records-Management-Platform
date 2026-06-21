@@ -28,10 +28,10 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 theme-transition ${
         scrolled 
-          ? "bg-white/95 backdrop-blur-md shadow-lg" 
-          : "bg-white shadow-md"
+          ? "bg-white/95 dark:bg-slate-900/95 border-b border-slate-200/50 dark:border-slate-800/50 backdrop-blur-md shadow-lg" 
+          : "bg-white dark:bg-slate-900 shadow-md border-b border-slate-100 dark:border-slate-800/40"
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
@@ -60,21 +60,21 @@ const Navbar = () => {
                 <>
                   <Link
                     to="/"
-                    className="px-4 py-2 text-gray-700 hover:text-indigo-650 hover:bg-indigo-50/50 rounded-lg transition-all duration-200 flex items-center gap-2"
+                    className="px-4 py-2 text-gray-700 dark:text-slate-300 hover:text-indigo-650 dark:hover:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-slate-800/50 rounded-lg transition-all duration-200 flex items-center gap-2"
                   >
                     <FiHome className="w-4 h-4" />
                     <span>Home</span>
                   </Link>
                   <Link
                     to="/login"
-                    className="px-4 py-2 text-gray-700 hover:text-indigo-650 hover:bg-indigo-50/50 rounded-lg transition-all duration-200 flex items-center gap-2"
+                    className="px-4 py-2 text-gray-700 dark:text-slate-300 hover:text-indigo-650 dark:hover:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-slate-800/50 rounded-lg transition-all duration-200 flex items-center gap-2"
                   >
                     <FiLogIn className="w-4 h-4" />
                     <span>Login</span>
                   </Link>
                   <Link
                     to="/register"
-                    className="ml-2 px-5 py-2 bg-gradient-to-r from-indigo-600 to-purple-650 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center gap-2"
+                    className="ml-2 px-5 py-2 bg-gradient-to-r from-indigo-600 to-purple-655 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center gap-2"
                   >
                     <FiUserPlus className="w-4 h-4" />
                     <span>Register</span>
@@ -85,7 +85,7 @@ const Navbar = () => {
                 <>
                   <Link
                     to="/home"
-                    className="px-4 py-2 text-gray-700 hover:text-indigo-650 hover:bg-indigo-50/50 rounded-lg transition-all duration-200 flex items-center gap-2"
+                    className="px-4 py-2 text-gray-700 dark:text-slate-300 hover:text-indigo-655 dark:hover:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-slate-800/50 rounded-lg transition-all duration-200 flex items-center gap-2"
                   >
                     <FiHome className="w-4 h-4" />
                     <span>Home</span>
@@ -106,17 +106,17 @@ const Navbar = () => {
                   <div className="relative ml-4">
                     <button
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                      className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all duration-200"
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800/60 transition-all duration-200"
                     >
                       <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
                         <span className="text-white text-sm font-semibold">
                           {user?.name?.charAt(0).toUpperCase() || "U"}
                         </span>
                       </div>
-                      <span className="text-gray-700 hidden lg:inline font-medium">
+                      <span className="text-gray-700 dark:text-slate-300 hidden lg:inline font-medium">
                         {user?.name?.split(" ")[0] || "User"}
                       </span>
-                      <FiChevronDown className={`w-4 h-4 text-gray-600 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`} />
+                      <FiChevronDown className={`w-4 h-4 text-gray-650 dark:text-slate-455 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`} />
                     </button>
 
                     {/* Dropdown Menu */}
@@ -126,12 +126,12 @@ const Navbar = () => {
                           className="fixed inset-0 z-40"
                           onClick={() => setIsDropdownOpen(false)}
                         ></div>
-                        <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl z-50 border border-gray-200 overflow-hidden">
-                          <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
-                            <p className="text-sm font-semibold text-gray-800">{user?.name}</p>
-                            <p className="text-xs text-gray-500 mt-1">{user?.email}</p>
+                        <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-900 rounded-xl shadow-xl z-50 border border-gray-200 dark:border-slate-800/80 overflow-hidden">
+                          <div className="px-4 py-3 border-b border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-850/50">
+                            <p className="text-sm font-semibold text-gray-805 dark:text-slate-100">{user?.name}</p>
+                            <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">{user?.email}</p>
                             {user?.role === "admin" && (
-                              <span className="inline-block mt-2 px-2 py-0.5 text-xs font-semibold bg-purple-100 text-purple-700 rounded-full">
+                              <span className="inline-block mt-2 px-2 py-0.5 text-xs font-semibold bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400 rounded-full">
                                 Administrator
                               </span>
                             )}
@@ -139,25 +139,25 @@ const Navbar = () => {
                           <div className="py-2">
                             <Link
                               to="/profile"
-                              className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
+                              className="flex items-center gap-3 px-4 py-2 text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors"
                               onClick={() => setIsDropdownOpen(false)}
                             >
-                              <FiUser className="w-4 h-4" />
+                              <FiUser className="w-4 h-4 text-indigo-500" />
                               <span>Profile Settings</span>
                             </Link>
                             {user?.role === "admin" && (
                               <Link
                                 to="/admin"
-                                className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
+                                className="flex items-center gap-3 px-4 py-2 text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors"
                                 onClick={() => setIsDropdownOpen(false)}
                               >
-                                <FiShield className="w-4 h-4 text-purple-600" />
+                                <FiShield className="w-4 h-4 text-purple-650 dark:text-purple-400" />
                                 <span>Admin Dashboard</span>
                               </Link>
                             )}
                             <button
                               onClick={handleLogout}
-                              className="w-full flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50 transition-colors"
+                              className="w-full flex items-center gap-3 px-4 py-2 text-red-650 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
                             >
                               <FiLogOut className="w-4 h-4" />
                               <span>Logout</span>
@@ -189,13 +189,13 @@ const Navbar = () => {
         <div className={`md:hidden transition-all duration-300 overflow-hidden ${
           isMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
         }`}>
-          <div className="px-4 pt-2 pb-4 space-y-2 bg-white border-t border-gray-200 shadow-lg">
+          <div className="px-4 pt-2 pb-4 space-y-2 bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 shadow-lg">
             {!token ? (
               <>
                 <Link
                   to="/"
                   onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-indigo-655 hover:bg-indigo-50/50 rounded-lg transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-slate-300 hover:text-indigo-650 dark:hover:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-slate-850/60 rounded-lg transition-colors"
                 >
                   <FiHome className="w-5 h-5" />
                   <span>Home</span>
@@ -203,7 +203,7 @@ const Navbar = () => {
                 <Link
                   to="/login"
                   onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-indigo-655 hover:bg-indigo-50/50 rounded-lg transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-slate-300 hover:text-indigo-655 dark:hover:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-slate-850/60 rounded-lg transition-colors"
                 >
                   <FiLogIn className="w-5 h-5" />
                   <span>Login</span>
@@ -220,7 +220,7 @@ const Navbar = () => {
             ) : (
               <>
                 {/* Mobile User Info */}
-                <div className="px-4 py-3 mb-2 border-b border-gray-200 bg-gray-55 rounded-lg">
+                <div className="px-4 py-3 mb-2 border-b border-gray-250 dark:border-slate-800 bg-gray-50 dark:bg-slate-850/40 rounded-lg">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
                       <span className="text-white font-semibold text-lg">
@@ -228,10 +228,10 @@ const Navbar = () => {
                       </span>
                     </div>
                     <div className="flex-1">
-                      <p className="text-gray-800 font-semibold">{user?.name}</p>
-                      <p className="text-xs text-gray-500">{user?.email}</p>
+                      <p className="text-gray-805 dark:text-slate-100 font-semibold">{user?.name}</p>
+                      <p className="text-xs text-gray-500 dark:text-slate-400">{user?.email}</p>
                       {user?.role === "admin" && (
-                        <span className="inline-block mt-1 text-xs text-purple-600 font-semibold">Admin</span>
+                        <span className="inline-block mt-1 text-xs text-purple-600 dark:text-purple-400 font-semibold">Admin</span>
                       )}
                     </div>
                   </div>
@@ -240,7 +240,7 @@ const Navbar = () => {
                 <Link
                   to="/home"
                   onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-indigo-655 hover:bg-indigo-50/50 rounded-lg transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-slate-300 hover:text-indigo-650 dark:hover:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-slate-850/60 rounded-lg transition-colors"
                 >
                   <FiHome className="w-5 h-5" />
                   <span>Home</span>
@@ -261,7 +261,7 @@ const Navbar = () => {
                 <Link
                   to="/profile"
                   onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-indigo-655 hover:bg-indigo-50/50 rounded-lg transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-slate-300 hover:text-indigo-650 dark:hover:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-slate-850/60 rounded-lg transition-colors"
                 >
                   <FiUser className="w-5 h-5" />
                   <span>Profile Settings</span>
@@ -269,7 +269,7 @@ const Navbar = () => {
                 
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-red-650 hover:bg-red-50 rounded-lg transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-red-650 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors"
                 >
                   <FiLogOut className="w-5 h-5" />
                   <span>Logout</span>

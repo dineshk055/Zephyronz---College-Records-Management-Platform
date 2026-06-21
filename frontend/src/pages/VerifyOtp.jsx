@@ -112,12 +112,12 @@ const VerifyOtp = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-slate-50 to-purple-50 relative overflow-hidden px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-slate-50 to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 relative overflow-hidden px-4 py-8">
       {/* Background ambient glows */}
-      <div className="absolute -top-12 -left-12 w-96 h-96 bg-indigo-350/10 rounded-full blur-[100px] pointer-events-none"></div>
-      <div className="absolute -bottom-12 -right-12 w-96 h-96 bg-purple-350/10 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute -top-12 -left-12 w-96 h-96 bg-indigo-350/10 dark:bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute -bottom-12 -right-12 w-96 h-96 bg-purple-350/10 dark:bg-purple-500/5 rounded-full blur-[100px] pointer-events-none"></div>
 
-      <div className="relative backdrop-blur-xl bg-white/70 border border-white/60 shadow-[0_0_50px_rgba(99,102,241,0.05)] rounded-3xl p-8 md:p-10 w-full max-w-md transform transition-all duration-300 hover:shadow-[0_0_65px_rgba(99,102,241,0.1)]">
+      <div className="relative backdrop-blur-xl bg-white/70 dark:bg-slate-900/40 border border-white/60 dark:border-slate-800/40 shadow-[0_0_50px_rgba(99,102,241,0.05)] rounded-3xl p-8 md:p-10 w-full max-w-md transform transition-all duration-300 hover:shadow-[0_0_65px_rgba(99,102,241,0.1)]">
         
         {/* Header */}
         <div className="text-center mb-8">
@@ -128,14 +128,14 @@ const VerifyOtp = () => {
               className="w-full h-full object-cover"
             />
           </div>
-          <h1 className="text-3xl font-extrabold text-slate-800">
+          <h1 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100">
             Verify Email
           </h1>
-          <p className="text-slate-550 mt-2 text-sm font-medium">We've sent a 6-digit code to <span className="text-slate-800 font-semibold">{email}</span></p>
+          <p className="text-slate-550 dark:text-slate-400 mt-2 text-sm font-medium">We've sent a 6-digit code to <span className="text-slate-800 dark:text-slate-200 font-semibold">{email}</span></p>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-650 rounded-2xl text-sm font-semibold animate-in fade-in duration-200 leading-relaxed">
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-655 rounded-2xl text-sm font-semibold animate-in fade-in duration-200 leading-relaxed">
             {error}
           </div>
         )}
@@ -143,7 +143,7 @@ const VerifyOtp = () => {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 text-center">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2 text-center">
               Enter Verification Code
             </label>
             <input
@@ -153,7 +153,7 @@ const VerifyOtp = () => {
               placeholder="000000"
               value={otp}
               onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-              className="w-full bg-white border border-slate-200 rounded-2xl py-3.5 text-slate-850 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition duration-200 text-center tracking-[8px] font-bold text-2xl"
+              className="w-full bg-white dark:bg-slate-950/65 border border-slate-200 dark:border-slate-800 rounded-2xl py-3.5 text-slate-850 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition duration-200 text-center tracking-[8px] font-bold text-2xl"
               disabled={loading}
               autoFocus
             />
@@ -167,8 +167,8 @@ const VerifyOtp = () => {
               disabled={cooldown > 0 || resendLoading}
               className={`font-semibold focus:outline-none transition-colors ${
                 cooldown > 0 
-                  ? "text-slate-400 cursor-not-allowed" 
-                  : "text-indigo-605 hover:text-indigo-700"
+                  ? "text-slate-400 dark:text-slate-500 cursor-not-allowed" 
+                  : "text-indigo-605 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300"
               }`}
             >
               {resendLoading 
@@ -187,9 +187,9 @@ const VerifyOtp = () => {
                 <span className="text-base">⚙️</span>
                 <div>
                   <p className="font-semibold text-amber-800">Developer Testing Mode</p>
-                  <p className="mt-1 text-slate-600">
+                  <p className="mt-1 text-slate-650 dark:text-slate-400">
                     SMTP server is not configured in your backend `.env`. Please verify your registration using this code: 
-                    <span className="ml-1.5 font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300 tracking-[1.5px] font-mono text-sm">{developerOtp}</span>
+                    <span className="ml-1.5 font-bold text-amber-855 bg-amber-100 dark:bg-amber-950/40 px-2 py-0.5 rounded border border-amber-300 dark:border-amber-800 tracking-[1.5px] font-mono text-sm">{developerOtp}</span>
                   </p>
                 </div>
               </div>
@@ -216,8 +216,8 @@ const VerifyOtp = () => {
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-slate-200 text-center">
-          <Link to="/register" className="text-xs text-slate-500 hover:text-slate-700 transition-colors font-bold uppercase tracking-wider">
+        <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800 text-center">
+          <Link to="/register" className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-350 transition-colors font-bold uppercase tracking-wider">
             ← Back to Registration
           </Link>
         </div>

@@ -1,7 +1,7 @@
 import express from "express";
 import { protect } from "../middleware/authMiddleware.js";
 import { adminOnly } from "../middleware/adminMiddleware.js";
-import { getUsers, approveUser, rejectUser, deleteUser, getUserProfile, updateUserProfile } from "../controllers/userController.js";
+import { getUsers, approveUser, rejectUser, deleteUser, getUserProfile, updateUserProfile, sendChangePasswordOtp, changePasswordWithOtp } from "../controllers/userController.js";
 
 const router = express.Router();
 
@@ -22,5 +22,11 @@ router.put("/:id/reject", protect, adminOnly, rejectUser);
 
 // Delete user - Admin only
 router.delete("/:id", protect, adminOnly, deleteUser);
+
+// Change password (send OTP) - Protected
+router.post("/change-password/send-otp", protect, sendChangePasswordOtp);
+
+// Change password (verify & reset) - Protected
+router.post("/change-password/reset", protect, changePasswordWithOtp);
 
 export default router;
