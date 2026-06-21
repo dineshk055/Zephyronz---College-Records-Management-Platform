@@ -35,15 +35,15 @@ const FilePreviewModal = ({ file, onClose }) => {
   const isImage = isImageFile(file);
   
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 backdrop-blur-sm animate-fade-in" onClick={onClose}>
-      <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl transition-all border border-slate-100" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-slate-950/80 flex items-center justify-center z-50 p-4 backdrop-blur-md animate-fade-in" onClick={onClose}>
+      <div className="bg-slate-900 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl transition-all border border-slate-800/80" onClick={e => e.stopPropagation()}>
         <div className="p-6">
-          <div className="flex justify-between items-center mb-6 border-b pb-4">
+          <div className="flex justify-between items-center mb-6 border-b border-slate-850/60 pb-4">
             <div>
-              <h3 className="text-2xl font-bold text-slate-800">{file.title}</h3>
-              <p className="text-sm text-slate-500 mt-1">Uploaded File Preview</p>
+              <h3 className="text-2xl font-bold text-slate-100">{file.title}</h3>
+              <p className="text-sm text-slate-400 mt-1">Uploaded File Preview</p>
             </div>
-            <button onClick={onClose} className="text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 p-2.5 rounded-full transition-all">
+            <button onClick={onClose} className="text-slate-400 hover:text-slate-200 bg-slate-800 hover:bg-slate-700 p-2.5 rounded-full transition-all">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -53,29 +53,29 @@ const FilePreviewModal = ({ file, onClose }) => {
           <div className="flex flex-col items-center gap-6">
             {file.pagesData && file.pagesData.length > 0 ? (
               file.pagesData.map((page, index) => (
-                <div key={index} className="relative border border-slate-200 rounded-2xl overflow-hidden max-w-full bg-slate-50 shadow-md">
+                <div key={index} className="relative border border-slate-800 rounded-2xl overflow-hidden max-w-full bg-slate-950 shadow-md">
                   <img src={page} alt={`Page ${index + 1}`} className="w-full h-auto max-h-[70vh] object-contain" />
-                  <div className="text-center text-xs text-slate-500 font-semibold py-2.5 border-t bg-white">
+                  <div className="text-center text-xs text-slate-450 font-semibold py-2.5 border-t border-slate-800 bg-slate-900">
                     Page {index + 1} of {file.pagesData.length}
                   </div>
                 </div>
               ))
             ) : file.pages && file.pages.length > 0 ? (
               file.pages.map((page, index) => (
-                <div key={index} className="relative border border-slate-200 rounded-2xl overflow-hidden max-w-full bg-slate-50 shadow-md">
+                <div key={index} className="relative border border-slate-800 rounded-2xl overflow-hidden max-w-full bg-slate-950 shadow-md">
                   <img src={getPageUrl(page)} alt={`Page ${index + 1}`} className="w-full h-auto max-h-[70vh] object-contain" />
-                  <div className="text-center text-xs text-slate-500 font-semibold py-2.5 border-t bg-white">
+                  <div className="text-center text-xs text-slate-450 font-semibold py-2.5 border-t border-slate-800 bg-slate-900">
                     Page {index + 1} of {file.pages.length}
                   </div>
                 </div>
               ))
             ) : isImage && fileUrl ? (
-              <img src={fileUrl} alt={file.title} className="w-full max-h-[70vh] object-contain rounded-2xl shadow-md border border-slate-100" />
+              <img src={fileUrl} alt={file.title} className="w-full max-h-[70vh] object-contain rounded-2xl shadow-md border border-slate-800" />
             ) : (
-              <div className="text-center p-8 bg-slate-50 rounded-2xl border border-slate-100 max-w-md w-full">
-                <p className="text-slate-600 font-semibold mb-2">Preview not available for this file type</p>
+              <div className="text-center p-8 bg-slate-950/50 rounded-2xl border border-slate-800/85 max-w-md w-full">
+                <p className="text-slate-350 font-semibold mb-2">Preview not available for this file type</p>
                 {fileUrl && (
-                  <a href={fileUrl} download className="mt-4 inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-2.5 rounded-xl hover:bg-indigo-700 font-medium transition-all shadow-md">
+                  <a href={fileUrl} download className="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-650 text-white px-6 py-2.5 rounded-xl hover:from-indigo-700 hover:to-purple-700 font-medium transition-all shadow-md">
                     Download File
                   </a>
                 )}
@@ -91,42 +91,42 @@ const FilePreviewModal = ({ file, onClose }) => {
 // Stats Cards
 const StatsCards = ({ stats }) => (
   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-    <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg">
+    <div className="bg-slate-900/55 backdrop-blur-md rounded-2xl p-6 text-white border border-slate-800/60 hover:border-blue-500/30 transition-all duration-300 shadow-md group">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-blue-100 text-sm">Total Files</p>
-          <p className="text-3xl font-bold mt-2">{stats.totalFiles}</p>
+          <p className="text-slate-450 text-sm font-medium">Total Files</p>
+          <p className="text-3xl font-bold mt-2 text-white">{stats.totalFiles}</p>
         </div>
-        <div className="bg-white bg-opacity-20 p-3 rounded-full">
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-blue-500/10 p-3.5 rounded-xl border border-blue-500/20 text-blue-400 group-hover:scale-110 transition-transform">
+          <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
           </svg>
         </div>
       </div>
     </div>
     
-    <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-lg">
+    <div className="bg-slate-900/55 backdrop-blur-md rounded-2xl p-6 text-white border border-slate-800/60 hover:border-green-500/30 transition-all duration-300 shadow-md group">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-green-100 text-sm">Total Users</p>
-          <p className="text-3xl font-bold mt-2">{stats.totalUsers}</p>
+          <p className="text-slate-450 text-sm font-medium">Total Users</p>
+          <p className="text-3xl font-bold mt-2 text-white">{stats.totalUsers}</p>
         </div>
-        <div className="bg-white bg-opacity-20 p-3 rounded-full">
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-green-500/10 p-3.5 rounded-xl border border-green-500/20 text-green-400 group-hover:scale-110 transition-transform">
+          <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
           </svg>
         </div>
       </div>
     </div>
     
-    <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg">
+    <div className="bg-slate-900/55 backdrop-blur-md rounded-2xl p-6 text-white border border-slate-800/60 hover:border-purple-500/30 transition-all duration-300 shadow-md group">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-purple-100 text-sm">Pending Approvals</p>
-          <p className="text-3xl font-bold mt-2">{stats.pendingApprovals}</p>
+          <p className="text-slate-455 text-sm font-medium">Pending Approvals</p>
+          <p className="text-3xl font-bold mt-2 text-white">{stats.pendingApprovals}</p>
         </div>
-        <div className="bg-white bg-opacity-20 p-3 rounded-full">
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-purple-500/10 p-3.5 rounded-xl border border-purple-500/20 text-purple-400 group-hover:scale-110 transition-transform">
+          <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
@@ -474,43 +474,49 @@ const AdminDashboard = () => {
   // No-op - moved outside component
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div 
+      className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed relative text-slate-100 pb-16"
+      style={{ backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.82), rgba(15, 23, 42, 0.82)), url('/campus_bg.jpg')` }}
+    >
       {/* Header */}
-      <div className="bg-white shadow-md sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <header className="sticky top-0 z-20 backdrop-blur-xl bg-slate-950/60 border-b border-slate-800/40 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-3">
-              <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-lg">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="bg-gradient-to-tr from-indigo-500 to-purple-650 p-2.5 rounded-xl shadow-lg shadow-indigo-500/20">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Admin Dashboard
-              </h1>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-white via-indigo-150 to-purple-200 bg-clip-text text-transparent">
+                  Admin Dashboard
+                </h1>
+                <p className="text-xs text-slate-400 mt-0.5">Zephyronz Security & Records Panel</p>
+              </div>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <p className="text-sm text-gray-500">Welcome back,</p>
-                <p className="font-semibold text-gray-800">{user?.name}</p>
-                <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
+              <div className="text-right hidden sm:block">
+                <p className="text-xs text-slate-450">Welcome back,</p>
+                <p className="font-semibold text-slate-200 text-sm">{user?.name}</p>
+                <p className="text-xs text-indigo-400 font-medium capitalize">{user?.role}</p>
               </div>
-              <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold">
+              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-650 rounded-full flex items-center justify-center text-white font-bold shadow-md shadow-indigo-900/25">
                 {user?.name?.charAt(0).toUpperCase()}
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         
         {/* Stats Cards */}
         <StatsCards stats={stats} />
 
         {/* Tabs */}
-        <div className="mb-8 border-b border-gray-200">
+        <div className="mb-8 border-b border-slate-800/60">
           <nav className="flex space-x-8">
             {[
               { id: "upload", label: "Upload Files", icon: "M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" },
@@ -523,8 +529,8 @@ const AdminDashboard = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center space-x-2 pb-4 px-1 border-b-2 transition-all duration-200 ${
                   activeTab === tab.id
-                    ? "border-purple-500 text-purple-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "border-indigo-500 text-indigo-400 font-semibold"
+                    : "border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700"
                 }`}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -539,15 +545,15 @@ const AdminDashboard = () => {
         {/* Upload Tab */}
         {activeTab === "upload" && (
           <div className="max-w-2xl mx-auto">
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-              <div className="bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-4">
-                <h2 className="text-xl font-semibold text-white">Upload New File</h2>
-                <p className="text-purple-100 text-sm">Share documents with users</p>
+            <div className="backdrop-blur-xl bg-slate-900/40 border border-slate-800/80 shadow-[0_0_50px_rgba(99,102,241,0.05)] rounded-3xl overflow-hidden">
+              <div className="bg-gradient-to-r from-indigo-550/20 to-purple-550/20 px-6 py-5 border-b border-slate-800/60">
+                <h2 className="text-xl font-bold text-white">Upload New File</h2>
+                <p className="text-slate-400 text-xs mt-1">Add secure documents accessible to authorized users</p>
               </div>
               
               <form onSubmit={handleUpload} className="p-6 space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
                     File Title *
                   </label>
                   <input
@@ -555,16 +561,16 @@ const AdminDashboard = () => {
                     placeholder="Enter a descriptive title"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                    className="w-full bg-slate-950/40 border border-slate-800/80 rounded-2xl px-4 py-3.5 text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all duration-200"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
                     Select File *
                   </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-500 transition-all duration-200">
+                  <div className="border-2 border-dashed border-slate-800/80 hover:border-indigo-500/60 rounded-2xl p-8 text-center bg-slate-950/20 hover:bg-slate-950/40 transition-all duration-200 cursor-pointer">
                     <input
                       id="fileInput"
                       type="file"
@@ -572,13 +578,13 @@ const AdminDashboard = () => {
                       className="hidden"
                     />
                     <label htmlFor="fileInput" className="cursor-pointer">
-                      <svg className="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-12 h-12 mx-auto text-slate-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                       </svg>
-                      <p className="text-gray-600">
+                      <p className="text-slate-200 font-medium">
                         {file ? file.name : "Click to browse or drag and drop"}
                       </p>
-                      <p className="text-gray-400 text-sm mt-1">
+                      <p className="text-slate-400 text-xs mt-1.5">
                         {file ? formatFileSize(file.size) : "Supports: PDF, Images, Documents (Max 10MB)"}
                       </p>
                     </label>
@@ -586,19 +592,19 @@ const AdminDashboard = () => {
                 </div>
 
                 {uploadProgress > 0 && uploadProgress < 100 && (
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div className="w-full bg-slate-800 rounded-full h-2">
                     <div 
-                      className="bg-purple-600 h-2.5 rounded-full transition-all duration-300"
+                      className="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full transition-all duration-300"
                       style={{ width: `${uploadProgress}%` }}
                     ></div>
-                    <p className="text-xs text-gray-500 mt-1 text-center">{uploadProgress}% uploaded</p>
+                    <p className="text-xs text-slate-450 mt-1.5 text-center">{uploadProgress}% uploaded</p>
                   </div>
                 )}
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02]"
+                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-650 text-white py-3.5 rounded-2xl font-semibold hover:from-indigo-750 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-550/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.01] shadow-lg shadow-indigo-650/15"
                 >
                   {loading ? (
                     <span className="flex items-center justify-center">
@@ -619,51 +625,51 @@ const AdminDashboard = () => {
 
         {/* Files Tab */}
         {activeTab === "files" && (
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
-              <h2 className="text-xl font-semibold text-white">Manage Files</h2>
-              <p className="text-blue-100 text-sm">View, preview, and delete uploaded files</p>
+          <div className="backdrop-blur-xl bg-slate-900/40 border border-slate-800/80 shadow-2xl rounded-3xl overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-500/20 to-indigo-550/20 px-6 py-5 border-b border-slate-800/60">
+              <h2 className="text-xl font-bold text-white">Manage Files</h2>
+              <p className="text-slate-400 text-xs mt-1">View, preview, and remove uploaded documents</p>
             </div>
             
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-slate-950/40 border-b border-slate-800/60">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uploaded By</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uploaded</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-450 uppercase tracking-wider">Title</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-455 uppercase tracking-wider">Uploaded By</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-455 uppercase tracking-wider">Size</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-455 uppercase tracking-wider">Uploaded</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-455 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-slate-800/50">
                   {files.length === 0 ? (
                     <tr>
-                      <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
+                      <td colSpan="5" className="px-6 py-12 text-center text-slate-450 bg-slate-900/20">
                         No files uploaded yet
                       </td>
                     </tr>
                   ) : (
                     files.map((file) => (
-                      <tr key={file._id} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{file.title}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <tr key={file._id} className="hover:bg-slate-900/20 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-200">{file.title}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
                           {file.uploadedBy?.name || "Unknown"}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
                           {formatFileSize(file.size)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
                           {formatDate(file.createdAt)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <div className="flex space-x-3">
+                          <div className="flex space-x-2">
                             <button
                               onClick={() => {
                                 setSelectedFile(file);
                                 setShowModal(true);
                               }}
-                              className="text-blue-600 hover:text-blue-800"
+                              className="text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 p-2 rounded-xl transition-all"
                               title="Preview"
                             >
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -673,7 +679,7 @@ const AdminDashboard = () => {
                             </button>
                             <button
                               onClick={() => handleDeleteFile(file._id)}
-                              className="text-red-600 hover:text-red-800"
+                              className="text-red-400 hover:text-red-300 hover:bg-red-500/10 p-2 rounded-xl transition-all"
                               title="Delete"
                             >
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -693,61 +699,61 @@ const AdminDashboard = () => {
 
         {/* Users Tab */}
         {activeTab === "users" && (
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-            <div className="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4">
-              <h2 className="text-xl font-semibold text-white">Manage Users</h2>
-              <p className="text-green-100 text-sm">Approve or remove user accounts</p>
+          <div className="backdrop-blur-xl bg-slate-900/40 border border-slate-800/80 shadow-2xl rounded-3xl overflow-hidden">
+            <div className="bg-gradient-to-r from-emerald-555/20 to-teal-555/20 px-6 py-5 border-b border-slate-800/60">
+              <h2 className="text-xl font-bold text-white">Manage Users</h2>
+              <p className="text-slate-400 text-xs mt-1">Approve registrations and manage user permissions</p>
             </div>
             
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-slate-950/40 border-b border-slate-800/60">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registered</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-455 uppercase tracking-wider">Name</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-455 uppercase tracking-wider">Email</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-455 uppercase tracking-wider">Role</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-455 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-455 uppercase tracking-wider">Registered</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-455 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-slate-800/50">
                   {users.length === 0 ? (
                     <tr>
-                      <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                      <td colSpan="6" className="px-6 py-12 text-center text-slate-450 bg-slate-900/20">
                         No users found
                       </td>
                     </tr>
                   ) : (
                     users.map((userItem) => (
-                      <tr key={userItem._id} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <tr key={userItem._id} className="hover:bg-slate-900/20 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-200">
                           {userItem.name}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
                           {userItem.email}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 py-1 text-xs rounded-full ${
+                          <span className={`px-2.5 py-0.5 text-xs font-semibold rounded-full border ${
                             userItem.role === "admin" 
-                              ? "bg-purple-100 text-purple-800" 
-                              : "bg-blue-100 text-blue-800"
+                              ? "bg-purple-500/10 text-purple-300 border-purple-500/20" 
+                              : "bg-blue-500/10 text-blue-300 border-blue-500/20"
                           }`}>
                             {userItem.role}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 py-1 text-xs rounded-full ${
+                          <span className={`px-2.5 py-0.5 text-xs font-semibold rounded-full border ${
                             userItem.status === "Approved" || userItem.isApproved 
-                              ? "bg-green-100 text-green-800" 
+                              ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20" 
                               : userItem.status === "Rejected"
-                              ? "bg-red-100 text-red-800"
-                              : "bg-yellow-100 text-yellow-800"
+                              ? "bg-rose-500/10 text-rose-300 border-rose-500/20"
+                              : "bg-amber-500/10 text-amber-300 border-amber-500/20"
                           }`}>
                             {userItem.status || (userItem.isApproved ? "Approved" : "Pending")}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
                           {formatDate(userItem.createdAt)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -755,7 +761,7 @@ const AdminDashboard = () => {
                             {(userItem.status !== "Approved" && !userItem.isApproved) && userItem.role !== "admin" && (
                               <button
                                 onClick={() => handleApproveUser(userItem._id)}
-                                className="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 transition-colors text-xs"
+                                className="bg-emerald-600/90 text-white px-3 py-1.5 rounded-xl hover:bg-emerald-700 transition-colors text-xs font-semibold shadow-md shadow-emerald-900/15"
                               >
                                 Approve
                               </button>
@@ -763,7 +769,7 @@ const AdminDashboard = () => {
                             {userItem.status !== "Rejected" && userItem.role !== "admin" && (
                               <button
                                 onClick={() => handleRejectUser(userItem._id)}
-                                className="bg-amber-500 text-white px-3 py-1 rounded-lg hover:bg-amber-600 transition-colors text-xs"
+                                className="bg-amber-600/90 text-white px-3 py-1.5 rounded-xl hover:bg-amber-700 transition-colors text-xs font-semibold shadow-md shadow-amber-900/15"
                               >
                                 Reject
                               </button>
@@ -771,7 +777,7 @@ const AdminDashboard = () => {
                             {userItem.role !== "admin" && (
                               <button
                                 onClick={() => handleDeleteUser(userItem._id)}
-                                className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition-colors text-xs"
+                                className="bg-rose-600/90 text-white px-3 py-1.5 rounded-xl hover:bg-rose-700 transition-colors text-xs font-semibold shadow-md shadow-rose-900/15"
                               >
                                 Delete
                               </button>
@@ -789,17 +795,17 @@ const AdminDashboard = () => {
 
         {/* Activity Logs Tab */}
         {activeTab === "logs" && (
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden animate-fadeIn">
-            <div className="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="backdrop-blur-xl bg-slate-900/40 border border-slate-800/80 shadow-2xl rounded-3xl overflow-hidden animate-fadeIn">
+            <div className="bg-gradient-to-r from-rose-500/25 to-red-650/25 px-6 py-5 border-b border-slate-800/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-white">Security & Activity Logs</h2>
-                <p className="text-red-100 text-sm">Monitor screenshot blocks, developer tool shortcuts, and window blurs</p>
+                <h2 className="text-xl font-bold text-white">Security & Activity Logs</h2>
+                <p className="text-slate-400 text-xs mt-1">Monitor print blocks, developer shortcut triggers, screenshot attempts, and screen blurs</p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2.5">
                 {selectedLogIds.length > 0 && (
                   <button
                     onClick={handleDeleteSelectedLogs}
-                    className="bg-red-700 hover:bg-red-800 text-white font-semibold py-2 px-4 rounded-xl transition-all shadow-md text-sm cursor-pointer border border-red-800"
+                    className="bg-rose-600 hover:bg-rose-750 text-white font-semibold py-2 px-4 rounded-xl transition-all shadow-md text-sm cursor-pointer border border-rose-750/30"
                   >
                     Delete Selected ({selectedLogIds.length})
                   </button>
@@ -807,7 +813,7 @@ const AdminDashboard = () => {
                 {securityLogs.length > 0 && (
                   <button
                     onClick={handleDeleteAllLogs}
-                    className="bg-white hover:bg-red-50 text-red-600 font-semibold py-2 px-4 rounded-xl transition-all shadow-md text-sm cursor-pointer"
+                    className="bg-slate-900 hover:bg-slate-855 text-rose-400 font-semibold py-2 px-4 rounded-xl transition-all shadow-md text-sm border border-slate-800"
                   >
                     Delete All Logs
                   </button>
@@ -817,29 +823,29 @@ const AdminDashboard = () => {
             
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-slate-950/40 border-b border-slate-800/60">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-455 uppercase tracking-wider w-12">
                       <input
                         type="checkbox"
                         checked={securityLogs.length > 0 && selectedLogIds.length === securityLogs.length}
                         onChange={handleToggleSelectAllLogs}
-                        className="rounded border-gray-300 text-red-600 focus:ring-red-500 cursor-pointer h-4 w-4"
+                        className="rounded border-slate-800/80 text-rose-600 focus:ring-rose-550 cursor-pointer h-4 w-4 bg-slate-950/50"
                         title="Select All Logs"
                       />
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event Type</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP Address</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-455 uppercase tracking-wider">User</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-455 uppercase tracking-wider">Event Type</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-455 uppercase tracking-wider">Details</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-455 uppercase tracking-wider">IP Address</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-455 uppercase tracking-wider">Timestamp</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-455 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-slate-800/50">
                   {securityLogs.length === 0 ? (
                     <tr>
-                      <td colSpan="7" className="px-6 py-12 text-center text-gray-500">
+                      <td colSpan="7" className="px-6 py-12 text-center text-slate-450 bg-slate-900/20">
                         No security logs found
                       </td>
                     </tr>
@@ -847,45 +853,45 @@ const AdminDashboard = () => {
                     securityLogs.map((log) => {
                       const isSelected = selectedLogIds.includes(log._id);
                       return (
-                        <tr key={log._id} className={`hover:bg-gray-50 transition-colors ${isSelected ? 'bg-red-50/30' : ''}`}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 w-12">
+                        <tr key={log._id} className={`hover:bg-slate-900/20 transition-colors ${isSelected ? 'bg-rose-955/20' : ''}`}>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400 w-12">
                             <input
                               type="checkbox"
                               checked={isSelected}
                               onChange={() => handleToggleSelectLog(log._id)}
-                              className="rounded border-gray-300 text-red-600 focus:ring-red-500 cursor-pointer h-4 w-4"
+                              className="rounded border-slate-800/80 text-rose-600 focus:ring-rose-550 cursor-pointer h-4 w-4 bg-slate-950/50"
                             />
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <span className="text-gray-900 block font-semibold">{log.user?.name || "Visitor"}</span>
-                            <span className="text-gray-500 text-xs">{log.user?.email || "Anonymous"}</span>
+                            <span className="text-slate-200 block font-semibold">{log.user?.name || "Visitor"}</span>
+                            <span className="text-slate-500 text-xs">{log.user?.email || "Anonymous"}</span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm">
-                            <span className={`px-2.5 py-1 text-xs rounded-full font-bold uppercase tracking-wider border ${
+                            <span className={`px-2.5 py-0.5 text-xs rounded-full font-bold uppercase tracking-wider border ${
                               log.eventType === "screenshot" 
-                                ? "bg-red-100 text-red-800 border-red-200" 
+                                ? "bg-rose-500/10 text-rose-300 border-rose-500/20" 
                                 : log.eventType === "unauthorized_action"
-                                ? "bg-orange-100 text-orange-800 border-orange-200"
+                                ? "bg-orange-500/10 text-orange-300 border-orange-500/20"
                                 : log.eventType === "developer_shortcut"
-                                ? "bg-amber-100 text-amber-800 border-amber-200"
-                                : "bg-blue-100 text-blue-800 border-blue-200"
+                                ? "bg-amber-500/10 text-amber-300 border-amber-500/20"
+                                : "bg-sky-500/10 text-sky-300 border-sky-500/20"
                             }`}>
                               {log.eventType?.replace('_', ' ')}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-700 max-w-xs truncate" title={log.details}>
+                          <td className="px-6 py-4 text-sm text-slate-300 max-w-xs truncate" title={log.details}>
                             {log.details}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
                             {log.ipAddress || "N/A"}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
                             {formatDate(log.createdAt)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
                             <button
                               onClick={() => handleDeleteLog(log._id)}
-                              className="text-red-600 hover:text-red-900 font-semibold cursor-pointer"
+                              className="text-rose-400 hover:text-rose-300 font-semibold cursor-pointer"
                               title="Delete this log"
                             >
                               Delete

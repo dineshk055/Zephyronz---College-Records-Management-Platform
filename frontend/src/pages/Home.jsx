@@ -197,35 +197,38 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div 
+      className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed relative text-slate-100 pb-16"
+      style={{ backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)), url('/campus_bg.jpg')` }}
+    >
       {/* Header with Glassmorphism */}
-      <header className="sticky top-0 z-20 backdrop-blur-xl bg-white/80 border-b border-white/20 shadow-sm">
+      <header className="sticky top-0 z-20 backdrop-blur-xl bg-slate-950/60 border-b border-slate-800/40 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
                 <MdOutlineDashboardCustomize className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-800 to-indigo-600 bg-clip-text text-transparent">
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-white via-indigo-100 to-purple-200 bg-clip-text text-transparent">
                   Document Hub
                 </h1>
-                <p className="text-sm text-slate-500 mt-0.5">
+                <p className="text-sm text-slate-400 mt-0.5">
                   Secure document management system
                 </p>
               </div>
             </div>
             
             {user && (
-              <div className="flex items-center gap-3 bg-white/50 backdrop-blur-sm px-4 py-2 rounded-2xl shadow-sm border border-white/50">
+              <div className="flex items-center gap-3 bg-slate-900/40 backdrop-blur-md px-4 py-2 rounded-2xl shadow-md border border-slate-800/50">
                 <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-md">
                   <span className="text-white font-semibold text-lg">
                     {user.name?.charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div className="hidden md:block">
-                  <p className="text-sm font-semibold text-slate-700">{user.name}</p>
-                  <p className="text-xs text-slate-500">{user.email}</p>
+                  <p className="text-sm font-semibold text-slate-200">{user.name}</p>
+                  <p className="text-xs text-slate-400">{user.email}</p>
                 </div>
               </div>
             )}
@@ -233,72 +236,73 @@ const Home = () => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-2xl shadow-sm p-5 border border-indigo-100 hover:shadow-md transition-all group">
+          <div className="bg-slate-900/55 backdrop-blur-md rounded-2xl shadow-md p-5 border border-slate-800/60 hover:border-indigo-500/30 hover:bg-slate-900/70 transition-all duration-300 group">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-500 text-sm font-medium">Total Documents</p>
-                <p className="text-3xl font-bold text-slate-800 mt-1">{files.length}</p>
+                <p className="text-slate-400 text-sm font-medium">Total Documents</p>
+                <p className="text-3xl font-bold text-white mt-1">{files.length}</p>
               </div>
-              <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                <HiOutlineDocumentText className="w-6 h-6 text-indigo-600" />
+              <div className="w-12 h-12 bg-indigo-500/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform border border-indigo-500/20">
+                <HiOutlineDocumentText className="w-6 h-6 text-indigo-400" />
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-2xl shadow-sm p-5 border border-green-100 hover:shadow-md transition-all group">
+          <div className="bg-slate-900/55 backdrop-blur-md rounded-2xl shadow-md p-5 border border-slate-800/60 hover:border-green-500/30 hover:bg-slate-900/70 transition-all duration-300 group">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-500 text-sm font-medium">PDF Documents</p>
-                <p className="text-3xl font-bold text-slate-800 mt-1">{getFileTypeCount("pdf")}</p>
+                <p className="text-slate-400 text-sm font-medium">PDF Documents</p>
+                <p className="text-3xl font-bold text-white mt-1">{getFileTypeCount("pdf")}</p>
               </div>
-              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                <FaFilePdf className="w-6 h-6 text-green-600" />
+              <div className="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform border border-green-500/20">
+                <FaFilePdf className="w-6 h-6 text-green-400" />
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-2xl shadow-sm p-5 border border-blue-100 hover:shadow-md transition-all group">
+          <div className="bg-slate-900/55 backdrop-blur-md rounded-2xl shadow-md p-5 border border-slate-800/60 hover:border-blue-500/30 hover:bg-slate-900/70 transition-all duration-300 group">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-500 text-sm font-medium">Images</p>
-                <p className="text-3xl font-bold text-slate-800 mt-1">{getFileTypeCount("image")}</p>
+                <p className="text-slate-400 text-sm font-medium">Images</p>
+                <p className="text-3xl font-bold text-white mt-1">{getFileTypeCount("image")}</p>
               </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                <FiImage className="w-6 h-6 text-blue-600" />
+              <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform border border-blue-500/20">
+                <FiImage className="w-6 h-6 text-blue-400" />
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-2xl shadow-sm p-5 border border-purple-100 hover:shadow-md transition-all group">
+          <div className="bg-slate-900/55 backdrop-blur-md rounded-2xl shadow-md p-5 border border-slate-800/60 hover:border-purple-500/30 hover:bg-slate-900/70 transition-all duration-300 group">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-500 text-sm font-medium">Storage Used</p>
-                <p className="text-3xl font-bold text-slate-800 mt-1">
+                <p className="text-slate-400 text-sm font-medium">Storage Used</p>
+                <p className="text-3xl font-bold text-white mt-1">
                   {formatFileSize(files.reduce((acc, file) => acc + (file.size || 0), 0))}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                <FiDatabase className="w-6 h-6 text-purple-600" />
+              <div className="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform border border-purple-500/20">
+                <FiDatabase className="w-6 h-6 text-purple-400" />
               </div>
             </div>
           </div>
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-sm p-4 mb-8 border border-white/50">
+        {/* Search and Filters */}
+        <div className="bg-slate-900/55 backdrop-blur-md rounded-2xl shadow-md p-4 mb-8 border border-slate-800/60">
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Search Bar */}
             <div className="flex-1 relative">
-              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+              <FiSearch className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
               <input
                 type="text"
                 placeholder="Search documents by title or uploader..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                className="w-full pl-11 pr-4 py-2.5 bg-slate-950/40 border border-slate-800/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 text-slate-100 placeholder-slate-500 transition-all"
               />
             </div>
             
@@ -308,10 +312,10 @@ const Home = () => {
                 <button
                   key={type}
                   onClick={() => setSelectedType(type)}
-                  className={`px-4 py-2 rounded-xl font-medium transition-all capitalize ${
+                  className={`px-4 py-2 rounded-xl font-medium transition-all capitalize border ${
                     selectedType === type
-                      ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md"
-                      : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
+                      ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md border-indigo-500/30"
+                      : "bg-slate-950/30 text-slate-300 hover:bg-slate-900/50 border-slate-800/80"
                   }`}
                 >
                   {type === "all" ? "All" : type}
@@ -320,11 +324,11 @@ const Home = () => {
             </div>
             
             {/* View Toggle */}
-            <div className="flex gap-2 bg-white rounded-xl border border-slate-200 p-1">
+            <div className="flex gap-2 bg-slate-950/30 rounded-xl border border-slate-800/80 p-1">
               <button
                 onClick={() => setViewMode("grid")}
                 className={`p-2 rounded-lg transition-all ${
-                  viewMode === "grid" ? "bg-indigo-100 text-indigo-600" : "text-slate-400 hover:text-slate-600"
+                  viewMode === "grid" ? "bg-indigo-650/40 text-indigo-400 border border-indigo-500/20" : "text-slate-500 hover:text-slate-300"
                 }`}
               >
                 <FiGrid className="w-5 h-5" />
@@ -332,7 +336,7 @@ const Home = () => {
               <button
                 onClick={() => setViewMode("list")}
                 className={`p-2 rounded-lg transition-all ${
-                  viewMode === "list" ? "bg-indigo-100 text-indigo-600" : "text-slate-400 hover:text-slate-600"
+                  viewMode === "list" ? "bg-indigo-650/40 text-indigo-400 border border-indigo-500/20" : "text-slate-500 hover:text-slate-300"
                 }`}
               >
                 <FiList className="w-5 h-5" />
@@ -389,10 +393,10 @@ const Home = () => {
             {paginatedFiles.map((file) => (
               <div
                 key={file._id}
-                className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-100 hover:border-indigo-200 transform hover:-translate-y-1"
+                className="group bg-slate-905/65 backdrop-blur-md rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-800/60 hover:border-indigo-500/40 transform hover:-translate-y-1"
               >
                 {/* Preview Area */}
-                <div className="relative h-52 bg-gradient-to-br from-slate-50 to-indigo-50 flex items-center justify-center overflow-hidden">
+                <div className="relative h-52 bg-slate-950/40 flex items-center justify-center overflow-hidden border-b border-slate-800/30">
                   {file.pagesData && file.pagesData.length > 0 ? (
                     <img
                       src={file.pagesData[0]}
@@ -418,10 +422,10 @@ const Home = () => {
                     />
                   ) : (
                     <div className="flex flex-col items-center p-4 text-center">
-                      <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-2 text-slate-400">
+                      <div className="w-12 h-12 rounded-full bg-slate-800/40 flex items-center justify-center mb-2 text-slate-400">
                         {getFileIcon(file.originalName || file.title, file.mimetype, "md")}
                       </div>
-                      <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">
+                      <span className="text-xs text-slate-500 font-medium uppercase tracking-wider">
                         {failedImages[`${file._id}-0`] ? 'Content Missing (404)' : (file.mimetype?.split('/').pop() || 'File')}
                       </span>
                     </div>
@@ -429,35 +433,35 @@ const Home = () => {
                   
                   {/* Badges */}
                   {((file.pagesData && file.pagesData.length > 0) || (file.pages && file.pages.length > 0)) && (
-                    <span className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                    <span className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-full border border-white/5">
                       {file.pagesData && file.pagesData.length > 0 ? file.pagesData.length : file.pages.length} {(file.pagesData && file.pagesData.length > 0 ? file.pagesData.length : file.pages.length) === 1 ? 'Page' : 'Pages'}
                     </span>
                   )}
                   
-                  <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-semibold text-slate-600">
+                  <div className="absolute top-3 right-3 bg-slate-900/80 backdrop-blur-sm px-2.5 py-1 rounded-full text-xs font-semibold text-slate-300 border border-slate-700/30">
                     {formatFileSize(file.size)}
                   </div>
                 </div>
 
                 {/* Content */}
                 <div className="p-5">
-                  <h3 className="font-bold text-slate-800 text-lg mb-2 line-clamp-1 group-hover:text-indigo-600 transition-colors">
+                  <h3 className="font-bold text-slate-200 text-lg mb-2 line-clamp-1 group-hover:text-indigo-400 transition-colors">
                     {file.title}
                   </h3>
                   
-                  <div className="flex items-center gap-2 text-sm text-slate-500 mb-3">
-                    <FiUser className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                  <div className="flex items-center gap-2 text-sm text-slate-400 mb-3">
+                    <FiUser className="w-4 h-4 text-indigo-400 flex-shrink-0" />
                     <span className="truncate">{file.uploadedBy?.name || "Admin"}</span>
                   </div>
                   
-                  <div className="flex items-center gap-2 text-sm text-slate-500 mb-4">
-                    <FiCalendar className="w-4 h-4 flex-shrink-0" />
+                  <div className="flex items-center gap-2 text-sm text-slate-400 mb-4">
+                    <FiCalendar className="w-4 h-4 text-slate-500 flex-shrink-0" />
                     <span>{formatDate(file.createdAt)}</span>
                   </div>
 
                   <button
                     onClick={() => handleViewFile(file)}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl transition-all duration-200 transform hover:scale-105 font-medium shadow-md"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl transition-all duration-300 transform hover:scale-[1.02] font-semibold shadow-md shadow-indigo-550/10"
                   >
                     <FiEye className="w-4 h-4" />
                     <span>View Document</span>
@@ -468,25 +472,25 @@ const Home = () => {
           </div>
         ) : (
           // List View
-          <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-            <div className="divide-y divide-slate-100">
+          <div className="bg-slate-900/55 backdrop-blur-md rounded-2xl shadow-md overflow-hidden border border-slate-800/60">
+            <div className="divide-y divide-slate-850">
               {paginatedFiles.map((file) => (
                 <div
                   key={file._id}
-                  className="p-5 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 transition-all group"
+                  className="p-5 hover:bg-slate-850/40 transition-all group"
                 >
                   <div className="flex items-center justify-between flex-wrap gap-4">
                     <div className="flex items-center gap-4 flex-1 min-w-0">
-                      <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <div className="w-12 h-12 bg-slate-950/40 rounded-xl flex items-center justify-center flex-shrink-0 border border-slate-850">
                         {getFileIcon(file.originalName || file.title, file.mimetype)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors truncate">
+                        <h3 className="font-semibold text-slate-200 group-hover:text-indigo-450 transition-colors truncate">
                           {file.title}
                         </h3>
-                        <div className="flex flex-wrap gap-3 text-xs text-slate-500 mt-1">
+                        <div className="flex flex-wrap gap-3 text-xs text-slate-400 mt-1">
                           <span className="flex items-center gap-1">
-                            <FiUser className="w-3 h-3" />
+                            <FiUser className="w-3 h-3 text-indigo-400" />
                             {file.uploadedBy?.name || "Admin"}
                           </span>
                           <span className="flex items-center gap-1">
@@ -502,7 +506,7 @@ const Home = () => {
                     </div>
                     <button
                       onClick={() => handleViewFile(file)}
-                      className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all transform hover:scale-105 font-medium shadow-md"
+                      className="flex items-center gap-2 px-5 py-2.5 bg-indigo-650/40 hover:bg-indigo-600 text-indigo-300 hover:text-white rounded-xl transition-all transform hover:scale-[1.02] font-semibold border border-indigo-500/20"
                     >
                       <FiEye className="w-4 h-4" />
                       <span>View</span>
