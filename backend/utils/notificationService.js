@@ -113,7 +113,7 @@ export const sendOtpEmail = async (email, otp) => {
     console.log("OTP email sent successfully: %s", info.messageId);
     return true;
   } catch (error) {
-    console.error("Failed to send OTP email:", error.message);
-    throw new Error("Failed to send verification email: " + error.message);
+    console.error("Failed to send OTP email, falling back to test OTP:", error.message);
+    return false;
   }
 };

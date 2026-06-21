@@ -241,20 +241,20 @@ export const sendOtp = async (req, res) => {
     );
 
     // send OTP email
-    await sendOtpEmail(email.toLowerCase(), otp);
+    const emailSent = await sendOtpEmail(email.toLowerCase(), otp);
 
-    // If SMTP is not fully configured, provide a test OTP back to frontend in non-production
+    // If SMTP is not fully configured or email dispatch fails, provide a test OTP back to frontend in non-production
     let testOtp = null;
     const host = process.env.SMTP_HOST || process.env.EMAIL_HOST;
     const user = process.env.SMTP_USER || process.env.EMAIL_USER;
     const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
-    if ((!host || !user || !pass) && process.env.NODE_ENV !== 'production') {
+    if ((!host || !user || !pass || !emailSent) && process.env.NODE_ENV !== 'production') {
       testOtp = otp;
     }
 
     res.status(200).json({
       success: true,
-      message: "OTP sent successfully to your email",
+      message: emailSent ? "OTP sent successfully to your email" : "OTP generated successfully (Email delivery failed, using test fallback code)",
       testOtp,
     });
   } catch (error) {
