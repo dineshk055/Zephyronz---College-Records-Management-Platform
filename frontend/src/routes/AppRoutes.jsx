@@ -5,6 +5,7 @@ import Register from "../pages/Register";
 import VerifyOtp from "../pages/VerifyOtp";
 import Home from "../pages/Home";
 import AdminDashboard from "../pages/AdminDashboard";
+import ContentViewer from "../pages/ContentViewer";
 
 import ProtectedRoute from "../components/ProtectedRoute";
 import AdminRoute from "../components/AdminRoute";
@@ -36,6 +37,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <ProfileCard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/content/:id"
+        element={
+          <ProtectedRoute>
+            <ContentViewer />
           </ProtectedRoute>
         }
       />

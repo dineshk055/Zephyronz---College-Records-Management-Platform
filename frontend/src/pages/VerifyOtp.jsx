@@ -135,7 +135,7 @@ const VerifyOtp = () => {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-655 rounded-2xl text-sm font-semibold animate-in fade-in duration-200 leading-relaxed">
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-2xl text-xs font-semibold animate-in fade-in duration-200 leading-relaxed">
             {error}
           </div>
         )}
@@ -182,14 +182,14 @@ const VerifyOtp = () => {
 
           {/* Developer Notice for Local Testing */}
           {developerOtp && (
-            <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl p-4 text-xs font-medium animate-in slide-in-from-top duration-300 leading-relaxed">
+            <div className="bg-amber-500/10 border border-amber-500/25 text-amber-400 rounded-2xl p-4 text-xs font-medium animate-in slide-in-from-top duration-300 leading-relaxed">
               <div className="flex gap-3">
                 <span className="text-base">⚙️</span>
                 <div>
-                  <p className="font-semibold text-amber-800">Developer Testing Mode</p>
-                  <p className="mt-1 text-slate-650 dark:text-slate-400">
+                  <p className="font-semibold text-amber-300">Developer Testing Mode</p>
+                  <p className="mt-1 text-slate-400">
                     SMTP server is not configured in your backend `.env`. Please verify your registration using this code: 
-                    <span className="ml-1.5 font-bold text-amber-855 bg-amber-100 dark:bg-amber-950/40 px-2 py-0.5 rounded border border-amber-300 dark:border-amber-800 tracking-[1.5px] font-mono text-sm">{developerOtp}</span>
+                    <span className="ml-1.5 font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30 tracking-[1.5px] font-mono text-sm">{developerOtp}</span>
                   </p>
                 </div>
               </div>

@@ -10,6 +10,7 @@ import {
   uploadFile,
   getAllFiles,
   deleteFile,
+  getFileById,
 } from "../controllers/fileController.js";
 
 const router = express.Router();
@@ -34,6 +35,15 @@ router.get(
   protect,
 
   getAllFiles
+);
+
+// get single file - approved users
+router.get(
+  "/:id",
+
+  protect,
+
+  getFileById
 );
 
 // delete file - admin only

@@ -1,5 +1,42 @@
 @import "tailwindcss";
 
+@theme {
+  --color-primary: #2563EB;
+  --color-secondary: #06B6D4;
+  --color-success: #22C55E;
+  --color-bg-dark: #0F172A;
+  
+  --color-slate-50: #F8FAFC;
+  --color-slate-100: #F1F5F9;
+  --color-slate-200: #E2E8F0;
+  --color-slate-350: #94A3B8;
+  --color-slate-400: #94A3B8;
+  --color-slate-500: #64748B;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1E293B;
+  --color-slate-900: #1E293B;
+  --color-slate-950: #0F172A;
+  --color-slate-955: #0B0F19;
+  
+  --color-indigo-50: #EEF2FF;
+  --color-indigo-100: #E0E7FF;
+  --color-indigo-400: #60A5FA;
+  --color-indigo-500: #3B82F6;
+  --color-indigo-600: #2563EB;
+  --color-indigo-650: #1D4ED8;
+  --color-indigo-700: #1D4ED8;
+  --color-indigo-800: #1E40AF;
+  
+  --color-purple-500: #06B6D4;
+  --color-purple-600: #06B6D4;
+  --color-purple-650: #0891B2;
+  --color-purple-700: #0E7490;
+  
+  --color-emerald-500: #22C55E;
+  --color-emerald-600: #16A34A;
+}
+
 @variant dark (&:where(.dark, .dark *));
 
 /* Custom animations for premium look */
@@ -23,6 +60,11 @@
   to { transform: translateY(0); opacity: 1; }
 }
 
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
 .animate-fade-in {
   animation: fadeIn 0.4s ease-out forwards;
 }
@@ -39,6 +81,10 @@
   animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
 /* Global smooth transition for background and border colors */
 .theme-transition, 
 .theme-transition *, 
@@ -47,4 +93,55 @@
   transition-property: background-color, border-color, color, fill, stroke, box-shadow;
   transition-duration: 300ms;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom premium styles */
+body {
+  font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #0F172A;
+  color: #FFFFFF;
+}
+
+/* Hide scrollbars but keep functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Glassmorphism utility */
+.glass-panel {
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-panel-glow {
+  background: rgba(30, 41, 59, 0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  box-shadow: 0 0 25px rgba(37, 99, 235, 0.1);
+}
+
+/* Custom neon text glows */
+.glow-text-primary {
+  text-shadow: 0 0 10px rgba(37, 99, 235, 0.3);
+}
+
+.glow-text-secondary {
+  text-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
+}
+
+/* Skeleton loaders */
+.skeleton-loader {
+  background: linear-gradient(90deg, #1E293B 25%, #334155 50%, #1E293B 75%);
+  background-size: 200% 100%;
+  animation: loading-skeleton 1.5s infinite;
+}
+
+@keyframes loading-skeleton {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }

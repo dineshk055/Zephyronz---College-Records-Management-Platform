@@ -35,6 +35,13 @@ const ScreenshotGuard = () => {
       }
     };
 
+    const triggerWarning = (title, text, eventType, detailMsg) => {
+      setWarningTitle(title);
+      setWarningText(text);
+      setShowWarning(true);
+      logSecurityEvent(eventType, detailMsg);
+    };
+
     const handleKeyDown = (e) => {
       let detected = false;
       let shortcutName = "";
@@ -55,8 +62,8 @@ const ScreenshotGuard = () => {
         eventType = "screenshot";
         displayMsg = "Screenshots are strictly prohibited on this platform!";
       }
-      // 3. Cmd + Shift + 3 or Cmd + Shift + 4 (Mac native screenshots)
-      else if (e.metaKey && e.shiftKey && (e.key === "3" || e.key === "4")) {
+      // 3. Cmd + Shift + 3 or Cmd + Shift + 4 or Cmd + Shift + 5 (Mac screenshots)
+      else if (e.metaKey && e.shiftKey && (e.key === "3" || e.key === "4" || e.key === "5")) {
         detected = true;
         shortcutName = `Cmd + Shift + ${e.key}`;
         eventType = "screenshot";
@@ -64,7 +71,7 @@ const ScreenshotGuard = () => {
       }
       // 4. Ctrl + P (Print page shortcut)
       else if ((e.ctrlKey || e.metaKey) && (e.key === "P" || e.key === "p")) {
-        e.preventDefault(); // Block print dialog
+        e.preventDefault();
         detected = true;
         shortcutName = "Ctrl/Cmd + P (Print Shortcut)";
         eventType = "unauthorized_print";
@@ -78,13 +85,13 @@ const ScreenshotGuard = () => {
         eventType = "developer_shortcut";
         displayMsg = "Developer Tools are disabled for security reasons!";
       }
-      // 6. Ctrl + Shift + I or J (Developer Tools)
-      else if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "I" || e.key === "i" || e.key === "J" || e.key === "j")) {
+      // 6. Ctrl + Shift + I or J or C (Developer Tools)
+      else if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "I" || e.key === "i" || e.key === "J" || e.key === "j" || e.key === "C" || e.key === "c")) {
         e.preventDefault();
         detected = true;
-        shortcutName = "Ctrl/Cmd + Shift + I/J (Developer Tools)";
+        shortcutName = `Ctrl/Cmd + Shift + ${e.key.toUpperCase()} (Developer Tools)`;
         eventType = "developer_shortcut";
-        displayMsg = "Developer Tools are disabled for security reasons!";
+        displayMsg = "Developer Tools shortcuts are disabled for security reasons!";
       }
       // 7. Ctrl + U (View Source)
       else if ((e.ctrlKey || e.metaKey) && (e.key === "U" || e.key === "u")) {
@@ -102,15 +109,12 @@ const ScreenshotGuard = () => {
           detected = true;
           shortcutName = "Ctrl/Cmd + S (Save Shortcut)";
           eventType = "download_attempt";
-          displayMsg = "Saving/downloading this document is disabled for security reasons!";
+          displayMsg = "Saving this page is disabled for security reasons!";
         }
       }
 
       if (detected) {
-        setWarningTitle("Security Warning");
-        setWarningText(displayMsg);
-        setShowWarning(true);
-        logSecurityEvent(eventType, `Shortcut blocked: ${shortcutName}`);
+        triggerWarning("Security Warning", displayMsg, eventType, `Shortcut blocked: ${shortcutName}`);
       }
     };
 
@@ -118,10 +122,7 @@ const ScreenshotGuard = () => {
       const activeDoc = localStorage.getItem("active_document");
       if (activeDoc) {
         e.preventDefault();
-        setWarningTitle("Security Warning");
-        setWarningText("Copying document content is strictly prohibited!");
-        setShowWarning(true);
-        logSecurityEvent("download_attempt", "Copy blocked");
+        triggerWarning("Security Warning", "Copying document content is strictly prohibited!", "download_attempt", "Copy blocked");
       }
     };
 
@@ -129,10 +130,7 @@ const ScreenshotGuard = () => {
       const activeDoc = localStorage.getItem("active_document");
       if (activeDoc) {
         e.preventDefault();
-        setWarningTitle("Security Warning");
-        setWarningText("Right-clicks are disabled to protect document security.");
-        setShowWarning(true);
-        logSecurityEvent("download_attempt", "Right-click context menu blocked");
+        triggerWarning("Security Warning", "Right-clicks are disabled to protect document security.", "download_attempt", "Right-click context menu blocked");
       }
     };
 
@@ -140,34 +138,65 @@ const ScreenshotGuard = () => {
       const activeDoc = localStorage.getItem("active_document");
       if (activeDoc) {
         e.preventDefault();
-        setWarningTitle("Security Warning");
-        setWarningText("Dragging document content is disabled for security reasons.");
-        setShowWarning(true);
-        logSecurityEvent("download_attempt", "Image dragging blocked");
+        triggerWarning("Security Warning", "Dragging document content is disabled.", "download_attempt", "Image dragging blocked");
       }
     };
 
     const handleWindowBlur = () => {
       const activeDoc = localStorage.getItem("active_document");
       if (activeDoc) {
-        setWarningTitle("Security Alert");
-        setWarningText("Screen capture overlay or window blur detected while document is open! This activity has been reported.");
-        setShowWarning(true);
-        logSecurityEvent("screenshot", "Window lost focus (possible screenshot or screen capture overlay)");
+        triggerWarning("Security Alert", "Screen capture tool or window defocus detected!", "screenshot", "Window lost focus (possible capture tool)");
       }
     };
 
     const handleBeforePrint = () => {
       const activeDoc = localStorage.getItem("active_document");
       if (activeDoc) {
-        setWarningTitle("Security Violation");
-        setWarningText("Printing or saving this secure page to PDF is strictly prohibited!");
-        setShowWarning(true);
-        logSecurityEvent("unauthorized_print", "Print action triggered (blocked via print media)");
+        triggerWarning("Security Violation", "Printing this secure page is strictly prohibited!", "unauthorized_print", "Print action triggered");
       }
     };
 
-    // Inject print blocking CSS
+    // Tab Switching detection (Visibility Change)
+    const handleVisibilityChange = () => {
+      const activeDoc = localStorage.getItem("active_document");
+      if (document.visibilityState === "hidden" && activeDoc) {
+        logSecurityEvent("tab_switch", "User switched tabs while viewing a secure document");
+      }
+    };
+
+    // Developer Tools docked/opened detection
+    const devtoolsDetector = setInterval(() => {
+      const activeDoc = localStorage.getItem("active_document");
+      if (!activeDoc) return;
+
+      const threshold = 160;
+      const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+      const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+      
+      if (widthThreshold || heightThreshold) {
+        triggerWarning("Security Violation", "Developer tools opening detected! Access restricted.", "developer_shortcut", "Developer tools docking/opening detected");
+      }
+    }, 1000);
+
+    // Trap console object getters (secondary devtools checker)
+    const trapElement = new Image();
+    Object.defineProperty(trapElement, "id", {
+      get: function () {
+        const activeDoc = localStorage.getItem("active_document");
+        if (activeDoc) {
+          triggerWarning("Security Violation", "Developer Tools inspection detected!", "developer_shortcut", "Console debugger getter triggered");
+        }
+      }
+    });
+
+    const consoleTrapInterval = setInterval(() => {
+      const activeDoc = localStorage.getItem("active_document");
+      if (activeDoc) {
+        console.log("%c", trapElement);
+      }
+    }, 1500);
+
+    // Inject print blocking CSS and disable user select
     const styleEl = document.createElement("style");
     styleEl.innerHTML = `
       @media print {
@@ -175,7 +204,12 @@ const ScreenshotGuard = () => {
           display: none !important;
         }
       }
-      /* Prevent selection and drag on images */
+      body {
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+        user-select: none !important;
+      }
       img {
         user-select: none !important;
         -webkit-user-drag: none !important;
@@ -189,42 +223,47 @@ const ScreenshotGuard = () => {
     window.addEventListener("dragstart", handleDragStart);
     window.addEventListener("blur", handleWindowBlur);
     window.addEventListener("beforeprint", handleBeforePrint);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       if (document.head.contains(styleEl)) {
         document.head.removeChild(styleEl);
       }
+      clearInterval(devtoolsDetector);
+      clearInterval(consoleTrapInterval);
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("copy", handleCopy);
       window.removeEventListener("contextmenu", handleContextMenu);
       window.removeEventListener("dragstart", handleDragStart);
       window.removeEventListener("blur", handleWindowBlur);
       window.removeEventListener("beforeprint", handleBeforePrint);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [isAuthenticated, token, isAdmin]);
 
   if (!showWarning) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/85 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl p-8 max-w-md w-full border border-red-100 shadow-2xl mx-4 text-center">
-        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <FiAlertTriangle className="w-8 h-8 text-red-600" />
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-fade-in">
+      <div className="bg-slate-900 rounded-3xl p-8 max-w-md w-full border border-red-500/20 shadow-[0_0_50px_rgba(239,68,68,0.25)] text-center relative overflow-hidden glass-panel">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-red-600"></div>
+        <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-500/20">
+          <FiAlertTriangle className="w-8 h-8 text-red-500" />
         </div>
-        <h2 className="text-2xl font-bold text-red-600 mb-2">
+        <h2 className="text-xl font-extrabold text-red-500 mb-2">
           {warningTitle}
         </h2>
-        <p className="text-gray-700 font-semibold mb-3">
+        <p className="text-slate-100 text-sm font-semibold mb-3">
           {warningText}
         </p>
-        <p className="text-gray-500 text-sm mb-6">
-          Your action has been logged in the system database and a security alert has been dispatched to the administrator in real-time. Continuous violations may lead to account suspension.
+        <p className="text-slate-400 text-[11px] leading-relaxed mb-6">
+          This security incident has been logged. Continuous violations will dispatch alert reports directly to the administrator and may trigger automatic account locks.
         </p>
         <button
           onClick={() => setShowWarning(false)}
-          className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold py-2.5 px-4 rounded-xl transition-all shadow-md"
+          className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl transition-all shadow-md active:scale-98 text-xs uppercase tracking-wider"
         >
-          I Understand
+          Acknowledge & Dismiss
         </button>
       </div>
     </div>

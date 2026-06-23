@@ -23,7 +23,19 @@ export const uploadFile = async (req, res) => {
 
     let pageFileNames = [];
     let pageBase64Data = [];
-    const isPDF = req.file.mimetype === "application/pdf" || req.file.originalname.toLowerCase().endsWith(".pdf");
+    const fileExtension = req.file.originalname.split('.').pop().toLowerCase();
+    
+    const isPDF = req.file.mimetype === "application/pdf" || fileExtension === "pdf";
+    const isImage = req.file.mimetype.startsWith("image/") || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].includes(fileExtension);
+    const isVideo = req.file.mimetype.startsWith("video/") || ['mp4', 'webm', 'ogg', 'mkv', 'avi', 'mov'].includes(fileExtension);
+    const isDoc = req.file.mimetype.startsWith("text/") || 
+                  req.file.mimetype.includes("document") || 
+                  req.file.mimetype.includes("sheet") || 
+                  req.file.mimetype.includes("presentation") || 
+                  req.file.mimetype.includes("msword") || 
+                  req.file.mimetype.includes("excel") || 
+                  req.file.mimetype.includes("powerpoint") || 
+                  ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv'].includes(fileExtension);
 
     if (isPDF) {
       try {
@@ -61,7 +73,7 @@ export const uploadFile = async (req, res) => {
           msg: "Failed to process PDF pages into images: " + conversionError.message,
         });
       }
-    } else if (req.file.mimetype.startsWith("image/") || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(req.file.originalname.split('.').pop().toLowerCase())) {
+    } else if (isImage) {
       // If it's already an image, read, encode to base64, then delete original
       pageFileNames = [req.file.filename];
       if (fs.existsSync(filePath)) {
@@ -70,6 +82,11 @@ export const uploadFile = async (req, res) => {
         pageBase64Data = [base64];
         fs.unlinkSync(filePath); // Clean up uploaded image immediately
       }
+    } else if (isVideo || isDoc) {
+      // Keep video or document files on disk! Do not delete them.
+      // They will be served statically from the uploads folder.
+      pageFileNames = [];
+      pageBase64Data = [];
     } else {
       // Clean up file if not supported
       if (fs.existsSync(filePath)) {
@@ -77,7 +94,7 @@ export const uploadFile = async (req, res) => {
       }
       return res.status(400).json({
         success: false,
-        msg: "Only images and PDF files are allowed",
+        msg: "Unsupported file format. Allowed formats: PDFs, images, videos, and office documents.",
       });
     }
 
@@ -92,10 +109,17 @@ export const uploadFile = async (req, res) => {
       uploadedBy: req.user._id,
     });
 
+    const populatedFile = await File.findById(newFile._id).populate("uploadedBy", "name email");
+
+    if (req.io) {
+      req.io.emit("file-uploaded", populatedFile);
+      console.log(`Socket broadcast: new file "${populatedFile.title}" uploaded.`);
+    }
+
     res.status(201).json({
       success: true,
-      msg: "File uploaded and processed successfully in secure image format",
-      file: newFile,
+      msg: "File uploaded successfully!",
+      file: populatedFile,
     });
 
   } catch (error) {
@@ -168,6 +192,29 @@ export const deleteFile = async (req, res) => {
 
   } catch (error) {
     console.error(error);
+    res.status(500).json({
+      success: false,
+      msg: "Server error",
+    });
+  }
+};
+
+// get single file by ID
+export const getFileById = async (req, res) => {
+  try {
+    const file = await File.findById(req.params.id).populate("uploadedBy", "name email");
+    if (!file) {
+      return res.status(404).json({
+        success: false,
+        msg: "File not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      file,
+    });
+  } catch (error) {
+    console.error("Error fetching single file:", error);
     res.status(500).json({
       success: false,
       msg: "Server error",

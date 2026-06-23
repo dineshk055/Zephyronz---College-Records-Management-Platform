@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-hot-toast";
@@ -136,6 +137,7 @@ const StatsCards = ({ stats }) => (
 );
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const { token, user, socket } = useAuth();
   
   const [title, setTitle] = useState("");
@@ -334,9 +336,9 @@ const AdminDashboard = () => {
       return;
     }
 
-    // Check file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      alert("File size must be less than 10MB");
+    // Check file size (max 100MB)
+    if (file.size > 100 * 1024 * 1024) {
+      alert("File size must be less than 100MB");
       return;
     }
 
@@ -589,7 +591,7 @@ const AdminDashboard = () => {
                           {file ? file.name : "Click to browse or drag and drop"}
                         </p>
                         <p className="text-slate-500 dark:text-slate-450 text-xs mt-1.5">
-                          {file ? formatFileSize(file.size) : "Supports: PDF, Images, Documents (Max 10MB)"}
+                          {file ? formatFileSize(file.size) : "Supports: PDFs, Images, Videos, Documents (Max 100MB)"}
                         </p>
                       </label>
                     </div>
@@ -670,11 +672,10 @@ const AdminDashboard = () => {
                             <div className="flex space-x-2">
                               <button
                                 onClick={() => {
-                                  setSelectedFile(file);
-                                  setShowModal(true);
+                                  navigate(`/content/${file._id}`);
                                 }}
-                                className="text-indigo-605 dark:text-indigo-400 hover:text-indigo-500 hover:bg-indigo-500/5 p-2 rounded-xl transition-all"
-                                title="Preview"
+                                className="text-indigo-650 dark:text-indigo-400 hover:text-indigo-500 hover:bg-indigo-500/5 p-2 rounded-xl transition-all"
+                                title="Preview Secure Page"
                               >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />

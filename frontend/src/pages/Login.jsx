@@ -116,7 +116,7 @@ const Login = () => {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-650 rounded-2xl text-sm font-semibold animate-in fade-in duration-200 leading-relaxed">
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-2xl text-xs font-semibold animate-in fade-in duration-200 leading-relaxed">
             {error}
           </div>
         )}
