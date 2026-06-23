@@ -528,7 +528,7 @@ const Home = () => {
       {/* Floating Action Button (FAB) for WhatsApp Direct Chat */}
       <button
         onClick={handleQuickSupportClick}
-        className="fixed bottom-28 md:bottom-8 right-6 z-40 bg-green-600 hover:bg-green-500 hover:scale-105 active:scale-95 text-white w-14 h-14 rounded-full shadow-[0_6px_24px_rgba(22,163,74,0.45)] flex items-center justify-center transition-all duration-300 group border border-green-500/35 hover:shadow-[0_8px_32px_rgba(22,163,74,0.55)]"
+        className="fixed bottom-4 right-4 z-50 bg-green-600 hover:bg-green-500 hover:scale-105 active:scale-95 text-white w-14 h-14 rounded-full shadow-[0_6px_24px_rgba(22,163,74,0.45)] flex items-center justify-center transition-all duration-300 group border border-green-500/35 hover:shadow-[0_8px_32px_rgba(22,163,74,0.55)]"
         title="Chat with Admin on WhatsApp"
         aria-label="Direct Support Chat"
       >
