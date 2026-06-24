@@ -27,7 +27,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState("grid");
+  const [viewMode, setViewMode] = useState("list");
 
   // Floating WhatsApp Support Form State
   const [showWhatsappForm, setShowWhatsappForm] = useState(false);
@@ -133,19 +133,40 @@ const Home = () => {
   // Get file icon based on type
   const getFileIcon = (mimetype, originalName) => {
     const extension = originalName?.split('.').pop()?.toLowerCase();
-    if (mimetype?.includes('pdf') || extension === "pdf") return <FaFilePdf className="w-6 h-6 text-red-500" />;
-    if (mimetype?.startsWith('image') || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension)) return <FiImage className="w-6 h-6 text-green-500" />;
-    if (mimetype?.startsWith('video') || ['mp4', 'webm', 'ogg', 'mkv', 'avi', 'mov'].includes(extension)) return <FiVideo className="w-6 h-6 text-blue-500" />;
-    return <FiFileText className="w-6 h-6 text-indigo-500" />;
+    if (mimetype?.includes('pdf') || extension === "pdf") return <FaFilePdf className="w-5 h-5 text-white" />;
+    if (mimetype?.startsWith('image') || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension)) return <FiImage className="w-5 h-5 text-white" />;
+    if (mimetype?.startsWith('video') || ['mp4', 'webm', 'ogg', 'mkv', 'avi', 'mov'].includes(extension)) return <FiVideo className="w-5 h-5 text-white" />;
+    return <FiFileText className="w-5 h-5 text-white" />;
   };
 
-  // Get file color based on type
-  const getFileColor = (mimetype, originalName) => {
+  // Get impressive button colors based on file type - Light theme vibrant colors
+  const getButtonColor = (mimetype, originalName) => {
     const extension = originalName?.split('.').pop()?.toLowerCase();
-    if (mimetype?.includes('pdf') || extension === "pdf") return "border-red-200 dark:border-red-900/40 bg-red-50/95 dark:bg-red-950/20";
-    if (mimetype?.startsWith('image') || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension)) return "border-green-200 dark:border-green-900/40 bg-green-50/95 dark:bg-green-950/20";
-    if (mimetype?.startsWith('video') || ['mp4', 'webm', 'ogg', 'mkv', 'avi', 'mov'].includes(extension)) return "border-blue-200 dark:border-blue-900/40 bg-blue-50/95 dark:bg-blue-950/20";
-    return "border-indigo-200 dark:border-indigo-900/40 bg-indigo-50/95 dark:bg-indigo-950/20";
+    if (mimetype?.includes('pdf') || extension === "pdf") {
+      return "from-rose-500 via-red-500 to-pink-600 hover:from-rose-600 hover:via-red-600 hover:to-pink-700 shadow-rose-500/40";
+    }
+    if (mimetype?.startsWith('image') || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension)) {
+      return "from-emerald-400 via-green-500 to-teal-500 hover:from-emerald-500 hover:via-green-600 hover:to-teal-600 shadow-emerald-500/40";
+    }
+    if (mimetype?.startsWith('video') || ['mp4', 'webm', 'ogg', 'mkv', 'avi', 'mov'].includes(extension)) {
+      return "from-cyan-400 via-sky-500 to-blue-600 hover:from-cyan-500 hover:via-sky-600 hover:to-blue-700 shadow-sky-500/40";
+    }
+    return "from-violet-400 via-purple-500 to-fuchsia-600 hover:from-violet-500 hover:via-purple-600 hover:to-fuchsia-700 shadow-purple-500/40";
+  };
+
+  // Get background pattern for each card type
+  const getCardPattern = (mimetype, originalName) => {
+    const extension = originalName?.split('.').pop()?.toLowerCase();
+    if (mimetype?.includes('pdf') || extension === "pdf") {
+      return "after:bg-[radial-gradient(circle_at_30%_30%,_rgba(255,255,255,0.2)_0%,_transparent_60%)]";
+    }
+    if (mimetype?.startsWith('image') || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension)) {
+      return "after:bg-[radial-gradient(circle_at_70%_20%,_rgba(255,255,255,0.25)_0%,_transparent_60%)]";
+    }
+    if (mimetype?.startsWith('video') || ['mp4', 'webm', 'ogg', 'mkv', 'avi', 'mov'].includes(extension)) {
+      return "after:bg-[radial-gradient(circle_at_50%_80%,_rgba(255,255,255,0.2)_0%,_transparent_60%)]";
+    }
+    return "after:bg-[radial-gradient(circle_at_40%_40%,_rgba(255,255,255,0.25)_0%,_transparent_60%)]";
   };
 
   // Filter files based on search
@@ -214,7 +235,7 @@ const Home = () => {
                   onClick={() => setViewMode("grid")}
                   className={`p-2.5 rounded-xl transition-all ${
                     viewMode === "grid" 
-                      ? "bg-blue-500 text-white shadow-md" 
+                      ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md" 
                       : "text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800"
                   }`}
                 >
@@ -224,7 +245,7 @@ const Home = () => {
                   onClick={() => setViewMode("list")}
                   className={`p-2.5 rounded-xl transition-all ${
                     viewMode === "list" 
-                      ? "bg-blue-500 text-white shadow-md" 
+                      ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md" 
                       : "text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800"
                   }`}
                 >
@@ -238,7 +259,7 @@ const Home = () => {
         {/* Main Content Area */}
         <main className="flex-1 px-6 pb-24">
           <div className="max-w-7xl mx-auto">
-            <div className="mb-6 p-4 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/40 dark:border-indigo-900/40 rounded-2xl flex items-center gap-3 text-xs text-white dark:text-indigo-305 font-semibold">
+            <div className="mb-6 p-4 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-white/30 rounded-2xl flex items-center gap-3 text-xs text-white font-semibold">
               <span>🛡️ Security Alert: Screenshots and screen recording are disabled to protect document privacy.</span>
             </div>
             {loading ? (
@@ -264,7 +285,7 @@ const Home = () => {
                 <p className="text-gray-600 dark:text-slate-400 mb-6">{error}</p>
                 <button 
                   onClick={fetchFiles}
-                  className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl"
+                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl"
                 >
                   Try Again
                 </button>
@@ -281,65 +302,64 @@ const Home = () => {
                 </p>
               </div>
             ) : (
-              // Document Grid/List
-              <div className={`grid ${viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"} gap-4`}>
+              // Document Grid - Button Style with Impressive Colors
+              <div className={`grid ${viewMode === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"} gap-4`}>
                 {filteredFiles.map((file) => (
-                  <motion.div
+                  <motion.button
                     key={file._id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
-                    whileHover={{ y: -4 }}
-                    className={`bg-white/95 dark:bg-slate-900/90 backdrop-blur-sm rounded-2xl border-2 shadow-lg hover:shadow-2xl transition-all cursor-pointer group ${
-                      viewMode === "list" 
-                        ? "flex items-center gap-6 p-4" 
-                        : "p-6 hover:border-blue-300"
-                    } ${getFileColor(file.mimetype, file.originalName)}`}
+                    whileHover={{ scale: 1.05, y: -4, rotate: [0, -1, 1, 0] }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => navigate(`/content/${file._id}`)}
+                    className={`group relative w-full ${
+                      viewMode === "grid" 
+                        ? "aspect-square" 
+                        : "h-20"
+                    } bg-gradient-to-br ${getButtonColor(file.mimetype, file.originalName)} rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden flex items-center justify-center p-4 border-2 border-white/30 hover:border-white/60 ${getCardPattern(file.mimetype, file.originalName)} after:absolute after:inset-0 after:pointer-events-none`}
                   >
-                    {/* Icon */}
-                    <div className={`${
-                      viewMode === "list" 
-                        ? "w-20 h-20 flex-shrink-0" 
-                        : "w-full h-40"
-                    } rounded-xl flex items-center justify-center bg-white/80 dark:bg-slate-950/80 border-2 border-white dark:border-slate-800 shadow-inner`}>
-                      <div className={`${viewMode === "list" ? "text-4xl" : "text-6xl"}`}>
+                    {/* Animated gradient background */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-white/10 opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+                    
+                    {/* Shimmer effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                    
+                    {/* Content */}
+                    <div className="relative z-10 flex flex-col items-center justify-center w-full h-full gap-2.5">
+                      {/* Icon with glow */}
+                      <div className="text-white drop-shadow-lg group-hover:scale-110 transition-transform duration-300">
                         {getFileIcon(file.mimetype, file.originalName)}
                       </div>
-                    </div>
-
-                    {/* Content */}
-                    <div className={`${viewMode === "list" ? "flex-1 min-w-0" : "mt-4"} space-y-2`}>
-                      <div className="inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-indigo-600 dark:to-purple-650 text-white font-semibold rounded-xl text-sm shadow-md transition-all group-hover:from-blue-700 group-hover:to-indigo-700 max-w-full">
-                        <span className="truncate">{file.title}</span>
+                      
+                      {/* Title - Only on button */}
+                      <span className="text-white font-bold text-sm text-center line-clamp-2 px-1 leading-tight drop-shadow-lg">
+                        {file.title}
+                      </span>
+                      
+                      {/* Subtle arrow indicator on hover */}
+                      <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                        <FiArrowRight className="w-5 h-5 text-white/90 drop-shadow-lg" />
                       </div>
-                      <p className="text-sm text-gray-500 dark:text-slate-400 truncate font-mono">
-                        {file.originalName || "secure_document.pdf"}
-                      </p>
-                      {viewMode === "list" && (
-                        <div className="flex items-center gap-3 mt-2">
-                          <span className="text-xs bg-gray-100 dark:bg-slate-800 px-3 py-1 rounded-full text-gray-600 dark:text-slate-350">
-                            {file.mimetype || "Document"}
-                          </span>
-                          <span className="text-xs text-gray-400 dark:text-slate-500">
-                            {new Date(file.createdAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                      )}
-                    </div>
 
-                    {/* Arrow on hover */}
-                    <div className={`${
-                      viewMode === "list" ? "ml-4" : "mt-4"
-                    } flex items-center justify-end text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity`}>
-                      <FiArrowRight className="w-5 h-5" />
+                      {/* File type badge */}
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span className="text-[10px] font-bold text-white/80 bg-black/20 backdrop-blur-sm px-2 py-1 rounded-full">
+                          {file.mimetype?.split('/')[0] || 'DOC'}
+                        </span>
+                      </div>
                     </div>
-                  </motion.div>
+                    
+                    {/* Glow effect on hover */}
+                    <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                  </motion.button>
                 ))}
               </div>
             )}
           </div>
-        </main>        {/* Footer */}
+        </main>
+
+        {/* Footer */}
         <footer className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-t border-white/30 dark:border-slate-800/40 mt-auto">
           <div className="max-w-7xl mx-auto px-6 py-4">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-gray-600 dark:text-slate-400">
@@ -417,7 +437,7 @@ const Home = () => {
                 <button
                   type="submit"
                   disabled={formSubmitting}
-                  className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                  className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold py-3 rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
                 >
                   <FaWhatsapp className="w-5 h-5" />
                   {formSubmitting ? "Sending..." : "Send via WhatsApp"}
@@ -432,8 +452,8 @@ const Home = () => {
           onClick={() => setShowWhatsappForm(!showWhatsappForm)}
           className={`w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 ${
             showWhatsappForm 
-              ? "bg-gray-700 hover:bg-gray-800 rotate-45" 
-              : "bg-green-500 hover:bg-green-600"
+              ? "bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 rotate-45" 
+              : "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
           }`}
           aria-label="Contact Support"
         >
