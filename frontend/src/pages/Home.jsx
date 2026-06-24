@@ -27,7 +27,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState("grid");
+  const [viewMode, setViewMode] = useState("list");
 
   // Floating WhatsApp Support Form State
   const [showWhatsappForm, setShowWhatsappForm] = useState(false);
@@ -382,7 +382,7 @@ const Home = () => {
       </div>
 
       {/* WhatsApp Floating Button - Positioned at Right Side Center */}
-      <div className="fixed right-6 top-1/2 -translate-y-1/2 z-[9999]">
+      <div className="fixed right-6 top-1/2 translate-y-70 z-[9999]  ">
         <div className="relative">
           {/* WhatsApp FAB Button */}
           <button
