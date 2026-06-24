@@ -27,7 +27,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState("list");
+  const [viewMode, setViewMode] = useState("grid");
 
   // Floating WhatsApp Support Form State
   const [showWhatsappForm, setShowWhatsappForm] = useState(false);
@@ -383,86 +383,93 @@ const Home = () => {
 
       {/* WhatsApp Floating Button - Positioned at Right Side Center */}
       <div className="fixed right-6 top-1/2 -translate-y-1/2 z-[9999]">
-        <AnimatePresence>
-          {showWhatsappForm && (
-            <motion.div
-              initial={{ opacity: 0, x: 20, scale: 0.95 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 20, scale: 0.95 }}
-              transition={{ duration: 0.2 }}
-              className="absolute right-16 top-1/2 -translate-y-1/2 w-80 bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-gray-200 dark:border-slate-800"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <FaWhatsapp className="w-6 h-6 text-green-500" />
-                  <span className="font-bold text-gray-800 dark:text-slate-200">Support</span>
-                </div>
-                <button
-                  onClick={() => setShowWhatsappForm(false)}
-                  className="p-1 hover:bg-gray-150 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                >
-                  <FiX className="w-5 h-5 text-gray-500 dark:text-slate-400" />
-                </button>
-              </div>
+        <div className="relative">
+          {/* WhatsApp FAB Button */}
+          <button
+            onClick={() => setShowWhatsappForm(!showWhatsappForm)}
+            className={`w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 ${
+              showWhatsappForm 
+                ? "bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 rotate-45" 
+                : "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+            }`}
+            aria-label="Contact Support"
+          >
+            {showWhatsappForm ? (
+              <FiX className="w-7 h-7 text-white" />
+            ) : (
+              <FaWhatsapp className="w-8 h-8 text-white" />
+            )}
+          </button>
 
-              <form onSubmit={handleContactSubmit} className="space-y-3">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">
-                    Your Name
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={contactForm.name}
-                    onChange={handleContactChange}
-                    className="w-full bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-slate-100 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">
-                    Message
-                  </label>
-                  <textarea
-                    name="message"
-                    value={contactForm.message}
-                    onChange={handleContactChange}
-                    rows="3"
-                    className="w-full bg-gray-50 dark:bg-slate-955 border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-slate-100 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all resize-none"
-                    required
-                  ></textarea>
+          {/* WhatsApp Form - Positioned in Left Upper Corner */}
+          <AnimatePresence>
+            {showWhatsappForm && (
+              <motion.div
+                initial={{ opacity: 0, x: -20, y: -20, scale: 0.9 }}
+                animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+                exit={{ opacity: 0, x: -20, y: -20, scale: 0.9 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                className="absolute bottom-full right-0 mb-4 w-80 bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-gray-200 dark:border-slate-800"
+                style={{ transformOrigin: "bottom right" }}
+              >
+                {/* Triangle pointer pointing to the button */}
+                <div className="absolute -bottom-2 right-6 w-4 h-4 bg-white dark:bg-slate-900 border-r border-b border-gray-200 dark:border-slate-800 rotate-45"></div>
+                
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <FaWhatsapp className="w-6 h-6 text-green-500" />
+                    <span className="font-bold text-gray-800 dark:text-slate-200">Support</span>
+                  </div>
+                  <button
+                    onClick={() => setShowWhatsappForm(false)}
+                    className="p-1 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                  >
+                    <FiX className="w-5 h-5 text-gray-500 dark:text-slate-400" />
+                  </button>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={formSubmitting}
-                  className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold py-3 rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-                >
-                  <FaWhatsapp className="w-5 h-5" />
-                  {formSubmitting ? "Sending..." : "Send via WhatsApp"}
-                </button>
-              </form>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                <form onSubmit={handleContactSubmit} className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">
+                      Your Name
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={contactForm.name}
+                      onChange={handleContactChange}
+                      className="w-full bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-slate-100 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all"
+                      required
+                    />
+                  </div>
 
-        {/* WhatsApp FAB Button */}
-        <button
-          onClick={() => setShowWhatsappForm(!showWhatsappForm)}
-          className={`w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 ${
-            showWhatsappForm 
-              ? "bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 rotate-45" 
-              : "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
-          }`}
-          aria-label="Contact Support"
-        >
-          {showWhatsappForm ? (
-            <FiX className="w-7 h-7 text-white" />
-          ) : (
-            <FaWhatsapp className="w-8 h-8 text-white" />
-          )}
-        </button>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">
+                      Message
+                    </label>
+                    <textarea
+                      name="message"
+                      value={contactForm.message}
+                      onChange={handleContactChange}
+                      rows="3"
+                      className="w-full bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-slate-100 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all resize-none"
+                      required
+                    ></textarea>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={formSubmitting}
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold py-3 rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                  >
+                    <FaWhatsapp className="w-5 h-5" />
+                    {formSubmitting ? "Sending..." : "Send via WhatsApp"}
+                  </button>
+                </form>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );
