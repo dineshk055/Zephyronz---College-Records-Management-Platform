@@ -200,6 +200,10 @@ const Login = () => {
           </p>
         </div>
 
+        <div className="mt-6 p-3 bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800/50 rounded-2xl text-center text-xs text-slate-500 dark:text-slate-400 font-medium">
+          🛡️ Screenshots are not supported in this application for security reasons.
+        </div>
+
         <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800 text-center">
           <p className="text-xs text-slate-500 dark:text-slate-450">
             Demo Administrator: <span className="text-indigo-600/80 dark:text-indigo-400/80 font-mono">admin@example.com</span> / <span className="text-indigo-600/80 dark:text-indigo-400/80 font-mono">password123</span>

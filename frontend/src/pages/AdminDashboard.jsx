@@ -336,9 +336,9 @@ const AdminDashboard = () => {
       return;
     }
 
-    // Check file size (max 100MB)
-    if (file.size > 100 * 1024 * 1024) {
-      alert("File size must be less than 100MB");
+    // Check file size (max 20MB)
+    if (file.size > 20 * 1024 * 1024) {
+      alert("File size must be less than 20MB");
       return;
     }
 
@@ -518,6 +518,11 @@ const AdminDashboard = () => {
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
           
+          {/* Screenshot Protection Notice */}
+          <div className="mb-6 p-4 bg-purple-50/50 dark:bg-purple-950/20 border border-purple-100/40 dark:border-purple-900/40 rounded-2xl flex items-center gap-3 text-xs text-purple-750 dark:text-purple-305 font-semibold">
+            <span>🛡️ Security Alert: Screenshots are not supported in this application for security reasons.</span>
+          </div>
+
           {/* Stats Cards */}
           <StatsCards stats={stats} />
 
@@ -591,7 +596,7 @@ const AdminDashboard = () => {
                           {file ? file.name : "Click to browse or drag and drop"}
                         </p>
                         <p className="text-slate-500 dark:text-slate-450 text-xs mt-1.5">
-                          {file ? formatFileSize(file.size) : "Supports: PDFs, Images, Videos, Documents (Max 100MB)"}
+                          {file ? formatFileSize(file.size) : "Supports: PDFs, Images, Videos, Documents (Max 20MB)"}
                         </p>
                       </label>
                     </div>

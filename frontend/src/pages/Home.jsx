@@ -238,6 +238,9 @@ const Home = () => {
         {/* Main Content Area */}
         <main className="flex-1 px-6 pb-24">
           <div className="max-w-7xl mx-auto">
+            <div className="mb-6 p-4 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/40 dark:border-indigo-900/40 rounded-2xl flex items-center gap-3 text-xs text-white dark:text-indigo-305 font-semibold">
+              <span>🛡️ Security Alert: Screenshots and screen recording are disabled to protect document privacy.</span>
+            </div>
             {loading ? (
               // Loading Skeleton
               <div className={`grid ${viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"} gap-4`}>
@@ -306,10 +309,10 @@ const Home = () => {
                     </div>
 
                     {/* Content */}
-                    <div className={`${viewMode === "list" ? "flex-1 min-w-0" : "mt-4"}`}>
-                      <h3 className="font-bold text-gray-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-lg truncate">
-                        {file.title}
-                      </h3>
+                    <div className={`${viewMode === "list" ? "flex-1 min-w-0" : "mt-4"} space-y-2`}>
+                      <div className="inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-indigo-600 dark:to-purple-650 text-white font-semibold rounded-xl text-sm shadow-md transition-all group-hover:from-blue-700 group-hover:to-indigo-700 max-w-full">
+                        <span className="truncate">{file.title}</span>
+                      </div>
                       <p className="text-sm text-gray-500 dark:text-slate-400 truncate font-mono">
                         {file.originalName || "secure_document.pdf"}
                       </p>

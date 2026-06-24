@@ -442,6 +442,10 @@ const ProfileCard = () => {
                 Security
               </h3>
               
+              <div className="mb-4 p-3 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/40 dark:border-indigo-900/40 text-indigo-750 dark:text-indigo-305 rounded-2xl text-xs font-semibold leading-relaxed">
+                🛡️ Screenshots are not supported in this application for security reasons.
+              </div>
+              
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border border-gray-200/50 dark:border-slate-700/50">
                   <div className="flex items-center gap-3">
