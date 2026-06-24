@@ -17,8 +17,18 @@ import {
   FiLock,
   FiAlertTriangle,
   FiCheck,
-  FiArrowLeft
+  FiArrowLeft,
+  FiUser,
+  FiBriefcase,
+  FiGlobe,
+  FiBell,
+  FiSettings,
+  FiCreditCard,
+  FiHelpCircle,
+  FiShare2,
+  FiMoreHorizontal
 } from "react-icons/fi";
+import { FaGraduationCap, FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 const ProfileCard = () => {
@@ -35,7 +45,7 @@ const ProfileCard = () => {
 
   // Password Reset Modal states
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [passwordStep, setPasswordStep] = useState(1); // 1 = Send OTP, 2 = Enter OTP & Reset Password
+  const [passwordStep, setPasswordStep] = useState(1);
   const [otpSentMessage, setOtpSentMessage] = useState("");
   const [testOtpFallback, setTestOtpFallback] = useState(null);
   
@@ -98,7 +108,6 @@ const ProfileCard = () => {
     navigate("/login");
   };
 
-  // Change Password Flow
   const handleSendOtp = async () => {
     setPasswordLoading(true);
     setPasswordError("");
@@ -189,157 +198,139 @@ const ProfileCard = () => {
   };
 
   return (
-    <div 
-      className="min-h-screen relative bg-cover bg-center bg-no-repeat bg-fixed transition-colors duration-300 flex flex-col pb-16 pt-12 px-4 sm:px-6 lg:px-8 text-slate-805"
-      style={{ backgroundImage: `url('/campus_bg.jpg')` }}
-    >
-      {/* Background Overlay */}
-      <div className="absolute inset-0 bg-white/80 dark:bg-slate-950/85 backdrop-blur-[2px] transition-colors duration-300"></div>
-
-      <div className="max-w-5xl mx-auto w-full relative z-10">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 pb-24 pt-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-blue-400/10 to-purple-400/10 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-indigo-400/10 to-pink-400/10 rounded-full blur-3xl"></div>
+      
+      <div className="max-w-6xl mx-auto w-full relative z-10">
         {/* Back Button */}
-        <button
-          onClick={() => navigate(-1)}
-          className="mb-6 flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 transition-colors font-semibold"
-        >
-          <FiArrowLeft className="w-5 h-5" />
-          Back
-        </button>
+        <div className="mb-6">
+          <button
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm px-4 py-2 rounded-xl border border-gray-200/50 dark:border-gray-700/50 shadow-sm"
+          >
+            <FiArrowLeft className="w-4 h-4" />
+            <span>Back</span>
+          </button>
+        </div>
 
-        {/* Profile Split Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main profile settings card */}
-          <div className="lg:col-span-2 backdrop-blur-xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/60 dark:border-slate-800/60 shadow-sm rounded-3xl overflow-hidden transition-colors duration-300">
-            {/* Header Banner */}
-            <div className="relative h-32 bg-gradient-to-r from-indigo-600 via-purple-650 to-pink-600 flex justify-between items-start p-4">
-              <div className="absolute -bottom-12 left-8">
-                <div className="w-24 h-24 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-md border-4 border-white dark:border-slate-800">
-                  <span className="text-4xl font-extrabold text-indigo-600 dark:text-indigo-400">
-                    {user?.name?.charAt(0).toUpperCase() || "U"}
-                  </span>
-                </div>
+        {/* Profile Header */}
+        <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl border border-white/20 dark:border-slate-700/50 shadow-2xl p-8 mb-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+            {/* Avatar */}
+            <div className="relative">
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center shadow-xl ring-4 ring-white/50 dark:ring-slate-700/50">
+                <span className="text-3xl font-bold text-white">
+                  {user?.name?.charAt(0).toUpperCase() || "U"}
+                </span>
               </div>
-              <div className="ml-auto w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl border border-white/30 overflow-hidden shadow-sm">
-                <img 
-                  src="/pwa-192x192.png" 
-                  alt="Zephyronz Emblem" 
-                  className="w-full h-full object-cover"
-                />
+              <div className="absolute -bottom-1 -right-1 bg-green-500 w-5 h-5 rounded-full border-2 border-white dark:border-slate-800"></div>
+            </div>
+
+            {/* User Info */}
+            <div className="flex-1">
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+                {user?.name}
+              </h1>
+              <div className="flex flex-wrap items-center gap-3 mt-2">
+                <span className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300">
+                  <FiMail className="w-4 h-4" />
+                  {user?.email}
+                </span>
+                <span className="w-px h-4 bg-gray-300 dark:bg-gray-600"></span>
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+                  user?.role === "admin" 
+                    ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" 
+                    : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                }`}>
+                  <FiShield className="w-3 h-3" />
+                  {user?.role === "admin" ? "Administrator" : "Member"}
+                </span>
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+                  user?.isApproved 
+                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" 
+                    : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                }`}>
+                  {user?.isApproved ? (
+                    <><FiCheckCircle className="w-3 h-3" /> Verified</>
+                  ) : (
+                    <><FiClock className="w-3 h-3" /> Pending</>
+                  )}
+                </span>
               </div>
             </div>
 
-            {/* Profile Content */}
-            <div className="pt-16 pb-8 px-8">
-              {/* Edit Button */}
-              {!isEditing && (
-                <div className="flex justify-end mb-4">
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="flex items-center gap-2 px-4 py-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-slate-800/60 rounded-lg transition-colors font-semibold"
-                  >
-                    <FiEdit2 className="w-4 h-4" />
-                    Edit Profile
-                  </button>
-                </div>
-              )}
+            {/* Action Buttons */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setIsEditing(true)}
+                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl font-semibold text-sm transition-all shadow-lg hover:shadow-xl flex items-center gap-2"
+              >
+                <FiEdit2 className="w-4 h-4" />
+                Edit Profile
+              </button>
+              <button className="p-2 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-xl transition-all">
+                <FiMoreHorizontal className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+              </button>
+            </div>
+          </div>
+        </div>
 
-              {/* Success/Error Message */}
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Profile Details */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Profile Details Card */}
+            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl border border-white/20 dark:border-slate-700/50 shadow-xl p-6">
               {message.text && (
-                <div className={`mb-6 p-3 rounded-lg text-sm font-semibold ${
+                <div className={`mb-6 p-4 rounded-2xl text-sm font-semibold border transition-all ${
                   message.type === "success" 
-                    ? "bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-900/50" 
-                    : "bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900/50"
+                    ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800" 
+                    : "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800"
                 }`}>
                   {message.text}
                 </div>
               )}
 
               {!isEditing ? (
-                // View Mode
                 <div className="space-y-6">
-                  <div>
-                    <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">{user?.name}</h1>
-                    <div className="flex flex-wrap items-center gap-2 mt-2">
-                      <span className={`px-2.5 py-0.5 text-xs rounded-full font-semibold border ${
-                        user?.role === "admin" 
-                          ? "bg-purple-100 dark:bg-purple-950/40 text-purple-800 dark:text-purple-400 border-purple-200 dark:border-purple-900/50" 
-                          : "bg-indigo-100 dark:bg-indigo-950/40 text-indigo-800 dark:text-indigo-400 border-indigo-200 dark:border-indigo-900/50"
-                      }`}>
-                        {user?.role === "admin" ? "Administrator" : "Member"}
-                      </span>
-                      {user?.isApproved ? (
-                        <span className="flex items-center gap-1 px-2.5 py-0.5 text-xs rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400 font-semibold border border-emerald-200 dark:border-emerald-900/50">
-                          <FiCheckCircle className="w-3.5 h-3.5" />
-                          Verified Account
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-1 px-2.5 py-0.5 text-xs rounded-full bg-amber-100 dark:bg-amber-950/40 text-amber-805 dark:text-amber-400 font-semibold border border-amber-200 dark:border-amber-900/50">
-                          <FiClock className="w-3.5 h-3.5" />
-                          Pending Review
-                        </span>
-                      )}
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <FiUser className="w-5 h-5 text-blue-500" />
+                    Personal Information
+                  </h2>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-gray-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-gray-200/50 dark:border-slate-700/50">
+                      <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Full Name</p>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">{user?.name}</p>
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-200/50 dark:border-slate-800/60">
-                    <div className="flex items-center gap-3 p-4 bg-slate-50/70 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-805 rounded-xl">
-                      <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-950/40 rounded-full flex items-center justify-center flex-shrink-0">
-                        <FiMail className="w-5 h-5 text-indigo-650 dark:text-indigo-400" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Email Address</p>
-                        <p className="text-slate-800 dark:text-slate-200 font-semibold truncate">{user?.email}</p>
-                      </div>
+                    
+                    <div className="bg-gray-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-gray-200/50 dark:border-slate-700/50">
+                      <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email Address</p>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">{user?.email}</p>
                     </div>
-
-                    <div className="flex items-center gap-3 p-4 bg-slate-50/70 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-805 rounded-xl">
-                      <div className="w-10 h-10 bg-purple-50 dark:bg-purple-950/40 rounded-full flex items-center justify-center flex-shrink-0">
-                        <FiShield className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-550 dark:text-slate-400 font-medium">Role Category</p>
-                        <p className="text-slate-800 dark:text-slate-200 font-semibold capitalize">{user?.role}</p>
-                      </div>
+                    
+                    <div className="bg-gray-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-gray-200/50 dark:border-slate-700/50">
+                      <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</p>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1 capitalize">{user?.role}</p>
                     </div>
-
-                    <div className="flex items-center gap-3 p-4 bg-slate-50/70 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-805 rounded-xl">
-                      <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-950/40 rounded-full flex items-center justify-center flex-shrink-0">
-                        <FiUserCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Access Permission</p>
-                        <p className="text-slate-800 dark:text-slate-200 font-semibold">
-                          {user?.isApproved ? "Full Access Granted" : "Pending Authorization"}
-                        </p>
-                      </div>
+                    
+                    <div className="bg-gray-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-gray-200/50 dark:border-slate-700/50">
+                      <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Member Since</p>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">{formatDate(user?.createdAt)}</p>
                     </div>
-
-                    <div className="flex items-center gap-3 p-4 bg-slate-50/70 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-850 rounded-xl">
-                      <div className="w-10 h-10 bg-amber-50 dark:bg-amber-950/40 rounded-full flex items-center justify-center flex-shrink-0">
-                        <FiCalendar className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Member Since</p>
-                        <p className="text-slate-800 dark:text-slate-200 font-semibold">{formatDate(user?.createdAt)}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="pt-6 border-t border-slate-200 dark:border-slate-800 flex justify-end">
-                    <button
-                      onClick={handleLogout}
-                      className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-all duration-200 flex items-center justify-center gap-2 font-bold shadow-sm shadow-red-500/10"
-                    >
-                      <FiLogOut className="w-5 h-5" />
-                      Logout Account
-                    </button>
                   </div>
                 </div>
               ) : (
-                // Edit Mode
-                <form onSubmit={handleUpdate} className="space-y-6">
+                <form onSubmit={handleUpdate} className="space-y-4">
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <FiEdit2 className="w-5 h-5 text-blue-500" />
+                    Edit Profile
+                  </h2>
+                  
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
                       Full Name
                     </label>
                     <input
@@ -347,13 +338,13 @@ const ProfileCard = () => {
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
-                      className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3.5 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
+                      className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
                       Email Address
                     </label>
                     <input
@@ -361,22 +352,21 @@ const ProfileCard = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full bg-slate-100 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3.5 text-slate-500 dark:text-slate-400 cursor-not-allowed focus:outline-none"
-                      required
+                      className="w-full bg-gray-100 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-gray-500 dark:text-gray-400 cursor-not-allowed"
                       disabled
                     />
-                    <p className="text-xs text-slate-500 dark:text-slate-455 mt-1.5 font-medium">Registered email cannot be modified</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">Registered email cannot be modified.</p>
                   </div>
 
-                  <div className="flex gap-4 pt-4">
+                  <div className="flex gap-3 pt-2">
                     <button
                       type="submit"
                       disabled={loading}
-                      className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-indigo-600 to-purple-650 text-white rounded-2xl hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 font-bold shadow-md shadow-indigo-500/15"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl font-semibold text-sm transition-all shadow-lg hover:shadow-xl disabled:opacity-50"
                     >
                       {loading ? (
                         <>
-                          <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                          <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                           </svg>
@@ -392,7 +382,7 @@ const ProfileCard = () => {
                     <button
                       type="button"
                       onClick={() => setIsEditing(false)}
-                      className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-2xl transition-all font-bold"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-300 rounded-xl font-semibold text-sm transition-all"
                     >
                       <FiX className="w-4 h-4" />
                       Cancel
@@ -401,29 +391,41 @@ const ProfileCard = () => {
                 </form>
               )}
             </div>
+
+            
           </div>
 
-          {/* Right Column settings panels */}
+          {/* Right Column - Settings & Security */}
           <div className="space-y-6">
-            {/* Theme Card */}
-            <div className="backdrop-blur-xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/60 dark:border-slate-800/60 shadow-sm rounded-3xl p-6 transition-colors duration-300">
-              <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-4 text-lg">Visual Customization</h3>
+            {/* Theme Toggle */}
+            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl border border-white/20 dark:border-slate-700/50 shadow-xl p-6">
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <FiGlobe className="w-4 h-4 text-blue-500" />
+                Appearance
+              </h3>
               
-              <div className="flex items-center justify-between p-4 bg-slate-50/70 dark:bg-slate-950/40 border border-slate-200/50 dark:border-slate-800/80 rounded-xl">
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border border-gray-200/50 dark:border-slate-700/50">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-950/40 rounded-full flex items-center justify-center flex-shrink-0">
-                    {theme === "dark" ? <FiMoon className="w-5 h-5 text-indigo-400" /> : <FiSun className="w-5 h-5 text-indigo-650" />}
+                  <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                    {theme === "dark" ? 
+                      <FiMoon className="w-5 h-5 text-blue-600 dark:text-blue-400" /> : 
+                      <FiSun className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                    }
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-150">Application Theme</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Currently: {theme === "dark" ? "Dark" : "Light"}</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">Theme Mode</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {theme === "dark" ? "Dark Mode" : "Light Mode"}
+                    </p>
                   </div>
                 </div>
+                
                 <button
                   onClick={toggleTheme}
-                  className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none bg-indigo-600 dark:bg-slate-700"
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    theme === "dark" ? "bg-blue-600" : "bg-gray-300"
+                  }`}
                 >
-                  <span className="sr-only">Toggle theme</span>
                   <span
                     className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
                       theme === "dark" ? "translate-x-6" : "translate-x-1"
@@ -433,34 +435,22 @@ const ProfileCard = () => {
               </div>
             </div>
 
-            {/* Security settings card */}
-            <div className="backdrop-blur-xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/60 dark:border-slate-800/60 shadow-sm rounded-3xl p-6 transition-colors duration-300">
-              <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-4 text-lg">System Security</h3>
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-slate-50/70 dark:bg-slate-950/40 border border-slate-200/50 dark:border-slate-800/80 rounded-xl">
+            {/* Security Card */}
+            <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl border border-white/20 dark:border-slate-700/50 shadow-xl p-6">
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <FiShield className="w-4 h-4 text-purple-500" />
+                Security
+              </h3>
+              
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border border-gray-200/50 dark:border-slate-700/50">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-950/40 rounded-full flex items-center justify-center flex-shrink-0">
-                      <FiShield className="w-5 h-5 text-emerald-600" />
+                    <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center">
+                      <FiLock className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-150">Anti-Screenshot</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-405">Real-time guard blur</p>
-                    </div>
-                  </div>
-                  <span className="flex items-center gap-1 px-2.5 py-0.5 text-xs rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400 font-bold border border-emerald-200 dark:border-emerald-800">
-                    Shield Active
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-slate-50/70 dark:bg-slate-950/40 border border-slate-200/50 dark:border-slate-800/80 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-950/40 rounded-full flex items-center justify-center flex-shrink-0">
-                      <FiLock className="w-5 h-5 text-indigo-650 dark:text-indigo-400" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-150">Account Security</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">Update password</p>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white">Password</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Last changed 2 months ago</p>
                     </div>
                   </div>
                   <button
@@ -470,10 +460,73 @@ const ProfileCard = () => {
                       setTestOtpFallback(null);
                       setShowPasswordModal(true);
                     }}
-                    className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-750 text-white rounded-lg transition-colors font-bold text-xs shadow-sm shadow-indigo-600/15"
+                    className="px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-xs font-semibold transition-all"
                   >
-                    Change Password
+                    Update
                   </button>
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border border-gray-200/50 dark:border-slate-700/50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
+                      <FiCheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white">2FA Status</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Not enabled</p>
+                    </div>
+                  </div>
+                  <button className="px-3 py-1.5 bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-300 rounded-lg text-xs font-semibold transition-all">
+                    Setup
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border border-gray-200/50 dark:border-slate-700/50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center">
+                      <FiLogOut className="w-5 h-5 text-red-600 dark:text-red-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white">Logout</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Sign out of account</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-semibold transition-all"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Account Stats */}
+            <div className="bg-gradient-to-br from-blue-500 to-indigo-500 rounded-3xl p-6 text-white shadow-xl">
+              <div className="flex items-center gap-3 mb-4">
+                <FaGraduationCap className="w-6 h-6" />
+                <h3 className="font-bold">Account Status</h3>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex justify-between items-center border-b border-white/10 pb-2">
+                  <span className="text-sm opacity-80">Status</span>
+                  <span className="text-sm font-semibold flex items-center gap-1.5">
+                    <span className="w-2 h-2 bg-green-300 rounded-full animate-pulse"></span>
+                    Active
+                  </span>
+                </div>
+                <div className="flex justify-between items-center border-b border-white/10 pb-2">
+                  <span className="text-sm opacity-80">Verified</span>
+                  <span className="text-sm font-semibold">
+                    {user?.isApproved ? "✅ Yes" : "⏳ Pending"}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm opacity-80">Account Age</span>
+                  <span className="text-sm font-semibold">
+                    {user?.createdAt ? Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24 * 30)) : 0} months
+                  </span>
                 </div>
               </div>
             </div>
@@ -483,81 +536,77 @@ const ProfileCard = () => {
 
       {/* Change Password Modal */}
       {showPasswordModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
+        <div className="fixed inset-0 z-[99999] overflow-y-auto">
           <div 
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => !passwordLoading && setShowPasswordModal(false)}
           ></div>
           <div className="relative min-h-screen flex items-center justify-center p-4">
-            <div className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl max-w-md w-full overflow-hidden transition-colors duration-300">
-              
-              {/* Modal Header */}
-              <div className="flex justify-between items-center px-6 py-5 border-b border-slate-200/50 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40">
+            <div className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-scale-up">
+              <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 dark:border-slate-700">
                 <div className="flex items-center gap-2">
-                  <FiLock className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                  <h3 className="font-bold text-slate-800 dark:text-slate-100">Update Password</h3>
+                  <FiLock className="w-5 h-5 text-blue-500" />
+                  <h3 className="font-bold text-gray-900 dark:text-white">Update Password</h3>
                 </div>
                 <button
                   onClick={() => setShowPasswordModal(false)}
                   disabled={passwordLoading}
-                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                 >
                   <FiX className="w-5 h-5" />
                 </button>
               </div>
 
-              {/* Modal Content */}
               <div className="p-6">
                 {passwordSuccess ? (
-                  <div className="text-center py-8">
-                    <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-950/40 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-250">
-                      <FiCheck className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+                  <div className="text-center py-6">
+                    <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FiCheck className="w-8 h-8 text-green-600 dark:text-green-400" />
                     </div>
-                    <h4 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2">Password Updated Successfully!</h4>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Your account credentials have been updated.</p>
+                    <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Password Updated!</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Your password has been changed successfully.</p>
                   </div>
                 ) : (
                   <>
                     {passwordError && (
-                      <div className="mb-4 p-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-400 rounded-xl text-xs font-semibold flex items-center gap-2 animate-pulse">
+                      <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-700 dark:text-red-400 flex items-center gap-2">
                         <FiAlertTriangle className="w-4 h-4 flex-shrink-0" />
                         <span>{passwordError}</span>
                       </div>
                     )}
 
                     {passwordStep === 1 ? (
-                      // Step 1: Send OTP request
-                      <div className="space-y-5 text-center">
-                        <p className="text-sm text-slate-655 dark:text-slate-350">
-                          To change your password, we need to send a 6-digit verification code (OTP) to your registered email: <strong>{user?.email}</strong>.
+                      <div className="space-y-4 text-center">
+                        <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                          We'll send a verification code to your registered email: <strong className="text-gray-900 dark:text-white">{user?.email}</strong>
                         </p>
                         <button
                           type="button"
                           onClick={handleSendOtp}
                           disabled={passwordLoading}
-                          className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-indigo-650 hover:bg-indigo-700 text-white rounded-2xl transition-all font-bold disabled:opacity-50 shadow-md shadow-indigo-500/10"
+                          className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-semibold text-sm transition-all disabled:opacity-50"
                         >
-                          {passwordLoading ? "Generating Code..." : "Send Verification Code"}
+                          {passwordLoading ? "Sending..." : "Send Verification Code"}
                         </button>
                       </div>
                     ) : (
-                      // Step 2: Input OTP and new passwords
                       <form onSubmit={handleResetPassword} className="space-y-4">
-                        <div className="p-3 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/40 text-indigo-805 dark:text-indigo-350 rounded-xl text-xs">
-                          {otpSentMessage || "Verification code sent to email."}
+                        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl text-sm text-blue-700 dark:text-blue-400">
+                          {otpSentMessage || "Verification code sent to your email."}
                         </div>
 
-                        {/* Local test fallback reminder */}
                         {testOtpFallback && (
-                          <div className="p-3.5 bg-amber-50 dark:bg-amber-950/30 border border-amber-250 dark:border-amber-900/50 text-amber-800 dark:text-amber-300 rounded-xl text-xs space-y-1">
-                            <p className="font-bold">⚠️ Local testing helper:</p>
-                            <p>Email delivery is mocked. Please use the test verification code: <strong className="bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-amber-300/40 select-all font-mono text-sm">{testOtpFallback}</strong></p>
+                          <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl text-sm">
+                            <p className="font-semibold text-yellow-700 dark:text-yellow-400">Test Mode</p>
+                            <p className="text-yellow-600 dark:text-yellow-500 text-xs mt-1">
+                              Verification Code: <strong className="font-mono bg-yellow-100 dark:bg-yellow-900/30 px-2 py-0.5 rounded">{testOtpFallback}</strong>
+                            </p>
                           </div>
                         )}
 
                         <div>
-                          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
-                            Verification Code (OTP) *
+                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                            Verification Code *
                           </label>
                           <input
                             type="text"
@@ -565,13 +614,13 @@ const ProfileCard = () => {
                             placeholder="Enter 6-digit code"
                             value={passwordData.otp}
                             onChange={(e) => setPasswordData({ ...passwordData, otp: e.target.value })}
-                            className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-center font-mono text-lg tracking-widest text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                            className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-center font-mono text-base tracking-widest text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                             required
                           />
                         </div>
 
                         <div>
-                          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
                             New Password *
                           </label>
                           <input
@@ -579,30 +628,30 @@ const ProfileCard = () => {
                             placeholder="Min 6 characters"
                             value={passwordData.newPassword}
                             onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                            className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                            className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                             required
                           />
                         </div>
 
                         <div>
-                          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
-                            Confirm New Password *
+                          <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                            Confirm Password *
                           </label>
                           <input
                             type="password"
-                            placeholder="Re-enter password"
+                            placeholder="Re-enter new password"
                             value={passwordData.confirmPassword}
                             onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                            className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                            className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                             required
                           />
                         </div>
 
-                        <div className="flex gap-3 pt-3">
+                        <div className="flex gap-2 pt-2">
                           <button
                             type="submit"
                             disabled={passwordLoading}
-                            className="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-600 to-purple-650 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 font-bold shadow-md shadow-indigo-500/15"
+                            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-semibold text-sm transition-all disabled:opacity-50"
                           >
                             {passwordLoading ? "Updating..." : "Update Password"}
                           </button>
@@ -610,7 +659,7 @@ const ProfileCard = () => {
                             type="button"
                             onClick={() => setPasswordStep(1)}
                             disabled={passwordLoading}
-                            className="px-4 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl transition-all font-bold"
+                            className="px-4 py-2.5 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-300 rounded-xl font-semibold text-sm transition-all"
                           >
                             Back
                           </button>

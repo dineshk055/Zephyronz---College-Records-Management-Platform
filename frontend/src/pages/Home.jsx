@@ -5,43 +5,34 @@ import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-hot-toast";
 import {
-  FiSearch,
   FiFileText,
   FiVideo,
   FiImage,
+  FiAlertCircle,
+  FiX,
+  FiArrowRight,
+  FiLock,
+  FiSearch,
   FiGrid,
-  FiList,
-  FiUser,
-  FiCalendar,
-  FiSend,
-  FiInfo,
-  FiDatabase,
-  FiActivity,
-  FiTrendingUp,
-  FiLayers,
-  FiAlertCircle
+  FiList
 } from "react-icons/fi";
-import { FaFilePdf, FaWhatsapp } from "react-icons/fa";
-import { HiOutlineDocumentText } from "react-icons/hi";
+import { FaFilePdf, FaWhatsapp, FaGraduationCap } from "react-icons/fa";
+import homeBg from "../assets/home_bg.jpg";
 
 const Home = () => {
   const navigate = useNavigate();
   const { token, user, socket } = useAuth();
-  
+
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  // Search & Filter State
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedType, setSelectedType] = useState("all");
   const [viewMode, setViewMode] = useState("grid");
-  
-  // Contact Form State
+
+  // Floating WhatsApp Support Form State
+  const [showWhatsappForm, setShowWhatsappForm] = useState(false);
   const [contactForm, setContactForm] = useState({
     name: user?.name || "",
-    email: user?.email || "",
-    phone: "",
     message: ""
   });
   const [formSubmitting, setFormSubmitting] = useState(false);
@@ -87,9 +78,9 @@ const Home = () => {
       toast.success(`New document added: "${newFile.title}"!`, {
         icon: "✨",
         style: {
-          background: "#1E293B",
-          color: "#FFF",
-          border: "1px solid rgba(37, 99, 235, 0.2)"
+          background: "#FFFFFF",
+          color: "#1E293B",
+          border: "1px solid #E2E8F0"
         }
       });
     });
@@ -104,355 +95,296 @@ const Home = () => {
     };
   }, [socket]);
 
-  // Form handling
+  // Handle support form inputs
   const handleContactChange = (e) => {
     setContactForm({ ...contactForm, [e.target.name]: e.target.value });
   };
 
+  // Submit to WhatsApp
   const handleContactSubmit = (e) => {
     e.preventDefault();
-    const { name, email, phone, message } = contactForm;
+    const { name, message } = contactForm;
 
-    if (!name.trim() || !email.trim() || !phone.trim() || !message.trim()) {
-      toast.error("Please fill out all contact fields.");
-      return;
-    }
-
-    if (!/^\+?[0-9\s-]{10,15}$/.test(phone)) {
-      toast.error("Please enter a valid phone number.");
+    if (!name.trim() || !message.trim()) {
+      toast.error("Please fill out all fields.");
       return;
     }
 
     setFormSubmitting(true);
-    
-    // Construct pre-filled WhatsApp message
+
     const formattedText = 
-      `*ZEPHYRONZ INQUIRY*\n` +
+      `*ZEPHYRONZ SUPPORT INQUIRY*\n` +
       `---------------------------\n` +
       `*Name:* ${name}\n` +
-      `*Email:* ${email}\n` +
-      `*Phone:* ${phone}\n` +
       `*Message:* ${message}`;
 
-    const adminWhatsAppNumber = "916369679025"; // Format: country code + number without plus
+    const adminWhatsAppNumber = "916369679025";
     const whatsappUrl = `https://wa.me/${adminWhatsAppNumber}?text=${encodeURIComponent(formattedText)}`;
 
-    // Trigger WhatsApp redirect
     setTimeout(() => {
       setFormSubmitting(false);
+      setShowWhatsappForm(false);
       toast.success("Redirecting to WhatsApp support...");
       window.open(whatsappUrl, "_blank");
-      
-      // Reset message field
       setContactForm(prev => ({ ...prev, message: "" }));
     }, 800);
   };
 
-  const handleQuickSupportClick = () => {
-    const defaultText = "Hello Admin, I need instant support with my Zephyronz college records account.";
-    window.open(`https://wa.me/916369679025?text=${encodeURIComponent(defaultText)}`, "_blank");
-  };
-
-  // Filter Logic
-  const getFilteredFiles = () => {
-    return files.filter(file => {
-      const matchSearch = 
-        file.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        file.originalName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        file.uploadedBy?.name?.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      if (!matchSearch) return false;
-
-      const extension = file.originalName?.split('.').pop()?.toLowerCase();
-      if (selectedType === "all") return true;
-      if (selectedType === "pdf") return file.mimetype === "application/pdf" || extension === "pdf";
-      if (selectedType === "image") return file.mimetype?.startsWith("image/") || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension);
-      if (selectedType === "video") return file.mimetype?.startsWith("video/") || ['mp4', 'webm', 'ogg', 'mkv', 'avi', 'mov'].includes(extension);
-      if (selectedType === "document") return file.mimetype?.includes("document") || file.mimetype?.includes("sheet") || file.mimetype?.includes("presentation") || ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv'].includes(extension);
-      
-      return true;
-    });
-  };
-
-  const filteredList = getFilteredFiles();
-
+  // Get file icon based on type
   const getFileIcon = (mimetype, originalName) => {
     const extension = originalName?.split('.').pop()?.toLowerCase();
-    if (mimetype?.includes('pdf') || extension === "pdf") return <FaFilePdf className="w-5 h-5 text-red-500" />;
-    if (mimetype?.startsWith('image') || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension)) return <FiImage className="w-5 h-5 text-green-400" />;
-    if (mimetype?.startsWith('video') || ['mp4', 'webm', 'ogg', 'mkv', 'avi', 'mov'].includes(extension)) return <FiVideo className="w-5 h-5 text-blue-400" />;
-    return <FiFileText className="w-5 h-5 text-cyan-400" />;
+    if (mimetype?.includes('pdf') || extension === "pdf") return <FaFilePdf className="w-6 h-6 text-red-500" />;
+    if (mimetype?.startsWith('image') || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension)) return <FiImage className="w-6 h-6 text-green-500" />;
+    if (mimetype?.startsWith('video') || ['mp4', 'webm', 'ogg', 'mkv', 'avi', 'mov'].includes(extension)) return <FiVideo className="w-6 h-6 text-blue-500" />;
+    return <FiFileText className="w-6 h-6 text-indigo-500" />;
   };
 
-  const getFormatName = (mimetype, originalName) => {
-    const extension = originalName?.split('.').pop()?.toUpperCase() || "RECORD";
-    return extension;
+  // Get file color based on type
+  const getFileColor = (mimetype, originalName) => {
+    const extension = originalName?.split('.').pop()?.toLowerCase();
+    if (mimetype?.includes('pdf') || extension === "pdf") return "border-red-200 dark:border-red-900/40 bg-red-50/95 dark:bg-red-950/20";
+    if (mimetype?.startsWith('image') || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension)) return "border-green-200 dark:border-green-900/40 bg-green-50/95 dark:bg-green-950/20";
+    if (mimetype?.startsWith('video') || ['mp4', 'webm', 'ogg', 'mkv', 'avi', 'mov'].includes(extension)) return "border-blue-200 dark:border-blue-900/40 bg-blue-50/95 dark:bg-blue-950/20";
+    return "border-indigo-200 dark:border-indigo-900/40 bg-indigo-50/95 dark:bg-indigo-950/20";
   };
 
-  const formatFileSize = (bytes) => {
-    if (!bytes) return "0 B";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
-  };
+  // Filter files based on search
+  const filteredFiles = files.filter(file =>
+    file.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    file.originalName?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white pb-20 relative">
-      {/* Background radial glows */}
-      <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[120px] pointer-events-none"></div>
-      <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-cyan-600/5 rounded-full blur-[120px] pointer-events-none"></div>
-
-      <div className="max-w-6xl mx-auto px-4 py-6 relative z-10 space-y-8">
+    <div 
+      className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
+      style={{ 
+        backgroundImage: `url(${homeBg})`,
+      }}
+    >
+      {/* Main Content */}
+      <div className="min-h-screen flex flex-col">
         
-        {/* Welcome Dashboard Banner */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gradient-to-r from-blue-900/40 to-slate-900/60 p-6 rounded-3xl border border-blue-900/20 shadow-2xl backdrop-blur-md">
-          <div className="space-y-1">
-            <h2 className="text-xl md:text-2xl font-extrabold tracking-tight">
-              Welcome back, <span className="bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">{user?.name?.split(' ')[0] || 'Member'}</span> 👋
-            </h2>
-            <p className="text-xs md:text-sm text-slate-400">
-              Access and manage your secured credentials and academic logs.
-            </p>
-          </div>
-          <div className="flex items-center gap-4 bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
-            <div className="w-10 h-10 rounded-xl bg-blue-650/10 flex items-center justify-center border border-blue-500/25">
-              <FiDatabase className="w-5 h-5 text-blue-400 animate-pulse" />
+        {/* Header Section */}
+        <header className="pt-12 pb-6 px-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-4xl md:text-5xl font-bold text-white drop-shadow-lg flex items-center gap-3">
+                  <FaGraduationCap className="text-yellow-300" />
+                  Academic Vault
+                </h1>
+                <p className="text-white/90 text-sm md:text-base mt-1 drop-shadow-md font-medium">
+                  Welcome back, {user?.name || "Student"}! Access your learning materials below.
+                </p>
+              </div>
+              
+              {/* Stats */}
+              <div className="flex items-center gap-4 bg-white/20 backdrop-blur-sm rounded-2xl px-6 py-3 border border-white/30 shadow-lg">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-white drop-shadow-md">{files.length}</div>
+                  <div className="text-xs text-white/80 font-medium">Documents</div>
+                </div>
+                <div className="w-px h-10 bg-white/30"></div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-white drop-shadow-md">24/7</div>
+                  <div className="text-xs text-white/80 font-medium">Available</div>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Vault Files</p>
-              <p className="text-base font-bold text-slate-100">{files.length} Secure Logs</p>
-            </div>
           </div>
-        </div>
+        </header>
 
-        {/* Quick actions slider */}
-        <div className="space-y-3">
-          <h3 className="text-xs font-extrabold uppercase tracking-widest text-slate-400 flex items-center gap-2">
-            <FiActivity className="w-3.5 h-3.5 text-blue-500" />
-            <span>Vault Quick Actions</span>
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <button 
-              onClick={() => setSelectedType("all")} 
-              className={`p-4 rounded-2xl border text-left transition-all group ${
-                selectedType === "all" ? "bg-blue-600/10 border-blue-500/50" : "bg-slate-900/60 border-slate-800/80 hover:border-slate-700"
-              }`}
-            >
-              <FiLayers className="w-6 h-6 text-blue-400 mb-2 group-hover:scale-110 transition-transform" />
-              <p className="text-sm font-bold">All Folders</p>
-              <p className="text-[10px] text-slate-400 mt-0.5">Browse all categories</p>
-            </button>
-            <button 
-              onClick={() => setSelectedType("pdf")} 
-              className={`p-4 rounded-2xl border text-left transition-all group ${
-                selectedType === "pdf" ? "bg-blue-600/10 border-blue-500/50" : "bg-slate-900/60 border-slate-800/80 hover:border-slate-700"
-              }`}
-            >
-              <FaFilePdf className="w-6 h-6 text-red-400 mb-2 group-hover:scale-110 transition-transform" />
-              <p className="text-sm font-bold">PDF Records</p>
-              <p className="text-[10px] text-slate-400 mt-0.5">Documents & forms</p>
-            </button>
-            <button 
-              onClick={() => setSelectedType("video")} 
-              className={`p-4 rounded-2xl border text-left transition-all group ${
-                selectedType === "video" ? "bg-blue-600/10 border-blue-500/50" : "bg-slate-900/60 border-slate-800/80 hover:border-slate-700"
-              }`}
-            >
-              <FiVideo className="w-6 h-6 text-cyan-400 mb-2 group-hover:scale-110 transition-transform" />
-              <p className="text-sm font-bold">Lectures & Media</p>
-              <p className="text-[10px] text-slate-400 mt-0.5">Stream uploaded video files</p>
-            </button>
-            <button 
-              onClick={() => setSelectedType("document")} 
-              className={`p-4 rounded-2xl border text-left transition-all group ${
-                selectedType === "document" ? "bg-blue-600/10 border-blue-500/50" : "bg-slate-900/60 border-slate-800/80 hover:border-slate-700"
-              }`}
-            >
-              <HiOutlineDocumentText className="w-6 h-6 text-purple-400 mb-2 group-hover:scale-110 transition-transform" />
-              <p className="text-sm font-bold">Office Sheets</p>
-              <p className="text-[10px] text-slate-400 mt-0.5">Word, Excel, Text logs</p>
-            </button>
-          </div>
-        </div>
-
-        {/* Live Search and Display filters */}
-        <div className="flex flex-col md:flex-row gap-4 bg-slate-900/60 p-4 rounded-2xl border border-slate-850 shadow-md">
-          <div className="flex-1 relative">
-            <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 w-4.5 h-4.5" />
-            <input
-              type="text"
-              placeholder="Search records or uploaders..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-950/75 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm text-slate-200 placeholder-slate-500 transition-all"
-            />
-          </div>
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={`p-2 rounded-lg transition-all ${
-                  viewMode === "grid" 
-                    ? "bg-slate-800 text-blue-400 shadow-inner" 
-                    : "text-slate-500 hover:text-slate-350"
-                }`}
-                title="Grid view"
-              >
-                <FiGrid className="w-4.5 h-4.5" />
-              </button>
-              <button
-                onClick={() => setViewMode("list")}
-                className={`p-2 rounded-lg transition-all ${
-                  viewMode === "list" 
-                    ? "bg-slate-800 text-blue-400 shadow-inner" 
-                    : "text-slate-500 hover:text-slate-350"
-                }`}
-                title="List view"
-              >
-                <FiList className="w-4.5 h-4.5" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Dynamic Records Catalog */}
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-xs font-extrabold uppercase tracking-widest text-slate-400 flex items-center gap-2">
-              <FiTrendingUp className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Available Documents & CMS</span>
-            </h3>
-            <span className="text-[10px] bg-slate-850 px-2 py-0.5 rounded-full border border-slate-800 text-slate-400">
-              {filteredList.length} items
-            </span>
-          </div>
-
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3].map((n) => (
-                <div key={n} className="h-44 rounded-2xl skeleton-loader border border-slate-850"></div>
-              ))}
-            </div>
-          ) : error ? (
-            <div className="bg-red-500/5 border border-red-500/10 rounded-2xl p-6 text-center text-red-400 text-sm flex flex-col items-center gap-3">
-              <FiAlertCircle className="w-8 h-8 text-red-500" />
-              <p>{error}</p>
-              <button 
-                onClick={fetchFiles}
-                className="px-4 py-1.5 bg-red-650 hover:bg-red-700 text-white rounded-lg font-semibold text-xs transition-colors"
-              >
-                Retry
-              </button>
-            </div>
-          ) : filteredList.length === 0 ? (
-            <div className="text-center py-16 bg-slate-900/30 rounded-3xl border border-slate-850 p-8">
-              <HiOutlineDocumentText className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-              <h4 className="font-bold text-slate-350">No secure files found</h4>
-              <p className="text-xs text-slate-500 mt-1 max-w-xs mx-auto">
-                No record matches your search. Try adjusting filters or search string.
-              </p>
-            </div>
-          ) : viewMode === "grid" ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredList.map((file) => (
-                <motion.div
-                  layoutId={`file-${file._id}`}
-                  key={file._id}
-                  onClick={() => navigate(`/content/${file._id}`)}
-                  className="group bg-slate-900/70 hover:bg-slate-900 border border-slate-850 hover:border-blue-500/25 rounded-2xl overflow-hidden shadow-lg transition-all duration-300 cursor-pointer flex flex-col justify-between"
-                  whileHover={{ y: -4 }}
+        {/* Search and Filter Bar */}
+        <div className="px-6 pb-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col sm:flex-row gap-4 items-center">
+              <div className="flex-1 relative w-full">
+                <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
+                <input
+                  type="text"
+                  placeholder="Search documents..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3 rounded-2xl border-2 border-white/30 dark:border-slate-800/40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm focus:bg-white dark:focus:bg-slate-900 focus:border-blue-400 dark:focus:border-blue-500 outline-none transition-all shadow-lg text-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-slate-400"
+                />
+              </div>
+              
+              <div className="flex items-center gap-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl p-1.5 border-2 border-white/30 dark:border-slate-800/40 shadow-lg">
+                <button
+                  onClick={() => setViewMode("grid")}
+                  className={`p-2.5 rounded-xl transition-all ${
+                    viewMode === "grid" 
+                      ? "bg-blue-500 text-white shadow-md" 
+                      : "text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800"
+                  }`}
                 >
-                  <div className="p-5 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="w-10 h-10 rounded-xl bg-slate-950 flex items-center justify-center border border-slate-800 shadow-md">
+                  <FiGrid className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={`p-2.5 rounded-xl transition-all ${
+                    viewMode === "list" 
+                      ? "bg-blue-500 text-white shadow-md" 
+                      : "text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800"
+                  }`}
+                >
+                  <FiList className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content Area */}
+        <main className="flex-1 px-6 pb-24">
+          <div className="max-w-7xl mx-auto">
+            {loading ? (
+              // Loading Skeleton
+              <div className={`grid ${viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"} gap-4`}>
+                {[1, 2, 3, 4, 5, 6].map((n) => (
+                  <div key={n} className={`bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl border-2 border-white/30 dark:border-slate-800/40 p-6 animate-pulse shadow-lg ${
+                    viewMode === "list" ? "flex items-center gap-6" : ""
+                  }`}>
+                    <div className={`${viewMode === "list" ? "w-16 h-16" : "w-full h-32"} bg-gray-200 dark:bg-slate-850 rounded-xl`}></div>
+                    <div className={`${viewMode === "list" ? "flex-1" : "mt-4"} space-y-3`}>
+                      <div className="h-4 bg-gray-200 dark:bg-slate-850 rounded w-3/4"></div>
+                      <div className="h-3 bg-gray-200 dark:bg-slate-850 rounded w-1/2"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : error ? (
+              // Error State
+              <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-3xl border-2 border-red-200 dark:border-red-900/30 p-12 text-center shadow-xl">
+                <FiAlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">Oops! Something went wrong</h3>
+                <p className="text-gray-600 dark:text-slate-400 mb-6">{error}</p>
+                <button 
+                  onClick={fetchFiles}
+                  className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl"
+                >
+                  Try Again
+                </button>
+              </div>
+            ) : filteredFiles.length === 0 ? (
+              // Empty State
+              <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-3xl border-2 border-gray-200 dark:border-slate-800 p-16 text-center shadow-xl">
+                <div className="w-24 h-24 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FiLock className="w-12 h-12 text-gray-400 dark:text-slate-500" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">No Documents Found</h3>
+                <p className="text-gray-600 dark:text-slate-400">
+                  {searchTerm ? "No documents match your search criteria." : "No documents have been uploaded yet."}
+                </p>
+              </div>
+            ) : (
+              // Document Grid/List
+              <div className={`grid ${viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"} gap-4`}>
+                {filteredFiles.map((file) => (
+                  <motion.div
+                    key={file._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    whileHover={{ y: -4 }}
+                    className={`bg-white/95 dark:bg-slate-900/90 backdrop-blur-sm rounded-2xl border-2 shadow-lg hover:shadow-2xl transition-all cursor-pointer group ${
+                      viewMode === "list" 
+                        ? "flex items-center gap-6 p-4" 
+                        : "p-6 hover:border-blue-300"
+                    } ${getFileColor(file.mimetype, file.originalName)}`}
+                    onClick={() => navigate(`/content/${file._id}`)}
+                  >
+                    {/* Icon */}
+                    <div className={`${
+                      viewMode === "list" 
+                        ? "w-20 h-20 flex-shrink-0" 
+                        : "w-full h-40"
+                    } rounded-xl flex items-center justify-center bg-white/80 dark:bg-slate-950/80 border-2 border-white dark:border-slate-800 shadow-inner`}>
+                      <div className={`${viewMode === "list" ? "text-4xl" : "text-6xl"}`}>
                         {getFileIcon(file.mimetype, file.originalName)}
                       </div>
-                      <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-850 text-slate-400 uppercase tracking-widest border border-slate-800">
-                        {getFormatName(file.mimetype, file.originalName)}
-                      </span>
                     </div>
 
-                    <div className="space-y-1">
-                      <h4 className="font-extrabold text-slate-100 group-hover:text-blue-400 transition-colors text-sm line-clamp-1">
+                    {/* Content */}
+                    <div className={`${viewMode === "list" ? "flex-1 min-w-0" : "mt-4"}`}>
+                      <h3 className="font-bold text-gray-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-lg truncate">
                         {file.title}
-                      </h4>
-                      <p className="text-[10px] text-slate-500 truncate">
-                        {file.originalName || "secure_record.bin"}
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-slate-400 truncate font-mono">
+                        {file.originalName || "secure_document.pdf"}
                       </p>
+                      {viewMode === "list" && (
+                        <div className="flex items-center gap-3 mt-2">
+                          <span className="text-xs bg-gray-100 dark:bg-slate-800 px-3 py-1 rounded-full text-gray-600 dark:text-slate-350">
+                            {file.mimetype || "Document"}
+                          </span>
+                          <span className="text-xs text-gray-400 dark:text-slate-500">
+                            {new Date(file.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                  </div>
 
-                  <div className="px-5 py-3.5 bg-slate-950/60 border-t border-slate-850/80 flex items-center justify-between text-[11px] text-slate-400">
-                    <span className="flex items-center gap-1">
-                      <FiUser className="w-3 h-3 text-slate-550" />
-                      <span className="max-w-[80px] truncate">{file.uploadedBy?.name || "Admin"}</span>
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <FiCalendar className="w-3 h-3 text-slate-550" />
-                      <span>{new Date(file.createdAt).toLocaleDateString()}</span>
-                    </span>
-                    <span className="font-semibold text-slate-500">
-                      {formatFileSize(file.size)}
-                    </span>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          ) : (
-            // List View
-            <div className="bg-slate-900/40 rounded-2xl border border-slate-850 overflow-hidden divide-y divide-slate-850/80 shadow-lg">
-              {filteredList.map((file) => (
-                <div
-                  key={file._id}
-                  onClick={() => navigate(`/content/${file._id}`)}
-                  className="flex items-center justify-between gap-4 p-4 hover:bg-slate-900/60 cursor-pointer transition-colors group"
-                >
-                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                    <div className="w-10 h-10 rounded-xl bg-slate-950 flex items-center justify-center border border-slate-800 flex-shrink-0">
-                      {getFileIcon(file.mimetype, file.originalName)}
+                    {/* Arrow on hover */}
+                    <div className={`${
+                      viewMode === "list" ? "ml-4" : "mt-4"
+                    } flex items-center justify-end text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity`}>
+                      <FiArrowRight className="w-5 h-5" />
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <h4 className="font-bold text-slate-100 group-hover:text-blue-400 transition-colors text-sm truncate">
-                        {file.title}
-                      </h4>
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[10px] text-slate-500 mt-0.5">
-                        <span className="font-mono">{file.originalName}</span>
-                        <span className="w-1 h-1 bg-slate-800 rounded-full"></span>
-                        <span>{file.uploadedBy?.name || "Admin"}</span>
-                        <span className="w-1 h-1 bg-slate-800 rounded-full"></span>
-                        <span>{formatFileSize(file.size)}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <span className="text-[9px] font-bold px-2 py-1 rounded bg-slate-850 text-slate-400 border border-slate-800 uppercase tracking-widest flex-shrink-0">
-                    View
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Contact Admin Form Section */}
-        <div className="bg-slate-900/60 border border-slate-850 shadow-2xl rounded-3xl p-6 md:p-8 backdrop-blur-md relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-green-500/5 rounded-full blur-2xl pointer-events-none"></div>
-          
-          <div className="space-y-6 max-w-xl mx-auto">
-            <div className="text-center space-y-1.5">
-              <div className="inline-flex w-12 h-12 bg-green-500/10 rounded-2xl items-center justify-center border border-green-500/20 text-green-400 mb-2">
-                <FaWhatsapp className="w-6 h-6" />
+                  </motion.div>
+                ))}
               </div>
-              <h3 className="text-lg font-bold text-slate-100">Contact College Records Admin</h3>
-              <p className="text-xs text-slate-400">
-                Submit an inquiry. This form routes your message directly to the administrator's WhatsApp.
-              </p>
+            )}
+          </div>
+        </main>        {/* Footer */}
+        <footer className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-t border-white/30 dark:border-slate-800/40 mt-auto">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-gray-600 dark:text-slate-400">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-gray-800 dark:text-slate-200">Zephyronz</span>
+                <span>© {new Date().getFullYear()}</span>
+                <span className="hidden sm:inline">•</span>
+                <span className="text-gray-500 dark:text-slate-500">All Rights Reserved</span>
+              </div>
+              <div className="flex items-center gap-4">
+                <span className="flex items-center gap-1.5 text-xs bg-green-100 dark:bg-green-950/30 px-3 py-1.5 rounded-full text-green-700 dark:text-green-400">
+                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                  Secure Vault
+                </span>
+                <span className="text-gray-400 dark:text-slate-500">v2.0</span>
+              </div>
             </div>
+          </div>
+        </footer>
+      </div>
 
-            <form onSubmit={handleContactSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* WhatsApp Floating Button - Positioned at Right Side Center */}
+      <div className="fixed right-6 top-1/2 -translate-y-1/2 z-[9999]">
+        <AnimatePresence>
+          {showWhatsappForm && (
+            <motion.div
+              initial={{ opacity: 0, x: 20, scale: 0.95 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: 20, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="absolute right-16 top-1/2 -translate-y-1/2 w-80 bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-gray-200 dark:border-slate-800"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <FaWhatsapp className="w-6 h-6 text-green-500" />
+                  <span className="font-bold text-gray-800 dark:text-slate-200">Support</span>
+                </div>
+                <button
+                  onClick={() => setShowWhatsappForm(false)}
+                  className="p-1 hover:bg-gray-150 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                >
+                  <FiX className="w-5 h-5 text-gray-500 dark:text-slate-400" />
+                </button>
+              </div>
+
+              <form onSubmit={handleContactSubmit} className="space-y-3">
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-450 mb-1.5">
+                  <label className="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">
                     Your Name
                   </label>
                   <input
@@ -460,80 +392,55 @@ const Home = () => {
                     name="name"
                     value={contactForm.name}
                     onChange={handleContactChange}
-                    placeholder="Enter your name"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    className="w-full bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-slate-100 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all"
                     required
                   />
                 </div>
+
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-450 mb-1.5">
-                    Email Address
+                  <label className="block text-xs font-semibold text-gray-600 dark:text-slate-400 mb-1">
+                    Message
                   </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={contactForm.email}
+                  <textarea
+                    name="message"
+                    value={contactForm.message}
                     onChange={handleContactChange}
-                    placeholder="student@college.edu"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    rows="3"
+                    className="w-full bg-gray-50 dark:bg-slate-955 border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-slate-100 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all resize-none"
                     required
-                  />
+                  ></textarea>
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-450 mb-1.5">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={contactForm.phone}
-                  onChange={handleContactChange}
-                  placeholder="e.g. +91 98765 43210"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                  required
-                />
-              </div>
+                <button
+                  type="submit"
+                  disabled={formSubmitting}
+                  className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                >
+                  <FaWhatsapp className="w-5 h-5" />
+                  {formSubmitting ? "Sending..." : "Send via WhatsApp"}
+                </button>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-450 mb-1.5">
-                  Your Message
-                </label>
-                <textarea
-                  name="message"
-                  value={contactForm.message}
-                  onChange={handleContactChange}
-                  placeholder="Write your request details here..."
-                  rows="4"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none"
-                  required
-                ></textarea>
-              </div>
-
-              <button
-                type="submit"
-                disabled={formSubmitting}
-                className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-xs"
-              >
-                <FaWhatsapp className="w-4.5 h-4.5" />
-                <span>{formSubmitting ? "Routing..." : "Submit Inquiry to WhatsApp"}</span>
-              </button>
-            </form>
-          </div>
-        </div>
-
+        {/* WhatsApp FAB Button */}
+        <button
+          onClick={() => setShowWhatsappForm(!showWhatsappForm)}
+          className={`w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 ${
+            showWhatsappForm 
+              ? "bg-gray-700 hover:bg-gray-800 rotate-45" 
+              : "bg-green-500 hover:bg-green-600"
+          }`}
+          aria-label="Contact Support"
+        >
+          {showWhatsappForm ? (
+            <FiX className="w-7 h-7 text-white" />
+          ) : (
+            <FaWhatsapp className="w-8 h-8 text-white" />
+          )}
+        </button>
       </div>
-
-      {/* Floating Action Button (FAB) for WhatsApp Direct Chat */}
-      <button
-        onClick={handleQuickSupportClick}
-        className="fixed bottom-4 right-4 z-50 bg-green-600 hover:bg-green-500 hover:scale-105 active:scale-95 text-white w-14 h-14 rounded-full shadow-[0_6px_24px_rgba(22,163,74,0.45)] flex items-center justify-center transition-all duration-300 group border border-green-500/35 hover:shadow-[0_8px_32px_rgba(22,163,74,0.55)]"
-        title="Chat with Admin on WhatsApp"
-        aria-label="Direct Support Chat"
-      >
-        <FaWhatsapp className="w-7 h-7 animate-pulse" />
-      </button>
     </div>
   );
 };

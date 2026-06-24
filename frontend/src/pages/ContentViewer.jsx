@@ -127,24 +127,24 @@ const ContentViewer = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-        <p className="mt-4 text-slate-400 font-medium">Decrypting secure files...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white transition-colors duration-300">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 dark:border-blue-500"></div>
+        <p className="mt-4 text-slate-500 dark:text-slate-400 font-medium animate-pulse">Decrypting secure files...</p>
       </div>
     );
   }
 
   if (error || !file) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-white px-4">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-955 text-slate-800 dark:text-white px-4 transition-colors duration-300">
         <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-4 border border-red-500/20">
           <FiAlertTriangle className="w-8 h-8 text-red-500" />
         </div>
         <h3 className="text-xl font-bold mb-2">Access Denied or Error</h3>
-        <p className="text-slate-400 text-center max-w-sm mb-6">{error || "File could not be found."}</p>
+        <p className="text-slate-500 dark:text-slate-400 text-center max-w-sm mb-6">{error || "File could not be found."}</p>
         <button
           onClick={() => navigate("/home")}
-          className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all font-semibold"
+          className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all font-semibold shadow-md"
         >
           <FiChevronLeft className="w-5 h-5" />
           <span>Back to Hub</span>
@@ -157,14 +157,14 @@ const ContentViewer = () => {
   const isLocalhost = fileUrl.includes("localhost") || fileUrl.includes("127.0.0.1");
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex flex-col">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-white flex flex-col transition-colors duration-300">
       {/* Top Header */}
-      <header className="sticky top-0 z-30 bg-slate-900/80 backdrop-blur-md border-b border-slate-800/60 px-4 py-4 md:px-6">
+      <header className="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-205 dark:border-slate-800/60 px-4 py-4 md:px-6 transition-colors duration-300">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate("/home")}
-              className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-all"
+              className="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl transition-all border border-slate-200/50 dark:border-slate-800"
               aria-label="Back"
             >
               <FiChevronLeft className="w-5 h-5" />
@@ -199,7 +199,7 @@ const ContentViewer = () => {
                 <span className="hidden sm:inline">Download</span>
               </a>
             ) : (
-              <span className="flex items-center gap-1 text-slate-500 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl text-xs font-semibold">
+              <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-1.5 rounded-xl text-xs font-semibold">
                 <FiLock className="w-3.5 h-3.5 text-slate-500" />
                 <span>Protected</span>
               </span>
@@ -211,14 +211,14 @@ const ContentViewer = () => {
       {/* Main Content Area */}
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6 flex flex-col justify-center">
         {/* Security Warning Notice */}
-        <div className="mb-4 bg-blue-950/20 border border-blue-500/25 rounded-2xl p-3 flex items-start gap-2.5 text-blue-400 text-xs">
+        <div className="mb-4 bg-blue-50/50 dark:bg-blue-955/20 border border-blue-200 dark:border-blue-500/25 rounded-2xl p-3 flex items-start gap-2.5 text-blue-600 dark:text-blue-400 text-xs">
           <FiInfo className="w-4 h-4 mt-0.5 flex-shrink-0" />
           <p className="leading-relaxed">
             <strong>Security Protection Enabled</strong>: Capturing screenshots, printing, or attempting to save this screen layout violates system policies and will log alert dispatches directly to administrators.
           </p>
         </div>
 
-        <div className="w-full flex-1 flex flex-col items-center justify-center bg-slate-900/40 rounded-3xl border border-slate-800/80 p-4 md:p-8 min-h-[50vh] backdrop-blur-md overflow-hidden relative">
+        <div className="w-full flex-1 flex flex-col items-center justify-center bg-white dark:bg-slate-900/40 rounded-3xl border border-slate-200 dark:border-slate-800/80 p-4 md:p-8 min-h-[50vh] backdrop-blur-md overflow-hidden relative shadow-sm dark:shadow-none transition-colors duration-300">
           
           {/* 1. PDF / Images rendered as converted base64 page slides */}
           {file.pagesData && file.pagesData.length > 0 ? (
@@ -226,7 +226,7 @@ const ContentViewer = () => {
               {file.pagesData.map((pageData, index) => (
                 <div 
                   key={index} 
-                  className="relative bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl w-full"
+                  className="relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-lg dark:shadow-2xl w-full"
                 >
                   <img
                     src={pageData}
@@ -234,7 +234,7 @@ const ContentViewer = () => {
                     className="w-full h-auto object-contain max-h-[80vh]"
                     draggable="false"
                   />
-                  <div className="text-center text-xs text-slate-500 py-3 bg-slate-950 border-t border-slate-850">
+                  <div className="text-center text-xs text-slate-550 dark:text-slate-400 py-3 bg-slate-50 dark:bg-slate-950 border-t border-slate-100 dark:border-slate-850">
                     Page {index + 1} of {file.pagesData.length}
                   </div>
                 </div>
@@ -245,11 +245,11 @@ const ContentViewer = () => {
               {file.pages.map((pageFile, index) => (
                 <div 
                   key={index} 
-                  className="relative bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl w-full"
+                  className="relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-lg dark:shadow-2xl w-full"
                 >
                   {failedImages[index] ? (
-                    <div className="flex flex-col items-center justify-center p-12 text-slate-500 text-center">
-                      <FiAlertTriangle className="w-10 h-10 text-amber-500 mb-2" />
+                    <div className="flex flex-col items-center justify-center p-12 text-slate-550 text-center">
+                      <FiAlertTriangle className="w-10 h-10 text-amber-550 mb-2" />
                       <p className="font-semibold text-sm">Page {index + 1} Content Unreachable</p>
                     </div>
                   ) : (
@@ -261,7 +261,7 @@ const ContentViewer = () => {
                       onError={() => handleImageError(index)}
                     />
                   )}
-                  <div className="text-center text-xs text-slate-500 py-3 bg-slate-950 border-t border-slate-850">
+                  <div className="text-center text-xs text-slate-550 dark:text-slate-400 py-3 bg-slate-50 dark:bg-slate-955 border-t border-slate-100 dark:border-slate-850">
                     Page {index + 1} of {file.pages.length}
                   </div>
                 </div>
@@ -306,8 +306,8 @@ const ContentViewer = () => {
 
           /* 4. Text/CSV File Reader */
           : (file.mimetype?.startsWith("text/") || ['txt', 'csv'].includes(file.originalName?.split('.').pop()?.toLowerCase())) ? (
-            <div className="w-full max-w-4xl bg-slate-950 rounded-2xl border border-slate-800/80 p-4 md:p-6 shadow-inner font-mono text-left overflow-x-auto max-h-[70vh] no-scrollbar">
-              <pre className="text-slate-300 text-sm md:text-base leading-relaxed whitespace-pre">
+            <div className="w-full max-w-4xl bg-white dark:bg-slate-955 rounded-2xl border border-slate-200 dark:border-slate-800/80 p-4 md:p-6 shadow-inner font-mono text-left overflow-x-auto max-h-[70vh] no-scrollbar">
+              <pre className="text-slate-700 dark:text-slate-300 text-sm md:text-base leading-relaxed whitespace-pre">
                 {textData || "Loading text contents..."}
               </pre>
             </div>
@@ -318,25 +318,25 @@ const ContentViewer = () => {
             <div className="w-full h-[70vh] flex flex-col items-center justify-center">
               {isLocalhost ? (
                 // Local development helper (since MS Office online cannot fetch local addresses)
-                <div className="text-center p-8 bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full shadow-2xl">
+                <div className="text-center p-8 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full shadow-lg dark:shadow-2xl">
                   <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-500/20">
-                    <FiFileText className="w-8 h-8 text-blue-400" />
+                    <FiFileText className="w-8 h-8 text-blue-500 dark:text-blue-400" />
                   </div>
                   <h4 className="text-lg font-bold mb-2">Office Document</h4>
-                  <p className="text-sm text-slate-400 leading-relaxed mb-6">
+                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-6 font-medium">
                     This document (<strong>{file.originalName}</strong>) is stored locally. In production, it will render automatically inside our secure MS Office Web viewer.
                   </p>
                   {user?.role === "admin" ? (
                     <a
                       href={fileUrl}
                       download
-                      className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-xl transition-all shadow-md"
+                      className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-6 rounded-xl transition-all shadow-md"
                     >
                       <FiDownload className="w-4.5 h-4.5" />
                       <span>Download Offline copy</span>
                     </a>
                   ) : (
-                    <div className="text-xs text-amber-500 bg-amber-500/5 border border-amber-500/15 py-2 px-4 rounded-xl font-medium">
+                    <div className="text-xs text-amber-600 dark:text-amber-500 bg-amber-500/5 border border-amber-500/15 py-2 px-4 rounded-xl font-medium">
                       🔒 Downloads are disabled for student accounts.
                     </div>
                   )}
@@ -368,25 +368,25 @@ const ContentViewer = () => {
 
           /* 7. General Fallback */
           : (
-            <div className="text-center p-8 bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full shadow-2xl">
+            <div className="text-center p-8 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full shadow-lg dark:shadow-2xl">
               <div className="w-16 h-16 bg-purple-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-purple-500/20">
-                <FiFileText className="w-8 h-8 text-purple-400" />
+                <FiFileText className="w-8 h-8 text-purple-500 dark:text-purple-400" />
               </div>
               <h4 className="text-lg font-bold mb-2">Unsupported Preview</h4>
-              <p className="text-sm text-slate-400 leading-relaxed mb-6">
+              <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-6 font-medium">
                 Previewing files of type <strong>{file.mimetype || "unknown"}</strong> is not supported online.
               </p>
               {user?.role === "admin" ? (
                 <a
                   href={fileUrl}
                   download
-                  className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-xl transition-all shadow-md"
+                  className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-750 text-white font-semibold py-2.5 px-6 rounded-xl transition-all shadow-md"
                 >
                   <FiDownload className="w-4.5 h-4.5" />
                   <span>Download File</span>
                 </a>
               ) : (
-                <div className="text-xs text-amber-500 bg-amber-500/5 border border-amber-500/15 py-2 px-4 rounded-xl font-medium">
+                <div className="text-xs text-amber-605 dark:text-amber-500 bg-amber-500/5 border border-amber-500/15 py-2 px-4 rounded-xl font-medium">
                   🔒 Download restricted. Please contact admin.
                 </div>
               )}
