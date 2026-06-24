@@ -39,6 +39,10 @@ const allowedOrigins = [
   "http://localhost:3000"
 ];
 
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
 const corsOriginFunction = (origin, callback) => {
   if (!origin) return callback(null, true);
   
