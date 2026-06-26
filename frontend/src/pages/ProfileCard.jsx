@@ -18,6 +18,7 @@ import {
   FiAlertTriangle,
   FiCheck,
   FiArrowLeft,
+  FiPhone,
   FiUser,
   FiBriefcase,
   FiGlobe,
@@ -39,9 +40,11 @@ const ProfileCard = () => {
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
+    phone: user?.phone || "",
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
+  const [passwordVerificationMethod, setPasswordVerificationMethod] = useState("email");
 
   // Password Reset Modal states
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -81,10 +84,10 @@ const ProfileCard = () => {
       });
 
       if (response.ok) {
-        await response.json();
+        const data = await response.json();
         setMessage({ type: "success", text: "Profile updated successfully!" });
         
-        const updatedUser = { ...user, name: formData.name, email: formData.email };
+        const updatedUser = { ...user, name: formData.name, email: formData.email, phone: data.user?.phone || formData.phone };
         localStorage.setItem("user", JSON.stringify(updatedUser));
         
         setTimeout(() => {
@@ -118,7 +121,8 @@ const ProfileCard = () => {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
-        }
+        },
+        body: JSON.stringify({ method: passwordVerificationMethod })
       });
       const data = await response.json();
       if (response.ok && data.success) {
@@ -310,6 +314,11 @@ const ProfileCard = () => {
                       <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email Address</p>
                       <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">{user?.email}</p>
                     </div>
+
+                    <div className="bg-gray-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-gray-200/50 dark:border-slate-700/50">
+                      <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Phone Number</p>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">{user?.phone || "Not registered"}</p>
+                    </div>
                     
                     <div className="bg-gray-50 dark:bg-slate-900/50 rounded-2xl p-4 border border-gray-200/50 dark:border-slate-700/50">
                       <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</p>
@@ -356,6 +365,20 @@ const ProfileCard = () => {
                       disabled
                     />
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">Registered email cannot be modified.</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                      Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="+1234567890"
+                      className="w-full bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    />
                   </div>
 
                   <div className="flex gap-3 pt-2">
@@ -580,10 +603,50 @@ const ProfileCard = () => {
                     )}
 
                     {passwordStep === 1 ? (
-                      <div className="space-y-4 text-center">
-                        <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                          We'll send a verification code to your registered email: <strong className="text-gray-900 dark:text-white">{user?.email}</strong>
+                      <div className="space-y-4">
+                        <p className="text-sm text-gray-600 dark:text-gray-300 text-center leading-relaxed">
+                          Choose where you want to receive your verification code:
                         </p>
+                        
+                        <div className="flex gap-4">
+                          <label className="flex-1 flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-850 rounded-xl py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-900/40 transition">
+                            <input
+                              type="radio"
+                              name="passwordVerificationMethod"
+                              value="email"
+                              checked={passwordVerificationMethod === "email"}
+                              onChange={() => setPasswordVerificationMethod("email")}
+                              className="accent-blue-500"
+                            />
+                            <span className="text-sm font-semibold text-gray-750 dark:text-gray-300">Email</span>
+                          </label>
+                          <label className={`flex-1 flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-855 rounded-xl py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-900/40 transition ${!user?.phone ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            <input
+                              type="radio"
+                              name="passwordVerificationMethod"
+                              value="sms"
+                              checked={passwordVerificationMethod === "sms"}
+                              onChange={() => {
+                                if (user?.phone) {
+                                  setPasswordVerificationMethod("sms");
+                                } else {
+                                  toast.error("Please add a phone number to your profile first!");
+                                }
+                              }}
+                              disabled={!user?.phone}
+                              className="accent-blue-500"
+                            />
+                            <span className="text-sm font-semibold text-gray-750 dark:text-gray-300">SMS (Phone)</span>
+                          </label>
+                        </div>
+
+                        <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-2 font-medium">
+                          {passwordVerificationMethod === "sms" 
+                            ? `SMS will be sent to: ${user?.phone}` 
+                            : `Email will be sent to: ${user?.email}`
+                          }
+                        </p>
+
                         <button
                           type="button"
                           onClick={handleSendOtp}

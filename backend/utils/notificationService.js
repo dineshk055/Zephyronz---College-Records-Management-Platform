@@ -184,3 +184,48 @@ export const sendPasswordResetOtpEmail = async (email, otp) => {
     return false;
   }
 };
+
+export const sendOtpSms = async (phone, otp) => {
+  try {
+    const accountSid = process.env.TWILIO_ACCOUNT_SID;
+    const authToken = process.env.TWILIO_AUTH_TOKEN;
+    const fromNum = process.env.TWILIO_PHONE_NUMBER;
+
+    console.log(`--------------------------------------------------`);
+    console.log(`[SMS VERIFICATION] OTP for ${phone} is: ${otp}`);
+    console.log(`--------------------------------------------------`);
+
+    if (!accountSid || !authToken || !fromNum) {
+      console.warn("Twilio SMS settings are not fully configured. Printed OTP to console for local testing.");
+      return false; // Return false so it falls back to test OTP
+    }
+
+    const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
+    const auth = Buffer.from(`${accountSid}:${authToken}`).toString('base64');
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${auth}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams({
+        To: phone,
+        From: fromNum,
+        Body: `Your Zephyronz verification code is: ${otp}. It is valid for 5 minutes.`
+      })
+    });
+
+    if (response.ok) {
+      console.log(`OTP SMS sent successfully to ${phone}`);
+      return true;
+    } else {
+      const errorText = await response.text();
+      console.error(`Twilio SMS dispatch failed: ${response.status} - ${errorText}`);
+      return false;
+    }
+  } catch (error) {
+    console.error("Failed to send OTP SMS, falling back to test OTP:", error.message);
+    return false;
+  }
+};

@@ -99,7 +99,8 @@ export const uploadFile = async (req, res) => {
     }
 
     const newFile = await File.create({
-      title: req.body.title,
+      title: req.body.title || req.file.originalname.split('.').slice(0, -1).join('.'),
+      folder: req.body.folder ? req.body.folder.trim() : "General",
       fileUrl: req.file.filename,
       pages: pageFileNames,
       pagesData: pageBase64Data,

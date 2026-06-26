@@ -8,9 +8,7 @@ const VerifyOtp = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Retrieve credentials passed from Register state
-  const registrationData = location.state || {};
-  const { name, email, password, testOtp: initialTestOtp } = registrationData;
+  const { name, email, password, phone, verificationMethod, testOtp: initialTestOtp } = registrationData;
 
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
@@ -54,7 +52,7 @@ const VerifyOtp = () => {
       
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/auth/send-otp`,
-        { email }
+        { email, phone, method: verificationMethod }
       );
       
       if (response.data.success) {
@@ -94,7 +92,7 @@ const VerifyOtp = () => {
       setLoading(true);
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/auth/register`,
-        { name, email, password, otp }
+        { name, email, password, phone, otp }
       );
 
       if (response.data.success) {
@@ -129,9 +127,9 @@ const VerifyOtp = () => {
             />
           </div>
           <h1 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100">
-            Verify Email
+            {verificationMethod === "sms" ? "Verify Phone" : "Verify Email"}
           </h1>
-          <p className="text-slate-550 dark:text-slate-400 mt-2 text-sm font-medium">We've sent a 6-digit code to <span className="text-slate-800 dark:text-slate-200 font-semibold">{email}</span></p>
+          <p className="text-slate-550 dark:text-slate-400 mt-2 text-sm font-medium">We've sent a 6-digit code to <span className="text-slate-800 dark:text-slate-200 font-semibold">{verificationMethod === "sms" ? phone : email}</span></p>
         </div>
 
         {error && (

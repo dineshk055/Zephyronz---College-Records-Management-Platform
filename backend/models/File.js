@@ -30,6 +30,11 @@ const fileSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    folder: {
+      type: String,
+      trim: true,
+      default: "General",
+    },
     uploadedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

@@ -2,15 +2,17 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from 'react-hot-toast';
-import { FiEye, FiEyeOff, FiUser, FiMail, FiLock, FiUserPlus } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiUser, FiMail, FiLock, FiUserPlus, FiPhone } from "react-icons/fi";
 
 const Register = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
+    verificationMethod: "email",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -42,6 +44,11 @@ const Register = () => {
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email is invalid";
     }
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Phone number is required";
+    } else if (!/^\+?[1-9]\d{1,14}$/.test(formData.phone.trim())) {
+      newErrors.phone = "Phone number is invalid (must include country code, e.g. +1234567890)";
+    }
     if (!formData.password) {
       newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
@@ -70,17 +77,23 @@ const Register = () => {
       // Request verification code first (do NOT create account immediately)
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/auth/send-otp`,
-        { email: formData.email }
+        { 
+          email: formData.email,
+          phone: formData.phone,
+          method: formData.verificationMethod
+        }
       );
       
       if (response.data.success) {
-        toast.success("Verification code sent to your email!");
+        toast.success(response.data.message || "Verification code sent!");
         // Navigate to the separate verification page, passing user details in state
         navigate("/verify-otp", {
           state: {
             name: formData.name,
             email: formData.email,
+            phone: formData.phone,
             password: formData.password,
+            verificationMethod: formData.verificationMethod,
             testOtp: response.data.testOtp || null
           }
         });
@@ -167,6 +180,61 @@ const Register = () => {
             {errors.email && (
               <p className="mt-1.5 text-xs text-red-500 font-medium">{errors.email}</p>
             )}
+          </div>
+
+          {/* Phone Field */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+              Phone Number
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <FiPhone className="h-5 w-5 text-slate-400 dark:text-slate-500" />
+              </div>
+              <input
+                type="tel"
+                name="phone"
+                placeholder="+1234567890"
+                value={formData.phone}
+                onChange={handleChange}
+                className={`w-full bg-white dark:bg-slate-950/65 border ${errors.phone ? 'border-red-500/50' : 'border-slate-200 dark:border-slate-800'} rounded-2xl pl-11 pr-4 py-3 text-slate-850 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition duration-200`}
+                disabled={loading}
+              />
+            </div>
+            {errors.phone && (
+              <p className="mt-1.5 text-xs text-red-500 font-medium">{errors.phone}</p>
+            )}
+          </div>
+
+          {/* Verification Method Field */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+              Send Verification OTP via
+            </label>
+            <div className="flex gap-4">
+              <label className="flex-1 flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-800 rounded-2xl py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-950/40 transition">
+                <input
+                  type="radio"
+                  name="verificationMethod"
+                  value="email"
+                  checked={formData.verificationMethod === "email"}
+                  onChange={handleChange}
+                  className="accent-indigo-600"
+                />
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-350">Email</span>
+              </label>
+              <label className="flex-1 flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-800 rounded-2xl py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-950/40 transition">
+                <input
+                  type="radio"
+                  name="verificationMethod"
+                  value="sms"
+                  checked={formData.verificationMethod === "sms"}
+                  onChange={handleChange}
+                  className="accent-indigo-600"
+                />
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-350">SMS (Phone)</span>
+              </label>
+            </div>
           </div>
 
           {/* Password Field */}

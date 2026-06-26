@@ -14,7 +14,9 @@ import {
   FiLock,
   FiSearch,
   FiGrid,
-  FiList
+  FiList,
+  FiFolder,
+  FiArrowLeft
 } from "react-icons/fi";
 import { FaFilePdf, FaWhatsapp, FaGraduationCap, FaCoins } from "react-icons/fa";
 import homeBg from "../assets/home_bg.jpg";
@@ -28,6 +30,7 @@ const Home = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState("list");
+  const [activeFolder, setActiveFolder] = useState(null);
 
   // Floating WhatsApp Support Form State
   const [showWhatsappForm, setShowWhatsappForm] = useState(false);
@@ -169,11 +172,45 @@ const Home = () => {
     return "after:bg-[radial-gradient(circle_at_40%_40%,_rgba(255,255,255,0.25)_0%,_transparent_60%)]";
   };
 
-  // Filter files based on search
-  const filteredFiles = files.filter(file =>
-    file.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    file.originalName?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Folder gradients (vibrant, premium light/dark compatible gradients)
+  const folderGradients = [
+    "from-amber-400 via-orange-500 to-rose-500 hover:from-amber-500 hover:via-orange-600 hover:to-rose-650 shadow-orange-500/30",
+    "from-blue-400 via-indigo-500 to-violet-500 hover:from-blue-500 hover:via-indigo-600 hover:to-violet-600 shadow-indigo-500/30",
+    "from-emerald-400 via-teal-500 to-cyan-500 hover:from-emerald-500 hover:via-teal-600 hover:to-cyan-600 shadow-teal-500/30",
+    "from-pink-400 via-rose-500 to-red-500 hover:from-pink-500 hover:via-rose-600 hover:to-red-600 shadow-rose-500/30",
+    "from-fuchsia-400 via-purple-500 to-indigo-500 hover:from-fuchsia-500 hover:via-purple-600 hover:to-indigo-650 shadow-purple-500/30",
+  ];
+
+  const getFolderColor = (folderName) => {
+    let hash = 0;
+    for (let i = 0; i < folderName.length; i++) {
+      hash = folderName.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % folderGradients.length;
+    return folderGradients[index];
+  };
+
+  // Filter files based on search and activeFolder
+  const filteredFiles = files.filter(file => {
+    const fileFolder = file.folder || "General";
+    if (activeFolder !== null && fileFolder !== activeFolder) {
+      return false;
+    }
+    return (
+      file.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      file.originalName?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
+
+  // Group files by folder (for the root folder buttons view)
+  const groupedFolders = files.reduce((acc, file) => {
+    const folderName = file.folder || "General";
+    if (!acc[folderName]) {
+      acc[folderName] = [];
+    }
+    acc[folderName].push(file);
+    return acc;
+  }, {});
 
   return (
     <div 
@@ -192,10 +229,10 @@ const Home = () => {
               <div>
                 <h1 className="text-4xl md:text-5xl font-bold text-white drop-shadow-lg flex items-center gap-3">
                   <FaCoins className="text-yellow-300" />
-                  Financial Hub
+                  {activeFolder ? activeFolder : "Financial Hub"}
                 </h1>
                 <p className="text-white/90 text-sm md:text-base mt-1 drop-shadow-md font-medium">
-                  Welcome back, {user?.name || "Student"}!
+                  {activeFolder ? `Viewing files in ${activeFolder}` : `Welcome back, ${user?.name || "Student"}!`}
                 </p>
               </div>
               
@@ -262,6 +299,31 @@ const Home = () => {
             <div className="mb-6 p-4 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-white/30 rounded-2xl flex items-center gap-3 text-xs text-white font-semibold">
               <span>🛡️ Security Alert: Screenshots and screen recording are disabled to protect document privacy.</span>
             </div>
+            {activeFolder !== null && !loading && (
+              <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/10 dark:bg-slate-900/40 backdrop-blur-md border border-white/20 rounded-2xl p-4 shadow-lg">
+                <div className="flex items-center gap-3">
+                  <FiFolder className="w-8 h-8 text-yellow-300 drop-shadow-md" />
+                  <div>
+                    <h2 className="text-xl font-bold text-white drop-shadow-md">
+                      {activeFolder}
+                    </h2>
+                    <p className="text-xs text-white/80">
+                      Showing {filteredFiles.length} of {files.filter(f => (f.folder || "General") === activeFolder).length} files
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setActiveFolder(null);
+                    setSearchTerm("");
+                  }}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-650 text-white font-bold rounded-xl shadow-md transition-all duration-200 active:scale-95 border border-white/20"
+                >
+                  <FiArrowLeft className="w-4 h-4" />
+                  <span>Back to Folders</span>
+                </button>
+              </div>
+            )}
             {loading ? (
               // Loading Skeleton
               <div className={`grid ${viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"} gap-4`}>
@@ -290,15 +352,81 @@ const Home = () => {
                   Try Again
                 </button>
               </div>
-            ) : filteredFiles.length === 0 ? (
-              // Empty State
+            ) : files.length === 0 ? (
+              // Empty State (no files uploaded at all)
               <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-3xl border-2 border-gray-200 dark:border-slate-800 p-16 text-center shadow-xl">
                 <div className="w-24 h-24 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FiLock className="w-12 h-12 text-gray-400 dark:text-slate-500" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">No Documents Found</h3>
                 <p className="text-gray-600 dark:text-slate-400">
-                  {searchTerm ? "No documents match your search criteria." : "No documents have been uploaded yet."}
+                  No documents have been uploaded yet.
+                </p>
+              </div>
+            ) : activeFolder === null && searchTerm === "" ? (
+              // Folders View
+              <div className={`grid ${viewMode === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"} gap-4`}>
+                {Object.keys(groupedFolders).map((folderName) => {
+                  const folderFiles = groupedFolders[folderName];
+                  return (
+                    <motion.button
+                      key={folderName}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                      whileHover={{ scale: 1.05, y: -4, rotate: [0, -0.5, 0.5, 0] }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setActiveFolder(folderName)}
+                      className={`group relative w-full ${
+                        viewMode === "grid" 
+                          ? "aspect-square" 
+                          : "h-20"
+                      } bg-gradient-to-br ${getFolderColor(folderName)} rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden flex items-center justify-center p-4 border-2 border-white/30 hover:border-white/60 after:absolute after:inset-0 after:pointer-events-none after:bg-[radial-gradient(circle_at_30%_30%,_rgba(255,255,255,0.2)_0%,_transparent_60%)]`}
+                    >
+                      {/* Animated gradient background */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-white/10 opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+                      
+                      {/* Shimmer effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                      
+                      {/* Content */}
+                      <div className="relative z-10 flex flex-col items-center justify-center w-full h-full gap-2.5">
+                        {/* Folder Icon with glow */}
+                        <div className="text-white drop-shadow-lg group-hover:scale-110 transition-transform duration-300">
+                          <FiFolder className="w-8 h-8 text-white" />
+                        </div>
+                        
+                        {/* Title */}
+                        <span className="text-white font-bold text-base text-center line-clamp-2 px-1 leading-tight drop-shadow-lg">
+                          {folderName}
+                        </span>
+
+                        {/* File count badge */}
+                        <span className="text-xs font-bold text-white/80 bg-black/20 backdrop-blur-sm px-2.5 py-1 rounded-full">
+                          {folderFiles.length} {folderFiles.length === 1 ? "file" : "files"}
+                        </span>
+                        
+                        {/* Subtle arrow indicator on hover */}
+                        <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                          <FiArrowRight className="w-5 h-5 text-white/90 drop-shadow-lg" />
+                        </div>
+                      </div>
+                      
+                      {/* Glow effect on hover */}
+                      <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            ) : filteredFiles.length === 0 ? (
+              // Empty State for specific folder view or search view
+              <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-3xl border-2 border-gray-200 dark:border-slate-800 p-16 text-center shadow-xl w-full">
+                <div className="w-24 h-24 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FiLock className="w-12 h-12 text-gray-400 dark:text-slate-500" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">No Documents Found</h3>
+                <p className="text-gray-600 dark:text-slate-400">
+                  {searchTerm ? "No documents match your search criteria." : "No documents in this folder yet."}
                 </p>
               </div>
             ) : (

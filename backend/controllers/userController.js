@@ -1,7 +1,7 @@
 import User from '../models/User.js';
 import OTP from '../models/OTP.js';
 import bcrypt from 'bcryptjs';
-import { sendPasswordResetOtpEmail } from '../utils/notificationService.js';
+import { sendPasswordResetOtpEmail, sendOtpSms } from '../utils/notificationService.js';
 
 // @desc    Get all users
 // @route   GET /api/users
@@ -35,7 +35,7 @@ export const getUserProfile = async (req, res) => {
 // @access  Private
 export const updateUserProfile = async (req, res) => {
   try {
-    const { name, email } = req.body;
+    const { name, email, phone } = req.body;
     const user = await User.findById(req.user.id);
     
     if (!user) {
@@ -55,10 +55,25 @@ export const updateUserProfile = async (req, res) => {
       }
       user.email = email;
     }
+
+    // Update phone if provided and not already taken
+    if (phone !== undefined && phone !== user.phone) {
+      if (phone.trim()) {
+        const trimmedPhone = phone.trim();
+        const existingPhone = await User.findOne({ phone: trimmedPhone });
+        if (existingPhone && existingPhone._id.toString() !== user._id.toString()) {
+          return res.status(400).json({ message: 'Phone number already in use' });
+        }
+        user.phone = trimmedPhone;
+      } else {
+        user.phone = undefined;
+      }
+    }
     
     await user.save();
-    res.json({ message: 'Profile updated successfully', user: { id: user._id, name: user.name, email: user.email, role: user.role } });
+    res.json({ message: 'Profile updated successfully', user: { id: user._id, name: user.name, email: user.email, phone: user.phone, role: user.role } });
   } catch (error) {
+    console.error("Profile update error:", error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -160,6 +175,7 @@ export const deleteUser = async (req, res) => {
 // @access  Private
 export const sendChangePasswordOtp = async (req, res) => {
   try {
+    const { method } = req.body;
     const email = req.user.email;
     if (!email) {
       return res.status(400).json({ success: false, message: 'User email not found' });
@@ -167,39 +183,76 @@ export const sendChangePasswordOtp = async (req, res) => {
 
     const trimmedEmail = email.trim().toLowerCase();
 
+    if (method === "sms") {
+      if (!req.user.phone) {
+        return res.status(400).json({ success: false, message: "No phone number registered on your profile. Please add one in profile settings first." });
+      }
+    }
+
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Save OTP to DB (upsert, reset attempts)
+    // Save OTP to DB (upsert, reset attempts) using email as the query key
     await OTP.findOneAndUpdate(
       { email: trimmedEmail },
       { otp, attempts: 0, createdAt: new Date() },
       { upsert: true, new: true }
     );
 
-    // Send OTP email
-    const emailSent = await sendPasswordResetOtpEmail(trimmedEmail, otp);
+    let dispatchSuccess = false;
+    let message = "";
 
-    // In production, if email failed to send, return error response.
-    if (!emailSent && process.env.NODE_ENV === 'production') {
-      return res.status(500).json({
-        success: false,
-        message: "Failed to send verification email. Please check your email configuration or try again.",
-      });
+    if (method === "sms") {
+      dispatchSuccess = await sendOtpSms(req.user.phone.trim(), otp);
+
+      if (!dispatchSuccess && process.env.NODE_ENV === 'production') {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to send verification SMS. Please check your configuration or try again.",
+        });
+      }
+
+      message = dispatchSuccess 
+        ? 'Verification code sent to your phone number via SMS' 
+        : 'OTP generated successfully (SMS delivery failed, using test fallback code)';
+    } else {
+      dispatchSuccess = await sendPasswordResetOtpEmail(trimmedEmail, otp);
+
+      if (!dispatchSuccess && process.env.NODE_ENV === 'production') {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to send verification email. Please check your email configuration or try again.",
+        });
+      }
+
+      message = dispatchSuccess 
+        ? 'OTP sent successfully to your email' 
+        : 'OTP generated successfully (Email delivery failed, using test fallback code)';
     }
 
     // Provide test fallback OTP in non-production environments
     let testOtp = null;
-    const host = process.env.SMTP_HOST || process.env.EMAIL_HOST;
-    const user = process.env.SMTP_USER || process.env.EMAIL_USER;
-    const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
-    if ((!host || !user || !pass || !emailSent) && process.env.NODE_ENV !== 'production') {
-      testOtp = otp;
+    if (process.env.NODE_ENV !== 'production') {
+      if (method === "sms") {
+        const accountSid = process.env.TWILIO_ACCOUNT_SID;
+        const authToken = process.env.TWILIO_AUTH_TOKEN;
+        const fromNum = process.env.TWILIO_PHONE_NUMBER;
+        if (!accountSid || !authToken || !fromNum || !dispatchSuccess) {
+          testOtp = otp;
+        }
+      } else {
+        const host = process.env.SMTP_HOST || process.env.EMAIL_HOST;
+        const user = process.env.SMTP_USER || process.env.EMAIL_USER;
+        const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
+        if (!host || !user || !pass || !dispatchSuccess) {
+          testOtp = otp;
+        }
+      }
     }
 
     res.json({
       success: true,
-      message: emailSent ? 'OTP sent successfully to your email' : 'OTP generated successfully (Email delivery failed, using test fallback code)',
+      message,
       testOtp
     });
   } catch (error) {

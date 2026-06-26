@@ -252,8 +252,8 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { token, user, socket } = useAuth();
   
-  const [title, setTitle] = useState("");
-  const [file, setFile] = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState([]); // array of { id, file, title }
+  const [folder, setFolder] = useState("");
   const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState([]);
   const [users, setUsers] = useState([]);
@@ -436,54 +436,76 @@ const AdminDashboard = () => {
   const handleUpload = async (e) => {
     e.preventDefault();
     
-    if (!title.trim()) {
-      toast.error("Please enter a title");
-      return;
-    }
-    
-    if (!file) {
-      toast.error("Please select a file");
+    if (selectedFiles.length === 0) {
+      toast.error("Please select at least one file");
       return;
     }
 
-    if (file.size > 20 * 1024 * 1024) {
-      toast.error("File size must be less than 20MB");
+    if (!folder.trim()) {
+      toast.error("Please enter a folder name");
       return;
+    }
+
+    // Validate size of all files
+    for (const item of selectedFiles) {
+      if (item.file.size > 20 * 1024 * 1024) {
+        toast.error(`File "${item.file.name}" exceeds the 20MB size limit`);
+        return;
+      }
+      if (!item.title.trim()) {
+        toast.error(`Please enter a title for file "${item.file.name}"`);
+        return;
+      }
     }
 
     try {
       setLoading(true);
-      setUploadProgress(0);
       
-      const formData = new FormData();
-      formData.append("title", title);
-      formData.append("file", file);
+      const targetFolder = folder.trim();
+      let successCount = 0;
 
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/files/upload`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          setUploadProgress(percentCompleted);
-        },
-      });
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const item = selectedFiles[i];
+        setUploadProgress(0);
+        
+        const formData = new FormData();
+        formData.append("title", item.title);
+        formData.append("folder", targetFolder);
+        formData.append("file", item.file);
 
-      if (res.data.success) {
-        toast.success("File uploaded successfully!");
-        setTitle("");
-        setFile(null);
+        try {
+          const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/files/upload`, formData, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+            onUploadProgress: (progressEvent) => {
+              const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              setUploadProgress(percentCompleted);
+            },
+          });
+
+          if (res.data.success) {
+            successCount++;
+          }
+        } catch (uploadErr) {
+          console.error(`Error uploading file ${item.file.name}:`, uploadErr);
+          toast.error(`Failed to upload ${item.file.name}: ${uploadErr.response?.data?.msg || uploadErr.message}`);
+        }
+      }
+
+      if (successCount > 0) {
+        toast.success(`Successfully uploaded ${successCount} file(s)!`);
+        setSelectedFiles([]);
+        setFolder("");
         setUploadProgress(0);
         fetchFiles();
         if (fileInputRef.current) fileInputRef.current.value = "";
-      } else {
-        toast.error(res.data.msg || "Upload failed");
       }
       
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error(error.response?.data?.msg || "Upload failed");
+      toast.error("Upload process encountered an error.");
     } finally {
       setLoading(false);
     }
@@ -726,43 +748,97 @@ const AdminDashboard = () => {
                   <form onSubmit={handleUpload} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
-                        File Title *
+                        Folder Name *
                       </label>
                       <input
                         type="text"
-                        placeholder="Enter a descriptive title"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
+                        placeholder="Enter or select folder (e.g. Tuition, Exams)"
+                        value={folder}
+                        onChange={(e) => setFolder(e.target.value)}
                         className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl px-4 py-3 text-sm sm:text-base text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                        list="folder-suggestions"
                         required
                       />
+                      <datalist id="folder-suggestions">
+                        {[...new Set(files.map(f => f.folder || "General"))].filter(Boolean).map(fName => (
+                          <option key={fName} value={fName} />
+                        ))}
+                      </datalist>
                     </div>
 
                     <div>
                       <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
-                        Select File *
+                        Select Files *
                       </label>
                       <div className="border-2 border-dashed border-slate-200/80 dark:border-slate-800 hover:border-indigo-500/60 dark:hover:border-indigo-400 rounded-xl sm:rounded-2xl p-6 sm:p-8 text-center bg-slate-50/50 dark:bg-slate-950/50 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-all cursor-pointer">
                         <input
                           ref={fileInputRef}
                           id="fileInput"
                           type="file"
-                          onChange={(e) => setFile(e.target.files[0])}
+                          multiple
+                          onChange={(e) => {
+                            const newFiles = Array.from(e.target.files).map(f => ({
+                              file: f,
+                              title: f.name.split('.').slice(0, -1).join('.'),
+                              id: Math.random().toString(36).substring(7)
+                            }));
+                            setSelectedFiles(prev => [...prev, ...newFiles]);
+                          }}
                           className="hidden"
                         />
                         <label htmlFor="fileInput" className="cursor-pointer block">
                           <svg className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-slate-400 dark:text-slate-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                           </svg>
-                          <p className="text-slate-800 dark:text-slate-200 font-semibold text-sm sm:text-base break-all">
-                            {file ? file.name : "Tap to browse or drag & drop"}
+                          <p className="text-slate-850 dark:text-slate-200 font-semibold text-sm sm:text-base">
+                            Tap to browse or drag & drop files
                           </p>
-                          <p className="text-slate-500 dark:text-slate-400 text-xs mt-1.5">
-                            {file ? formatFileSize(file.size) : "PDFs, Images, Videos, Documents (Max 20MB)"}
+                          <p className="text-slate-550 dark:text-slate-400 text-xs mt-1.5">
+                            PDFs, Images, Videos, Documents (Max 20MB per file)
                           </p>
                         </label>
                       </div>
                     </div>
+
+                    {selectedFiles.length > 0 && (
+                      <div className="space-y-3">
+                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                          Selected Files Queue ({selectedFiles.length})
+                        </label>
+                        <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+                          {selectedFiles.map((item, idx) => (
+                            <div key={item.id} className="flex flex-col sm:flex-row gap-3 items-start sm:items-center bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200/60 dark:border-slate-800/80">
+                              <div className="flex-1 min-w-0 w-full">
+                                <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate">{item.file.name}</p>
+                                <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{formatFileSize(item.file.size)}</p>
+                              </div>
+                              <div className="flex items-center gap-2 w-full sm:w-auto">
+                                <input
+                                  type="text"
+                                  value={item.title}
+                                  placeholder="Enter custom title"
+                                  onChange={(e) => {
+                                    const updated = [...selectedFiles];
+                                    updated[idx].title = e.target.value;
+                                    setSelectedFiles(updated);
+                                  }}
+                                  className="flex-1 sm:w-48 bg-white dark:bg-slate-900 border border-slate-250 dark:border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedFiles(selectedFiles.filter(x => x.id !== item.id))}
+                                  className="text-red-500 hover:text-red-650 hover:bg-red-500/10 p-1.5 rounded-lg transition-all"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     {uploadProgress > 0 && uploadProgress < 100 && (
                       <div className="space-y-1.5">
@@ -792,7 +868,7 @@ const AdminDashboard = () => {
                           Uploading...
                         </span>
                       ) : (
-                        "Upload File"
+                        `Upload ${selectedFiles.length} File(s)`
                       )}
                     </motion.button>
                   </form>
@@ -845,7 +921,7 @@ const AdminDashboard = () => {
                               {file.title}
                             </h3>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                              {file.uploadedBy?.name || "Unknown"} • {formatFileSize(file.size)}
+                              {file.uploadedBy?.name || "Unknown"} • {formatFileSize(file.size)} • <span className="font-semibold text-slate-600 dark:text-slate-350 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[10px]">{file.folder || "General"}</span>
                             </p>
                             <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
                               {formatDate(file.createdAt)}
@@ -882,6 +958,7 @@ const AdminDashboard = () => {
                     <thead className="bg-slate-50/60 dark:bg-slate-950/40 border-b border-slate-200/60 dark:border-slate-800">
                       <tr>
                         <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Title</th>
+                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Folder</th>
                         <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Uploaded By</th>
                         <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Size</th>
                         <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Uploaded</th>
@@ -891,7 +968,7 @@ const AdminDashboard = () => {
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                       {filteredFiles.length === 0 ? (
                         <tr>
-                          <td colSpan="5" className="px-6 py-12 text-center text-slate-500 dark:text-slate-400 bg-slate-50/10">
+                          <td colSpan="6" className="px-6 py-12 text-center text-slate-500 dark:text-slate-400 bg-slate-50/10">
                             No files found
                           </td>
                         </tr>
@@ -899,6 +976,11 @@ const AdminDashboard = () => {
                         filteredFiles.map((file) => (
                           <tr key={file._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-950/40 transition-colors">
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-800 dark:text-slate-100">{file.title}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-300">
+                              <span className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-full text-xs font-semibold">
+                                {file.folder || "General"}
+                              </span>
+                            </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-300">
                               {file.uploadedBy?.name || "Unknown"}
                             </td>

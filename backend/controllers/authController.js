@@ -2,11 +2,11 @@ import User from "../models/User.js";
 import OTP from "../models/OTP.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { sendRegistrationEmail, sendOtpEmail } from "../utils/notificationService.js";
+import { sendRegistrationEmail, sendOtpEmail, sendOtpSms } from "../utils/notificationService.js";
 
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password, otp } = req.body;
+    const { name, email, password, phone, otp } = req.body;
 
     // check empty fields
     if (!name || !email || !password || !otp) {
@@ -60,14 +60,25 @@ export const registerUser = async (req, res) => {
     // delete OTP once verified (single-use)
     await OTP.deleteOne({ _id: otpRecord._id });
 
-    // check existing user
+    // check existing user by email
     const existingUser = await User.findOne({ email: trimmedEmail });
-
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: "User already exists",
+        message: "User with this email already exists",
       });
+    }
+
+    // check existing user by phone
+    if (phone) {
+      const trimmedPhone = phone.trim();
+      const existingPhone = await User.findOne({ phone: trimmedPhone });
+      if (existingPhone) {
+        return res.status(400).json({
+          success: false,
+          message: "Phone number already registered by another user",
+        });
+      }
     }
 
     // hash password
@@ -92,6 +103,7 @@ export const registerUser = async (req, res) => {
     const user = await User.create({
       name,
       email: trimmedEmail,
+      phone: phone ? phone.trim() : undefined,
       password: hashedPassword,
       role,
       isApproved,
@@ -127,6 +139,7 @@ export const registerUser = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
         role: user.role,
         isApproved: user.isApproved,
         status: user.status,
@@ -214,6 +227,7 @@ export const login = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
         role: user.role,
         isApproved: user.isApproved,
         status: user.status,
@@ -231,52 +245,95 @@ export const login = async (req, res) => {
 
 export const sendOtp = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, phone, method } = req.body;
     if (!email) {
       return res.status(400).json({ success: false, message: "Email is required" });
     }
 
     const trimmedEmail = email.trim().toLowerCase();
 
-    // check existing user
+    // check existing user by email
     const existingUser = await User.findOne({ email: trimmedEmail });
     if (existingUser) {
-      return res.status(400).json({ success: false, message: "User already exists" });
+      return res.status(400).json({ success: false, message: "User with this email already exists" });
+    }
+
+    // if method is SMS, check phone
+    if (method === "sms") {
+      if (!phone) {
+        return res.status(400).json({ success: false, message: "Phone number is required for SMS verification" });
+      }
+      const trimmedPhone = phone.trim();
+      const existingPhone = await User.findOne({ phone: trimmedPhone });
+      if (existingPhone) {
+        return res.status(400).json({ success: false, message: "Phone number already registered by another user" });
+      }
     }
 
     // generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // save OTP to DB (upsert if exists, reset attempts)
+    // save OTP to DB (upsert if exists, reset attempts) using email as the query key
     await OTP.findOneAndUpdate(
       { email: trimmedEmail },
       { otp, attempts: 0, createdAt: new Date() },
       { upsert: true, new: true }
     );
 
-    // send OTP email
-    const emailSent = await sendOtpEmail(trimmedEmail, otp);
+    let dispatchSuccess = false;
+    let message = "";
 
-    // In production, if email failed to send, return error response.
-    if (!emailSent && process.env.NODE_ENV === 'production') {
-      return res.status(500).json({
-        success: false,
-        message: "Failed to send verification email. Please check your email configuration or try again.",
-      });
+    if (method === "sms") {
+      dispatchSuccess = await sendOtpSms(phone.trim(), otp);
+      
+      if (!dispatchSuccess && process.env.NODE_ENV === 'production') {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to send verification SMS. Please check your configuration or try again.",
+        });
+      }
+
+      message = dispatchSuccess 
+        ? "Verification code sent to your phone number via SMS" 
+        : "OTP generated successfully (SMS delivery failed, using test fallback code)";
+    } else {
+      dispatchSuccess = await sendOtpEmail(trimmedEmail, otp);
+      
+      if (!dispatchSuccess && process.env.NODE_ENV === 'production') {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to send verification email. Please check your email configuration or try again.",
+        });
+      }
+
+      message = dispatchSuccess 
+        ? "OTP sent successfully to your email" 
+        : "OTP generated successfully (Email delivery failed, using test fallback code)";
     }
 
-    // If SMTP is not fully configured or email dispatch fails, provide a test OTP back to frontend in non-production
+    // Provide test fallback OTP in non-production environments if delivery failed or SMS settings not fully configured
     let testOtp = null;
-    const host = process.env.SMTP_HOST || process.env.EMAIL_HOST;
-    const user = process.env.SMTP_USER || process.env.EMAIL_USER;
-    const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
-    if ((!host || !user || !pass || !emailSent) && process.env.NODE_ENV !== 'production') {
-      testOtp = otp;
+    if (process.env.NODE_ENV !== 'production') {
+      if (method === "sms") {
+        const accountSid = process.env.TWILIO_ACCOUNT_SID;
+        const authToken = process.env.TWILIO_AUTH_TOKEN;
+        const fromNum = process.env.TWILIO_PHONE_NUMBER;
+        if (!accountSid || !authToken || !fromNum || !dispatchSuccess) {
+          testOtp = otp;
+        }
+      } else {
+        const host = process.env.SMTP_HOST || process.env.EMAIL_HOST;
+        const user = process.env.SMTP_USER || process.env.EMAIL_USER;
+        const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
+        if (!host || !user || !pass || !dispatchSuccess) {
+          testOtp = otp;
+        }
+      }
     }
 
     res.status(200).json({
       success: true,
-      message: emailSent ? "OTP sent successfully to your email" : "OTP generated successfully (Email delivery failed, using test fallback code)",
+      message,
       testOtp,
     });
   } catch (error) {
