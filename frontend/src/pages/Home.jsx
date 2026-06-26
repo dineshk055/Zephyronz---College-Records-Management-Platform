@@ -16,7 +16,7 @@ import {
   FiGrid,
   FiList
 } from "react-icons/fi";
-import { FaFilePdf, FaWhatsapp, FaGraduationCap } from "react-icons/fa";
+import { FaFilePdf, FaWhatsapp, FaGraduationCap, FaCoins } from "react-icons/fa";
 import homeBg from "../assets/home_bg.jpg";
 
 const Home = () => {
@@ -191,11 +191,11 @@ const Home = () => {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
                 <h1 className="text-4xl md:text-5xl font-bold text-white drop-shadow-lg flex items-center gap-3">
-                  <FaGraduationCap className="text-yellow-300" />
-                  Academic Vault
+                  <FaCoins className="text-yellow-300" />
+                  Financial Hub
                 </h1>
                 <p className="text-white/90 text-sm md:text-base mt-1 drop-shadow-md font-medium">
-                  Welcome back, {user?.name || "Student"}! Access your learning materials below.
+                  Welcome back, {user?.name || "Student"}!
                 </p>
               </div>
               
