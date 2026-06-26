@@ -165,18 +165,28 @@ export const sendChangePasswordOtp = async (req, res) => {
       return res.status(400).json({ success: false, message: 'User email not found' });
     }
 
+    const trimmedEmail = email.trim().toLowerCase();
+
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     // Save OTP to DB (upsert, reset attempts)
     await OTP.findOneAndUpdate(
-      { email: email.toLowerCase() },
+      { email: trimmedEmail },
       { otp, attempts: 0, createdAt: new Date() },
       { upsert: true, new: true }
     );
 
     // Send OTP email
-    const emailSent = await sendPasswordResetOtpEmail(email.toLowerCase(), otp);
+    const emailSent = await sendPasswordResetOtpEmail(trimmedEmail, otp);
+
+    // In production, if email failed to send, return error response.
+    if (!emailSent && process.env.NODE_ENV === 'production') {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to send verification email. Please check your email configuration or try again.",
+      });
+    }
 
     // Provide test fallback OTP in non-production environments
     let testOtp = null;
@@ -215,10 +225,19 @@ export const changePasswordWithOtp = async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
+    const trimmedEmail = user.email.trim().toLowerCase();
+
     // Find OTP record
-    const otpRecord = await OTP.findOne({ email: user.email.toLowerCase() });
+    const otpRecord = await OTP.findOne({ email: trimmedEmail });
     if (!otpRecord) {
       return res.status(400).json({ success: false, message: 'Invalid or expired OTP. Please request a new one.' });
+    }
+
+    // Check if OTP has expired (5 minutes = 300,000 ms) in code to avoid MongoDB Atlas clock drift issues
+    const otpAgeMs = Date.now() - new Date(otpRecord.createdAt).getTime();
+    if (otpAgeMs > 5 * 60 * 1000) {
+      await OTP.deleteOne({ _id: otpRecord._id });
+      return res.status(400).json({ success: false, message: 'OTP has expired. Please request a new one.' });
     }
 
     // Verify OTP value with brute-force check

@@ -16,12 +16,24 @@ export const registerUser = async (req, res) => {
       });
     }
 
+    const trimmedEmail = email.trim().toLowerCase();
+
     // verify OTP
-    const otpRecord = await OTP.findOne({ email: email.toLowerCase() });
+    const otpRecord = await OTP.findOne({ email: trimmedEmail });
     if (!otpRecord) {
       return res.status(400).json({
         success: false,
         message: "Invalid or expired verification code. Please request a new one.",
+      });
+    }
+
+    // Check if OTP has expired (5 minutes = 300,000 ms) in code to avoid MongoDB Atlas clock drift issues
+    const otpAgeMs = Date.now() - new Date(otpRecord.createdAt).getTime();
+    if (otpAgeMs > 5 * 60 * 1000) {
+      await OTP.deleteOne({ _id: otpRecord._id });
+      return res.status(400).json({
+        success: false,
+        message: "Verification code has expired. Please request a new one.",
       });
     }
 
@@ -49,7 +61,7 @@ export const registerUser = async (req, res) => {
     await OTP.deleteOne({ _id: otpRecord._id });
 
     // check existing user
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: trimmedEmail });
 
     if (existingUser) {
       return res.status(400).json({
@@ -79,7 +91,7 @@ export const registerUser = async (req, res) => {
     // create user
     const user = await User.create({
       name,
-      email,
+      email: trimmedEmail,
       password: hashedPassword,
       role,
       isApproved,
@@ -142,7 +154,7 @@ export const login = async (req, res) => {
     }
 
     // check user exists
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email.trim().toLowerCase() });
 
     if (!user) {
       return res.status(401).json({
@@ -224,8 +236,10 @@ export const sendOtp = async (req, res) => {
       return res.status(400).json({ success: false, message: "Email is required" });
     }
 
+    const trimmedEmail = email.trim().toLowerCase();
+
     // check existing user
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    const existingUser = await User.findOne({ email: trimmedEmail });
     if (existingUser) {
       return res.status(400).json({ success: false, message: "User already exists" });
     }
@@ -235,13 +249,21 @@ export const sendOtp = async (req, res) => {
 
     // save OTP to DB (upsert if exists, reset attempts)
     await OTP.findOneAndUpdate(
-      { email: email.toLowerCase() },
+      { email: trimmedEmail },
       { otp, attempts: 0, createdAt: new Date() },
       { upsert: true, new: true }
     );
 
     // send OTP email
-    const emailSent = await sendOtpEmail(email.toLowerCase(), otp);
+    const emailSent = await sendOtpEmail(trimmedEmail, otp);
+
+    // In production, if email failed to send, return error response.
+    if (!emailSent && process.env.NODE_ENV === 'production') {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to send verification email. Please check your email configuration or try again.",
+      });
+    }
 
     // If SMTP is not fully configured or email dispatch fails, provide a test OTP back to frontend in non-production
     let testOtp = null;
