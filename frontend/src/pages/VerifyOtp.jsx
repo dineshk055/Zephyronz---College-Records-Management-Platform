@@ -8,6 +8,7 @@ const VerifyOtp = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
+  const registrationData = location.state || {};
   const { name, email, password, phone, verificationMethod, testOtp: initialTestOtp } = registrationData;
 
   const [otp, setOtp] = useState("");
@@ -15,15 +16,24 @@ const VerifyOtp = () => {
   const [resendLoading, setResendLoading] = useState(false);
   const [developerOtp, setDeveloperOtp] = useState(initialTestOtp || "");
   const [cooldown, setCooldown] = useState(60); // 60 seconds resend cooldown
+  const [expiresIn, setExpiresIn] = useState(300); // 5 minutes validity
   const [error, setError] = useState("");
 
-  // Cooldown countdown timer effect
+  // Cooldown & Expiration countdown timer effect
   useEffect(() => {
-    if (cooldown > 0) {
-      const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [cooldown]);
+    const timer = setInterval(() => {
+      setCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+      setExpiresIn((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Format time as MM:SS
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
 
   // If no registration data is present, prompt redirection
   if (!email || !name || !password) {
@@ -58,6 +68,7 @@ const VerifyOtp = () => {
       if (response.data.success) {
         toast.success("A new verification code has been sent!");
         setCooldown(60); // Reset 60s cooldown timer
+        setExpiresIn(300); // Reset 5m expiration timer
         if (response.data.testOtp) {
           setDeveloperOtp(response.data.testOtp);
         } else {
@@ -141,9 +152,14 @@ const VerifyOtp = () => {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2 text-center">
-              Enter Verification Code
-            </label>
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Enter Verification Code
+              </label>
+              <span className={`text-xs font-bold ${expiresIn > 0 ? 'text-indigo-600 dark:text-indigo-400' : 'text-red-500'} bg-slate-100 dark:bg-slate-800/50 px-2 py-1 rounded-md`}>
+                {expiresIn > 0 ? `Expires in ${formatTime(expiresIn)}` : "Code Expired"}
+              </span>
+            </div>
             <input
               type="text"
               name="otp"
@@ -197,7 +213,7 @@ const VerifyOtp = () => {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={loading || resendLoading}
+            disabled={loading || resendLoading || expiresIn === 0}
             className="w-full bg-gradient-to-r from-indigo-600 to-purple-650 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3.5 rounded-2xl shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all duration-200 transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 text-sm"
           >
             {loading ? (

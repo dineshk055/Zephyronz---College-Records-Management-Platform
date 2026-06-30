@@ -145,9 +145,14 @@ const Login = () => {
 
           {/* Password field */}
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
-              Password
-            </label>
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Password
+              </label>
+              <Link to="/forgot-password" className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors">
+                Forgot Password?
+              </Link>
+            </div>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <FiLock className="h-5 w-5 text-slate-400 dark:text-slate-500" />
