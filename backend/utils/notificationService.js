@@ -1,27 +1,50 @@
 import nodemailer from "nodemailer";
 
+// Helper function to create SMTP transporter with robust settings
+const getTransporter = () => {
+  const host = process.env.SMTP_HOST || process.env.EMAIL_HOST;
+  const port = process.env.SMTP_PORT || process.env.EMAIL_PORT || 587;
+  const user = process.env.SMTP_USER || process.env.EMAIL_USER;
+  const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
+
+  if (!host || !user || !pass) {
+    console.warn("SMTP email settings are not fully configured in environment variables.");
+    return null;
+  }
+
+  const config = {
+    host,
+    port: parseInt(port),
+    secure: port == 465,
+    auth: {
+      user,
+      pass,
+    },
+    tls: {
+      rejectUnauthorized: false
+    }
+  };
+
+  // Optimize config for Gmail service if using smtp.gmail.com
+  if (host.includes("gmail.com")) {
+    delete config.host;
+    delete config.port;
+    delete config.secure;
+    config.service = "gmail";
+  }
+
+  return nodemailer.createTransport(config);
+};
+
 export const sendRegistrationEmail = async (userData) => {
   try {
-    const host = process.env.SMTP_HOST || process.env.EMAIL_HOST;
-    const port = process.env.SMTP_PORT || process.env.EMAIL_PORT || 587;
-    const user = process.env.SMTP_USER || process.env.EMAIL_USER;
-    const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
-    const from = process.env.SMTP_FROM || process.env.EMAIL_FROM || user;
-
-    if (!host || !user || !pass) {
-      console.warn("SMTP email settings are not fully configured in environment variables. Skipping registration email dispatch.");
+    const transporter = getTransporter();
+    if (!transporter) {
+      console.warn("Skipping registration email dispatch: SMTP not configured.");
       return;
     }
 
-    const transporter = nodemailer.createTransport({
-      host,
-      port: parseInt(port),
-      secure: port == 465, // true for 465, false for other ports
-      auth: {
-        user,
-        pass,
-      },
-    });
+    const from = process.env.SMTP_FROM || process.env.EMAIL_FROM || process.env.SMTP_USER || process.env.EMAIL_USER;
 
     const mailOptions = {
       from: `"Zephyronz Security" <${from}>`,
@@ -53,30 +76,17 @@ export const sendRegistrationEmail = async (userData) => {
 
 export const sendOtpEmail = async (email, otp) => {
   try {
-    const host = process.env.SMTP_HOST || process.env.EMAIL_HOST;
-    const port = process.env.SMTP_PORT || process.env.EMAIL_PORT || 587;
-    const user = process.env.SMTP_USER || process.env.EMAIL_USER;
-    const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
-    const from = process.env.SMTP_FROM || process.env.EMAIL_FROM || user;
-
     console.log(`--------------------------------------------------`);
     console.log(`[OTP VERIFICATION] OTP for ${email} is: ${otp}`);
     console.log(`--------------------------------------------------`);
 
-    if (!host || !user || !pass) {
+    const transporter = getTransporter();
+    if (!transporter) {
       console.warn("SMTP email settings are not fully configured. Printed OTP to console for local testing.");
-      return true; // Return true so it doesn't fail the API call
+      return true; // Return true to allow fallback code usage in dev
     }
 
-    const transporter = nodemailer.createTransport({
-      host,
-      port: parseInt(port),
-      secure: port == 465,
-      auth: {
-        user,
-        pass,
-      },
-    });
+    const from = process.env.SMTP_FROM || process.env.EMAIL_FROM || process.env.SMTP_USER || process.env.EMAIL_USER;
 
     const mailOptions = {
       from: `"Zephyronz Security" <${from}>`,
@@ -120,30 +130,17 @@ export const sendOtpEmail = async (email, otp) => {
 
 export const sendPasswordResetOtpEmail = async (email, otp) => {
   try {
-    const host = process.env.SMTP_HOST || process.env.EMAIL_HOST;
-    const port = process.env.SMTP_PORT || process.env.EMAIL_PORT || 587;
-    const user = process.env.SMTP_USER || process.env.EMAIL_USER;
-    const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
-    const from = process.env.SMTP_FROM || process.env.EMAIL_FROM || user;
-
     console.log(`--------------------------------------------------`);
     console.log(`[PASSWORD RESET] OTP for ${email} is: ${otp}`);
     console.log(`--------------------------------------------------`);
 
-    if (!host || !user || !pass) {
-      console.warn("SMTP email settings are not fully configured. Printed password reset OTP to console for local testing.");
-      return true;
+    const transporter = getTransporter();
+    if (!transporter) {
+      console.warn("SMTP email settings are not fully configured. Printed password reset OTP to console.");
+      return true; // Return true to allow fallback code usage in dev
     }
 
-    const transporter = nodemailer.createTransport({
-      host,
-      port: parseInt(port),
-      secure: port == 465,
-      auth: {
-        user,
-        pass,
-      },
-    });
+    const from = process.env.SMTP_FROM || process.env.EMAIL_FROM || process.env.SMTP_USER || process.env.EMAIL_USER;
 
     const mailOptions = {
       from: `"Zephyronz Security" <${from}>`,
@@ -197,7 +194,7 @@ export const sendOtpSms = async (phone, otp) => {
 
     if (!accountSid || !authToken || !fromNum) {
       console.warn("Twilio SMS settings are not fully configured. Printed OTP to console for local testing.");
-      return false; // Return false so it falls back to test OTP
+      return false; // Return false to indicate no actual SMS was sent
     }
 
     const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;

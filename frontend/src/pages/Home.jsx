@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
@@ -26,6 +26,7 @@ const Home = () => {
   const { token, user, socket } = useAuth();
 
   const [files, setFiles] = useState([]);
+  const [folders, setFolders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -39,6 +40,105 @@ const Home = () => {
     message: ""
   });
   const [formSubmitting, setFormSubmitting] = useState(false);
+
+  // Admin Upload Modal States for folder page
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadLoading, setUploadLoading] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
+
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    if (selectedFiles.length === 0) {
+      toast.error("Please select at least one file");
+      return;
+    }
+
+    try {
+      setUploadLoading(true);
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+      const targetFolder = activeFolder;
+      let successCount = 0;
+
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const item = selectedFiles[i];
+        setUploadProgress(0);
+
+        const formData = new FormData();
+        formData.append("title", item.title);
+        formData.append("folder", targetFolder);
+        formData.append("file", item.file);
+
+        try {
+          const res = await axios.post(`${apiUrl}/api/files/upload`, formData, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+            onUploadProgress: (progressEvent) => {
+              const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              setUploadProgress(percentCompleted);
+            },
+          });
+
+          if (res.data.success) {
+            successCount++;
+          }
+        } catch (uploadErr) {
+          if (uploadErr.response && uploadErr.response.status === 409) {
+            const replace = window.confirm(`${uploadErr.response.data.msg}`);
+            if (replace) {
+              formData.append("replace", "true");
+              try {
+                const resReplace = await axios.post(`${apiUrl}/api/files/upload`, formData, {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "multipart/form-data",
+                  },
+                  onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    setUploadProgress(percentCompleted);
+                  },
+                });
+                if (resReplace.data.success) {
+                  successCount++;
+                }
+              } catch (replaceErr) {
+                console.error("Replacement upload error:", replaceErr);
+                toast.error(`Failed to replace ${item.file.name}: ${replaceErr.response?.data?.msg || replaceErr.message}`);
+              }
+            }
+          } else {
+            console.error(`Error uploading file ${item.file.name}:`, uploadErr);
+            toast.error(`Failed to upload ${item.file.name}: ${uploadErr.response?.data?.msg || uploadErr.message}`);
+          }
+        }
+      }
+
+      if (successCount > 0) {
+        toast.success(`Successfully uploaded ${successCount} file(s)!`);
+        setSelectedFiles([]);
+        setUploadProgress(0);
+        setShowUploadModal(false);
+        fetchFiles();
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Upload process encountered an error.");
+    } finally {
+      setUploadLoading(false);
+    }
+  };
 
   // Fetch files helper
   const fetchFiles = useCallback(async () => {
@@ -62,12 +162,28 @@ const Home = () => {
     }
   }, [token]);
 
+  // Fetch folders helper
+  const fetchFolders = useCallback(async () => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+      const response = await axios.get(`${apiUrl}/api/folders`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (response.data.success) {
+        setFolders(response.data.folders || []);
+      }
+    } catch (err) {
+      console.error("Error fetching folders:", err);
+    }
+  }, [token]);
+
   // Initial load
   useEffect(() => {
     if (token) {
       fetchFiles();
+      fetchFolders();
     }
-  }, [token, fetchFiles]);
+  }, [token, fetchFiles, fetchFolders]);
 
   // Socket.io listener for real-time instant updates
   useEffect(() => {
@@ -92,9 +208,45 @@ const Home = () => {
       setFiles((prev) => prev.filter((f) => f._id !== deletedId));
     });
 
+    socket.on("folder-created", (newFolder) => {
+      setFolders((prev) => {
+        if (prev.some((f) => f._id === newFolder._id)) return prev;
+        return [...prev, newFolder];
+      });
+      toast.success(`New folder created: "${newFolder.name}"!`, {
+        icon: "📂",
+        style: {
+          background: "#FFFFFF",
+          color: "#1E293B",
+          border: "1px solid #E2E8F0"
+        }
+      });
+    });
+
+    socket.on("folder-renamed", ({ id, oldName, newName }) => {
+      setFolders((prev) =>
+        prev.map((f) => (f._id === id ? { ...f, name: newName } : f))
+      );
+      setFiles((prevFiles) =>
+        prevFiles.map((file) =>
+          file.folder === oldName ? { ...file, folder: newName } : file
+        )
+      );
+      setActiveFolder((prev) => (prev === oldName ? newName : prev));
+    });
+
+    socket.on("folder-deleted", ({ id, name }) => {
+      setFolders((prev) => prev.filter((f) => f._id !== id));
+      setFiles((prevFiles) => prevFiles.filter((file) => file.folder !== name));
+      setActiveFolder((prev) => (prev === name ? null : prev));
+    });
+
     return () => {
       socket.off("file-uploaded");
       socket.off("file-deleted");
+      socket.off("folder-created");
+      socket.off("folder-renamed");
+      socket.off("folder-deleted");
     };
   }, [socket]);
 
@@ -312,16 +464,27 @@ const Home = () => {
                     </p>
                   </div>
                 </div>
-                <button
-                  onClick={() => {
-                    setActiveFolder(null);
-                    setSearchTerm("");
-                  }}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-650 text-white font-bold rounded-xl shadow-md transition-all duration-200 active:scale-95 border border-white/20"
-                >
-                  <FiArrowLeft className="w-4 h-4" />
-                  <span>Back to Folders</span>
-                </button>
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  {user?.role === "admin" && (
+                    <button
+                      onClick={() => setShowUploadModal(true)}
+                      className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold rounded-xl shadow-md transition-all duration-200 active:scale-95 border border-white/20 text-xs sm:text-sm cursor-pointer"
+                    >
+                      <FiFolder className="w-4 h-4" />
+                      <span>Upload Files</span>
+                    </button>
+                  )}
+                  <button
+                    onClick={() => {
+                      setActiveFolder(null);
+                      setSearchTerm("");
+                    }}
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-650 text-white font-bold rounded-xl shadow-md transition-all duration-200 active:scale-95 border border-white/20 text-xs sm:text-sm cursor-pointer"
+                  >
+                    <FiArrowLeft className="w-4 h-4" />
+                    <span>Back to Folders</span>
+                  </button>
+                </div>
               </div>
             )}
             {loading ? (
@@ -352,25 +515,26 @@ const Home = () => {
                   Try Again
                 </button>
               </div>
-            ) : files.length === 0 ? (
-              // Empty State (no files uploaded at all)
+            ) : folders.length === 0 ? (
+              // Empty State (no folders created at all)
               <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-3xl border-2 border-gray-200 dark:border-slate-800 p-16 text-center shadow-xl">
                 <div className="w-24 h-24 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FiLock className="w-12 h-12 text-gray-400 dark:text-slate-500" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">No Documents Found</h3>
+                <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">No Folders Found</h3>
                 <p className="text-gray-600 dark:text-slate-400">
-                  No documents have been uploaded yet.
+                  No folders have been created yet.
                 </p>
               </div>
             ) : activeFolder === null && searchTerm === "" ? (
               // Folders View
               <div className={`grid ${viewMode === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"} gap-4`}>
-                {Object.keys(groupedFolders).map((folderName) => {
-                  const folderFiles = groupedFolders[folderName];
+                {folders.map((folder) => {
+                  const folderName = folder.name;
+                  const folderFiles = files.filter(f => (f.folder || "General") === folderName);
                   return (
                     <motion.button
-                      key={folderName}
+                      key={folder._id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3 }}
@@ -381,7 +545,7 @@ const Home = () => {
                         viewMode === "grid" 
                           ? "aspect-square" 
                           : "h-20"
-                      } bg-gradient-to-br ${getFolderColor(folderName)} rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden flex items-center justify-center p-4 border-2 border-white/30 hover:border-white/60 after:absolute after:inset-0 after:pointer-events-none after:bg-[radial-gradient(circle_at_30%_30%,_rgba(255,255,255,0.2)_0%,_transparent_60%)]`}
+                      } bg-gradient-to-br ${getFolderColor(folderName)} rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden flex items-center justify-center p-4 border-2 border-white/30 hover:border-white/60 after:absolute after:inset-0 after:pointer-events-none after:bg-[radial-gradient(circle_at_30%_30%,_rgba(255,255,255,0.2)_0%,_transparent_60%)] cursor-pointer`}
                     >
                       {/* Animated gradient background */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-white/10 opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
@@ -400,7 +564,7 @@ const Home = () => {
                         <span className="text-white font-bold text-base text-center line-clamp-2 px-1 leading-tight drop-shadow-lg">
                           {folderName}
                         </span>
-
+ 
                         {/* File count badge */}
                         <span className="text-xs font-bold text-white/80 bg-black/20 backdrop-blur-sm px-2.5 py-1 rounded-full">
                           {folderFiles.length} {folderFiles.length === 1 ? "file" : "files"}
@@ -412,8 +576,6 @@ const Home = () => {
                         </div>
                       </div>
                       
-                      {/* Glow effect on hover */}
-                      <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
                     </motion.button>
                   );
                 })}
@@ -599,6 +761,137 @@ const Home = () => {
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Upload Files Modal */}
+      <AnimatePresence>
+        {showUploadModal && (
+          <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-gray-200 dark:border-slate-800"
+            >
+              <div className="bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-purple-500/10 px-6 py-5 border-b border-gray-200 dark:border-slate-800 flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-800 dark:text-white">
+                    Upload Additional Files
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                    Folder: <span className="font-semibold text-indigo-500">{activeFolder}</span>
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowUploadModal(false);
+                    setSelectedFiles([]);
+                  }}
+                  className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                >
+                  <FiX className="w-5 h-5 text-gray-500 dark:text-slate-400" />
+                </button>
+              </div>
+
+              <form onSubmit={handleUpload} className="p-6 space-y-4">
+                <div>
+                  <div className="border-2 border-dashed border-gray-200 dark:border-slate-800 hover:border-indigo-500/60 rounded-2xl p-6 text-center bg-gray-50/50 dark:bg-slate-950/50 hover:bg-gray-50 dark:hover:bg-slate-900/50 transition-all cursor-pointer relative">
+                    <input
+                      ref={fileInputRef}
+                      id="folderFileInput"
+                      type="file"
+                      multiple
+                      onChange={(e) => {
+                        const newFiles = Array.from(e.target.files).map(f => ({
+                          file: f,
+                          title: f.name.split('.').slice(0, -1).join('.'),
+                          id: Math.random().toString(36).substring(7)
+                        }));
+                        setSelectedFiles(prev => [...prev, ...newFiles]);
+                      }}
+                      className="hidden"
+                    />
+                    <label htmlFor="folderFileInput" className="cursor-pointer block">
+                      <svg className="w-10 h-10 mx-auto text-gray-400 dark:text-slate-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                      </svg>
+                      <p className="text-gray-800 dark:text-slate-200 font-semibold text-sm">
+                        Tap to browse files
+                      </p>
+                      <p className="text-gray-500 dark:text-slate-400 text-xs mt-1">
+                        PDFs, Images, Videos, Documents (Max 20MB per file)
+                      </p>
+                    </label>
+                  </div>
+                </div>
+
+                {selectedFiles.length > 0 && (
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400">
+                      Files Queue ({selectedFiles.length})
+                    </label>
+                    <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                      {selectedFiles.map((item, idx) => (
+                        <div key={item.id} className="flex flex-col sm:flex-row gap-2 items-start sm:items-center bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl border border-gray-200 dark:border-slate-800/80">
+                          <div className="flex-1 min-w-0 w-full">
+                            <p className="text-xs font-semibold text-gray-700 dark:text-slate-350 truncate">{item.file.name}</p>
+                            <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5">{formatFileSize(item.file.size)}</p>
+                          </div>
+                          <div className="flex items-center gap-2 w-full sm:w-auto">
+                            <input
+                              type="text"
+                              value={item.title}
+                              placeholder="Enter custom title"
+                              onChange={(e) => {
+                                const newTitle = e.target.value;
+                                setSelectedFiles(prev => prev.map(f => f.id === item.id ? { ...f, title: newTitle } : f));
+                              }}
+                              className="flex-1 sm:w-36 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg px-2 py-1 text-xs text-gray-800 dark:text-slate-100"
+                              required
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setSelectedFiles(prev => prev.filter(f => f.id !== item.id))}
+                              className="p-1 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-500 rounded-lg transition-colors cursor-pointer"
+                            >
+                              <FiX className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {uploadLoading && (
+                  <div className="w-full bg-gray-100 dark:bg-slate-950 rounded-full h-2.5 overflow-hidden">
+                    <div className="bg-blue-500 h-2.5 rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-end gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowUploadModal(false);
+                      setSelectedFiles([]);
+                    }}
+                    className="px-4 py-2 border border-gray-200 dark:border-slate-800 rounded-xl text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-850 text-gray-700 dark:text-slate-350 transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={uploadLoading || selectedFiles.length === 0}
+                    className="px-5 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl text-sm font-semibold transition-all shadow-md active:scale-98 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {uploadLoading ? "Uploading..." : "Upload Queue"}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

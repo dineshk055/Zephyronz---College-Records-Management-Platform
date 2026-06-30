@@ -5,6 +5,8 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { FiMail, FiLock, FiEye, FiEyeOff, FiLogIn } from "react-icons/fi";
 
+const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -52,7 +54,7 @@ const Login = () => {
       setLoading(true);
 
       const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/auth/login`,
+        `${apiUrl}/api/auth/login`,
         {
           email: formData.email,
           password: formData.password,

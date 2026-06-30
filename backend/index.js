@@ -9,6 +9,7 @@ import userRoutes from "./routes/users.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import fileRoutes from "./routes/fileRoutes.js";
 import securityRoutes from "./routes/security.js";
+import folderRoutes from "./routes/folderRoutes.js";
 import fs from "fs";
 
 import { createServer } from "http";
@@ -147,6 +148,7 @@ myapp.use("/api/users", userRoutes);
 myapp.use("/api/admin", adminRoutes);
 myapp.use("/api/files", fileRoutes);
 myapp.use("/api/security", securityRoutes);
+myapp.use("/api/folders", folderRoutes);
 
 const PORT = process.env.PORT || 3000;
 

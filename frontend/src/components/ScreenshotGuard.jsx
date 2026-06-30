@@ -10,9 +10,31 @@ const ScreenshotGuard = () => {
   const [warningText, setWarningText] = useState("");
 
   useEffect(() => {
-    if (!isAuthenticated || !token || isAdmin) return;
+    const enableNativeSecure = () => {
+      try {
+        if (window.Android) {
+          if (typeof window.Android.enableSecure === "function") {
+            window.Android.enableSecure();
+          } else if (typeof window.Android.setFlagSecure === "function") {
+            window.Android.setFlagSecure(true);
+          }
+        }
+        if (window.JSInterface) {
+          if (typeof window.JSInterface.enableSecure === "function") {
+            window.JSInterface.enableSecure();
+          } else if (typeof window.JSInterface.setFlagSecure === "function") {
+            window.JSInterface.setFlagSecure(true);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to enable native secure flag:", err);
+      }
+    };
+
+    enableNativeSecure();
 
     const logSecurityEvent = async (eventType, details) => {
+      if (!token || isAdmin) return; // Only log security events for logged-in non-admin users
       try {
         const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
         const activeDoc = localStorage.getItem("active_document");

@@ -4,9 +4,12 @@ import axios from "axios";
 import toast from 'react-hot-toast';
 import { FiShield, FiAlertTriangle, FiArrowLeft } from "react-icons/fi";
 
+const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 const VerifyOtp = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const registrationData = location.state || {};
   
   const { name, email, password, phone, verificationMethod, testOtp: initialTestOtp } = registrationData;
 
@@ -50,8 +53,8 @@ const VerifyOtp = () => {
       setResendLoading(true);
       setError("");
       
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/auth/send-otp`,
+       const response = await axios.post(
+        `${apiUrl}/api/auth/send-otp`,
         { email, phone, method: verificationMethod }
       );
       
@@ -91,7 +94,7 @@ const VerifyOtp = () => {
     try {
       setLoading(true);
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/auth/register`,
+        `${apiUrl}/api/auth/register`,
         { name, email, password, phone, otp }
       );
 

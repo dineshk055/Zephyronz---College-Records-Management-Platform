@@ -32,6 +32,8 @@ import {
 import { FaGraduationCap, FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
+const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 const ProfileCard = () => {
   const { user, token, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -74,7 +76,7 @@ const ProfileCard = () => {
     setMessage({ type: "", text: "" });
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/profile`, {
+      const response = await fetch(`${apiUrl}/api/users/profile`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -116,7 +118,7 @@ const ProfileCard = () => {
     setPasswordError("");
     setTestOtpFallback(null);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/change-password/send-otp`, {
+      const response = await fetch(`${apiUrl}/api/users/change-password/send-otp`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -160,7 +162,7 @@ const ProfileCard = () => {
     setPasswordLoading(true);
     setPasswordError("");
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/change-password/reset`, {
+      const response = await fetch(`${apiUrl}/api/users/change-password/reset`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

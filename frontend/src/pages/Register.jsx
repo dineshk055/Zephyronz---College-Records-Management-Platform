@@ -4,6 +4,8 @@ import axios from "axios";
 import toast from 'react-hot-toast';
 import { FiEye, FiEyeOff, FiUser, FiMail, FiLock, FiUserPlus, FiPhone } from "react-icons/fi";
 
+const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 const Register = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -76,7 +78,7 @@ const Register = () => {
       setLoading(true);
       // Request verification code first (do NOT create account immediately)
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/auth/send-otp`,
+        `${apiUrl}/api/auth/send-otp`,
         { 
           email: formData.email,
           phone: formData.phone,

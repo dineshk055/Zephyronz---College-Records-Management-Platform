@@ -1,4 +1,5 @@
 import File from "../models/File.js";
+import Folder from "../models/Folder.js";
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -98,9 +99,60 @@ export const uploadFile = async (req, res) => {
       });
     }
 
+    const title = req.body.title || req.file.originalname.split('.').slice(0, -1).join('.');
+    const folderName = req.body.folder ? req.body.folder.trim() : "General";
+
+    // Overwrite Conflict Check
+    const existingFile = await File.findOne({ title: title, folder: folderName });
+    if (existingFile) {
+      if (req.body.replace !== "true") {
+        // Clean up the uploaded file to prevent dangling files on disk
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+        return res.status(409).json({
+          success: false,
+          conflict: true,
+          msg: `A file named "${title}" already exists in folder "${folderName}". Do you want to replace it?`,
+        });
+      } else {
+        // Replace is true. Find and delete the existing file and its physical files first.
+        const uploadDir = path.dirname(filePath);
+        if (existingFile.pages && existingFile.pages.length > 0) {
+          existingFile.pages.forEach(pageFile => {
+            const pagePath = path.join(uploadDir, pageFile);
+            if (fs.existsSync(pagePath)) {
+              fs.unlinkSync(pagePath);
+            }
+          });
+        }
+        if (existingFile.fileUrl) {
+          const originalFilePath = path.join(uploadDir, existingFile.fileUrl);
+          if (fs.existsSync(originalFilePath) && (!existingFile.pages || !existingFile.pages.includes(existingFile.fileUrl))) {
+            fs.unlinkSync(originalFilePath);
+          }
+        }
+        await existingFile.deleteOne();
+
+        // Emit file-deleted so other clients update in real time
+        if (req.io) {
+          req.io.emit("file-deleted", existingFile._id.toString());
+        }
+      }
+    }
+
+    // Automatically create folder if it does not exist
+    const folderExists = await Folder.findOne({ name: { $regex: new RegExp(`^${folderName}$`, "i") } });
+    if (!folderExists) {
+      const newFolder = await Folder.create({ name: folderName });
+      if (req.io) {
+        req.io.emit("folder-created", newFolder);
+      }
+    }
+
     const newFile = await File.create({
-      title: req.body.title || req.file.originalname.split('.').slice(0, -1).join('.'),
-      folder: req.body.folder ? req.body.folder.trim() : "General",
+      title: title,
+      folder: folderName,
       fileUrl: req.file.filename,
       pages: pageFileNames,
       pagesData: pageBase64Data,
@@ -185,6 +237,11 @@ export const deleteFile = async (req, res) => {
     }
 
     await file.deleteOne();
+
+    if (req.io) {
+      req.io.emit("file-deleted", req.params.id);
+      console.log(`Socket broadcast: file "${file.title}" (ID: ${req.params.id}) deleted.`);
+    }
 
     res.status(200).json({
       success: true,

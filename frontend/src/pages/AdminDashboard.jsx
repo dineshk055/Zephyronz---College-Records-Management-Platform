@@ -6,11 +6,13 @@ import { useAuth } from "../context/AuthContext";
 import { toast } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
+const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 // Get file URL helper
 const getFileUrl = (file) => {
   if (file && file.fileUrl) {
     let cleanPath = file.fileUrl.replace(/^\/?uploads\//, '');
-    return `${import.meta.env.VITE_API_URL}/uploads/${cleanPath}`;
+    return `${apiUrl}/uploads/${cleanPath}`;
   }
   return null;
 };
@@ -29,7 +31,6 @@ const FilePreviewModal = ({ file, onClose }) => {
   
   const getPageUrl = (page) => {
     let cleanPath = page.replace(/^\/?uploads\//, '');
-    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
     return `${apiUrl}/uploads/${cleanPath}`;
   };
 
@@ -214,6 +215,7 @@ const MobileTopTabs = ({ activeTab, setActiveTab }) => {
   const tabs = [
     { id: "upload", label: "Upload", icon: "M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" },
     { id: "files", label: "Files", icon: "M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" },
+    { id: "folders", label: "Folders", icon: "M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" },
     { id: "users", label: "Users", icon: "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" },
     { id: "logs", label: "Logs", icon: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" }
   ];
@@ -271,10 +273,27 @@ const AdminDashboard = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const fileInputRef = useRef(null);
+  const [folders, setFolders] = useState([]);
+  const [newFolderName, setNewFolderName] = useState("");
+  const [editingFolderId, setEditingFolderId] = useState(null);
+  const [editingFolderName, setEditingFolderName] = useState("");
+
+  const fetchFolders = useCallback(async () => {
+    try {
+      const res = await axios.get(`${apiUrl}/api/folders`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success) {
+        setFolders(res.data.folders || []);
+      }
+    } catch (error) {
+      console.error("Error fetching folders:", error);
+    }
+  }, [token]);
 
   const fetchFiles = useCallback(async () => {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/files`, {
+      const res = await axios.get(`${apiUrl}/api/files`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.success) {
@@ -288,7 +307,7 @@ const AdminDashboard = () => {
 
   const fetchUsers = useCallback(async () => {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/users`, {
+      const res = await axios.get(`${apiUrl}/api/users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const usersData = Array.isArray(res.data) ? res.data : res.data.users || [];
@@ -306,7 +325,7 @@ const AdminDashboard = () => {
 
   const fetchSecurityLogs = useCallback(async () => {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/security-logs`, {
+      const res = await axios.get(`${apiUrl}/api/admin/security-logs`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.success) {
@@ -338,7 +357,7 @@ const AdminDashboard = () => {
     if (!window.confirm(`Delete ${selectedLogIds.length} selected security logs?`)) return;
     try {
       const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/admin/security-logs/delete-bulk`,
+        `${apiUrl}/api/admin/security-logs/delete-bulk`,
         { ids: selectedLogIds },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -358,7 +377,7 @@ const AdminDashboard = () => {
     if (!window.confirm("Delete this security log?")) return;
     try {
       const res = await axios.delete(
-        `${import.meta.env.VITE_API_URL}/api/admin/security-logs/${id}`,
+        `${apiUrl}/api/admin/security-logs/${id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (res.data.success) {
@@ -377,7 +396,7 @@ const AdminDashboard = () => {
     if (!window.confirm("Delete ALL security logs? This cannot be undone.")) return;
     try {
       const res = await axios.delete(
-        `${import.meta.env.VITE_API_URL}/api/admin/security-logs`,
+        `${apiUrl}/api/admin/security-logs`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (res.data.success) {
@@ -397,8 +416,9 @@ const AdminDashboard = () => {
       fetchFiles();
       fetchUsers();
       fetchSecurityLogs();
+      fetchFolders();
     }
-  }, [token, fetchFiles, fetchUsers, fetchSecurityLogs]);
+  }, [token, fetchFiles, fetchUsers, fetchSecurityLogs, fetchFolders]);
 
   useEffect(() => {
     if (!socket) return;
@@ -427,11 +447,33 @@ const AdminDashboard = () => {
       fetchUsers();
     });
 
+    socket.on("folder-created", (newFolder) => {
+      setFolders((prev) => {
+        if (prev.some((f) => f._id === newFolder._id)) return prev;
+        return [...prev, newFolder].sort((a, b) => a.name.localeCompare(b.name));
+      });
+    });
+
+    socket.on("folder-renamed", ({ id, oldName, newName }) => {
+      setFolders((prev) =>
+        prev.map((f) => (f._id === id ? { ...f, name: newName } : f)).sort((a, b) => a.name.localeCompare(b.name))
+      );
+      fetchFiles();
+    });
+
+    socket.on("folder-deleted", ({ id, name }) => {
+      setFolders((prev) => prev.filter((f) => f._id !== id));
+      fetchFiles();
+    });
+
     return () => {
       socket.off("notification");
       socket.off("user-status-changed");
+      socket.off("folder-created");
+      socket.off("folder-renamed");
+      socket.off("folder-deleted");
     };
-  }, [socket, fetchUsers, fetchSecurityLogs]);
+  }, [socket, fetchUsers, fetchSecurityLogs, fetchFiles, fetchFolders]);
 
   const handleUpload = async (e) => {
     e.preventDefault();
@@ -474,7 +516,7 @@ const AdminDashboard = () => {
         formData.append("file", item.file);
 
         try {
-          const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/files/upload`, formData, {
+          const res = await axios.post(`${apiUrl}/api/files/upload`, formData, {
             headers: {
               Authorization: `Bearer ${token}`,
               "Content-Type": "multipart/form-data",
@@ -489,8 +531,33 @@ const AdminDashboard = () => {
             successCount++;
           }
         } catch (uploadErr) {
-          console.error(`Error uploading file ${item.file.name}:`, uploadErr);
-          toast.error(`Failed to upload ${item.file.name}: ${uploadErr.response?.data?.msg || uploadErr.message}`);
+          if (uploadErr.response && uploadErr.response.status === 409) {
+            const replace = window.confirm(`${uploadErr.response.data.msg}`);
+            if (replace) {
+              formData.append("replace", "true");
+              try {
+                const resReplace = await axios.post(`${apiUrl}/api/files/upload`, formData, {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "multipart/form-data",
+                  },
+                  onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    setUploadProgress(percentCompleted);
+                  },
+                });
+                if (resReplace.data.success) {
+                  successCount++;
+                }
+              } catch (replaceErr) {
+                console.error("Replacement upload error:", replaceErr);
+                toast.error(`Failed to replace ${item.file.name}: ${replaceErr.response?.data?.msg || replaceErr.message}`);
+              }
+            }
+          } else {
+            console.error(`Error uploading file ${item.file.name}:`, uploadErr);
+            toast.error(`Failed to upload ${item.file.name}: ${uploadErr.response?.data?.msg || uploadErr.message}`);
+          }
         }
       }
 
@@ -514,7 +581,7 @@ const AdminDashboard = () => {
   const handleDeleteFile = async (fileId) => {
     if (window.confirm("Delete this file?")) {
       try {
-        const res = await axios.delete(`${import.meta.env.VITE_API_URL}/api/files/${fileId}`, {
+        const res = await axios.delete(`${apiUrl}/api/files/${fileId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (res.data.success) {
@@ -528,9 +595,59 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleCreateFolder = async (e) => {
+    e.preventDefault();
+    if (!newFolderName.trim()) return;
+    try {
+      const res = await axios.post(`${apiUrl}/api/folders`, { name: newFolderName }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success) {
+        toast.success("Folder created successfully!");
+        setNewFolderName("");
+        fetchFolders();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.msg || "Failed to create folder");
+    }
+  };
+
+  const handleRenameFolder = async (id) => {
+    if (!editingFolderName.trim()) return;
+    try {
+      const res = await axios.put(`${apiUrl}/api/folders/${id}`, { name: editingFolderName }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success) {
+        toast.success("Folder renamed successfully!");
+        setEditingFolderId(null);
+        setEditingFolderName("");
+        fetchFolders();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.msg || "Failed to rename folder");
+    }
+  };
+
+  const handleDeleteFolder = async (id, name) => {
+    const confirm = window.confirm(`WARNING: Deleting folder "${name}" will permanently delete all files stored inside it.\n\nAre you sure you want to proceed?`);
+    if (!confirm) return;
+    try {
+      const res = await axios.delete(`${apiUrl}/api/folders/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success) {
+        toast.success("Folder and files deleted successfully!");
+        fetchFolders();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.msg || "Failed to delete folder");
+    }
+  };
+
   const handleApproveUser = async (userId) => {
     try {
-      const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/users/${userId}/approve`, {}, {
+      const res = await axios.put(`${apiUrl}/api/users/${userId}/approve`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success(res.data.message || "User approved");
@@ -544,7 +661,7 @@ const AdminDashboard = () => {
   const handleRejectUser = async (userId) => {
     if (window.confirm("Reject this user?")) {
       try {
-        const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/users/${userId}/reject`, {}, {
+        const res = await axios.put(`${apiUrl}/api/users/${userId}/reject`, {}, {
           headers: { Authorization: `Bearer ${token}` }
         });
         toast.success(res.data.message || "User rejected");
@@ -559,7 +676,7 @@ const AdminDashboard = () => {
   const handleDeleteUser = async (userId) => {
     if (window.confirm("Delete this user?")) {
       try {
-        const res = await axios.delete(`${import.meta.env.VITE_API_URL}/api/users/${userId}`, {
+        const res = await axios.delete(`${apiUrl}/api/users/${userId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         toast.success(res.data.message || "User deleted");
@@ -706,6 +823,7 @@ const AdminDashboard = () => {
             {[
               { id: "upload", label: "Upload Files", icon: "M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" },
               { id: "files", label: "Manage Files", icon: "M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" },
+              { id: "folders", label: "Manage Folders", icon: "M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" },
               { id: "users", label: "Manage Users", icon: "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" },
               { id: "logs", label: "Activity Logs", icon: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" }
             ].map(tab => (
@@ -760,8 +878,8 @@ const AdminDashboard = () => {
                         required
                       />
                       <datalist id="folder-suggestions">
-                        {[...new Set(files.map(f => f.folder || "General"))].filter(Boolean).map(fName => (
-                          <option key={fName} value={fName} />
+                        {folders.map(f => (
+                          <option key={f._id} value={f.name} />
                         ))}
                       </datalist>
                     </div>
@@ -1383,6 +1501,113 @@ const AdminDashboard = () => {
                       )}
                     </tbody>
                   </table>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "folders" && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+                {/* Column 1: Create Folder */}
+                <div className="md:col-span-1">
+                  <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 shadow-sm rounded-2xl p-6">
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2">Create New Folder</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Add a folder category to group files</p>
+                    <form onSubmit={handleCreateFolder} className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Folder Name</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Tuition, Exams, Semesters"
+                          value={newFolderName}
+                          onChange={(e) => setNewFolderName(e.target.value)}
+                          className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                          required
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        className="w-full py-2.5 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-xl text-sm font-semibold transition-all shadow-md active:scale-98 cursor-pointer"
+                      >
+                        Create Folder
+                      </button>
+                    </form>
+                  </div>
+                </div>
+
+                {/* Column 2: Folders List */}
+                <div className="md:col-span-2">
+                  <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 shadow-sm rounded-2xl p-6">
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2">Manage Folders</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">Rename or delete existing folders (and their contents)</p>
+
+                    <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+                      {folders.length === 0 ? (
+                        <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+                          No folders created yet.
+                        </div>
+                      ) : (
+                        folders.map((folder) => {
+                          const fileCount = files.filter(f => (f.folder || "General") === folder.name).length;
+                          const isEditing = editingFolderId === folder._id;
+                          return (
+                            <div key={folder._id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-slate-550 dark:bg-slate-950 rounded-xl border border-slate-200/60 dark:border-slate-800/80 gap-3">
+                              {isEditing ? (
+                                <div className="flex-1 flex items-center gap-2 w-full">
+                                  <input
+                                    type="text"
+                                    value={editingFolderName}
+                                    onChange={(e) => setEditingFolderName(e.target.value)}
+                                    className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-1.5 text-sm text-slate-800 dark:text-slate-100 focus:outline-none"
+                                    required
+                                    autoFocus
+                                  />
+                                  <button
+                                    onClick={() => handleRenameFolder(folder._id)}
+                                    className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-semibold cursor-pointer"
+                                  >
+                                    Save
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setEditingFolderId(null);
+                                      setEditingFolderName("");
+                                    }}
+                                    className="px-3 py-1.5 bg-slate-300 hover:bg-slate-400 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold cursor-pointer"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              ) : (
+                                <>
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="text-sm font-semibold text-slate-850 dark:text-slate-200 truncate">{folder.name}</h4>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{fileCount} {fileCount === 1 ? "file" : "files"}</p>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      onClick={() => {
+                                        setEditingFolderId(folder._id);
+                                        setEditingFolderName(folder.name);
+                                      }}
+                                      className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold cursor-pointer"
+                                    >
+                                      Rename
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteFolder(folder._id, folder.name)}
+                                      className="px-3 py-1.5 bg-red-100 hover:bg-red-200 dark:bg-red-950/20 text-red-650 dark:text-red-400 rounded-lg text-xs font-semibold cursor-pointer"
+                                    >
+                                      Delete
+                                    </button>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
