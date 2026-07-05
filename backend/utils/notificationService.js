@@ -47,9 +47,11 @@ export const sendRegistrationEmail = async (userData) => {
     const from = process.env.SMTP_FROM || process.env.EMAIL_FROM || process.env.SMTP_USER || process.env.EMAIL_USER;
 
     const mailOptions = {
-      from: `"Zephyronz Security" <${from}>`,
+      from: `"Zephyronz Team" <${from}>`,
+      replyTo: from,
       to: userData.email,
-      subject: "Registration Received - Pending Admin Approval",
+      subject: "Account Registration Received - Zephyronz",
+      text: `Hello ${userData.name},\n\nThank you for registering on our platform. Your account is currently Pending Admin Approval.\n\nOur administrators have been notified of your registration request. You will receive access once your account has been reviewed and approved.\n\nRegistered Details:\nName: ${userData.name}\nEmail: ${userData.email}\n\nThis is an automated notification.`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
           <h2 style="color: #4f46e5; text-align: center; margin-bottom: 20px;">Account Registration Received</h2>
@@ -89,9 +91,11 @@ export const sendOtpEmail = async (email, otp) => {
     const from = process.env.SMTP_FROM || process.env.EMAIL_FROM || process.env.SMTP_USER || process.env.EMAIL_USER;
 
     const mailOptions = {
-      from: `"Zephyronz Security" <${from}>`,
+      from: `"Zephyronz Team" <${from}>`,
+      replyTo: from,
       to: email,
-      subject: "Your Registration Verification Code - Zephyronz",
+      subject: "Your Zephyronz Verification Code",
+      text: `Your Zephyronz verification code is: ${otp}\n\nThis code is valid for 10 minutes.\n\nIf you did not initiate this request, please ignore this email.`,
       html: `
         <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 550px; margin: 0 auto; padding: 30px; border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); background-color: #ffffff;">
           <div style="text-align: center; margin-bottom: 30px;">
@@ -143,9 +147,11 @@ export const sendPasswordResetOtpEmail = async (email, otp) => {
     const from = process.env.SMTP_FROM || process.env.EMAIL_FROM || process.env.SMTP_USER || process.env.EMAIL_USER;
 
     const mailOptions = {
-      from: `"Zephyronz Security" <${from}>`,
+      from: `"Zephyronz Team" <${from}>`,
+      replyTo: from,
       to: email,
       subject: "Password Reset Verification Code - Zephyronz",
+      text: `Your Zephyronz password reset code is: ${otp}\n\nThis code is valid for 5 minutes.\n\nIf you did not request a password reset, please secure your account immediately.`,
       html: `
         <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 550px; margin: 0 auto; padding: 30px; border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); background-color: #ffffff;">
           <div style="text-align: center; margin-bottom: 30px;">
