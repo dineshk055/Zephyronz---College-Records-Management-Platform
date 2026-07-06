@@ -413,28 +413,7 @@ const Home = () => {
                 />
               </div>
               
-              <div className="flex items-center gap-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl p-1.5 border-2 border-white/30 dark:border-slate-800/40 shadow-lg">
-                <button
-                  onClick={() => setViewMode("grid")}
-                  className={`p-2.5 rounded-xl transition-all ${
-                    viewMode === "grid" 
-                      ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md" 
-                      : "text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800"
-                  }`}
-                >
-                  <FiGrid className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setViewMode("list")}
-                  className={`p-2.5 rounded-xl transition-all ${
-                    viewMode === "list" 
-                      ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md" 
-                      : "text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800"
-                  }`}
-                >
-                  <FiList className="w-5 h-5" />
-                </button>
-              </div>
+             
             </div>
           </div>
         </div>
