@@ -3,7 +3,7 @@ import axios from "axios";
 import toast from 'react-hot-toast';
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { FiMail, FiLock, FiEye, FiEyeOff, FiLogIn } from "react-icons/fi";
+import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
 

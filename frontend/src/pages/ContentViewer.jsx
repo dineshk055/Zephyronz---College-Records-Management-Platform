@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
-import { toast } from "react-hot-toast";
 import { 
   FiChevronLeft, 
   FiFileText, 
@@ -10,10 +9,8 @@ import {
   FiVideo, 
   FiAlertTriangle, 
   FiDownload, 
-  FiLock, 
   FiClock, 
-  FiUser,
-  FiInfo
+  FiUser
 } from "react-icons/fi";
 import { FaFilePdf } from "react-icons/fa";
 
@@ -194,13 +191,7 @@ const ContentViewer = () => {
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6 flex flex-col justify-center">
-        {/* Security Warning Notice */}
-        <div className="mb-4 bg-blue-50/50 dark:bg-blue-955/20 border border-blue-200 dark:border-blue-500/25 rounded-2xl p-3 flex items-start gap-2.5 text-blue-600 dark:text-blue-400 text-xs">
-          <FiInfo className="w-4 h-4 mt-0.5 flex-shrink-0" />
-          <p className="leading-relaxed">
-            <strong>Security Protection Enabled</strong>: Capturing screenshots, printing, or attempting to save this screen layout violates system policies and will log alert dispatches directly to administrators.
-          </p>
-        </div>
+       
 
         <div className="w-full flex-1 flex flex-col items-center justify-center bg-white dark:bg-slate-900/40 rounded-3xl border border-slate-200 dark:border-slate-800/80 p-4 md:p-8 min-h-[50vh] backdrop-blur-md overflow-hidden relative shadow-sm dark:shadow-none transition-colors duration-300">
           

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from 'react-hot-toast';
-import { FiEye, FiEyeOff, FiUser, FiMail, FiLock, FiUserPlus, FiPhone } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiUser, FiMail, FiLock, FiPhone } from "react-icons/fi";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
 

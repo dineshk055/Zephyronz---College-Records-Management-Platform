@@ -1,16 +1,15 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+import toast from "react-hot-toast";
 import { 
   FiMail, 
   FiShield, 
-  FiCalendar, 
   FiEdit2, 
   FiSave, 
   FiX,
   FiCheckCircle,
   FiClock,
-  FiUserCheck,
   FiLogOut,
   FiMoon,
   FiSun,
@@ -18,18 +17,11 @@ import {
   FiAlertTriangle,
   FiCheck,
   FiArrowLeft,
-  FiPhone,
   FiUser,
-  FiBriefcase,
   FiGlobe,
-  FiBell,
-  FiSettings,
-  FiCreditCard,
-  FiHelpCircle,
-  FiShare2,
   FiMoreHorizontal
 } from "react-icons/fi";
-import { FaGraduationCap, FaUserCircle } from "react-icons/fa";
+import { FaGraduationCap } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
@@ -47,6 +39,11 @@ const ProfileCard = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
   const [passwordVerificationMethod, setPasswordVerificationMethod] = useState("email");
+  const [accountAge] = useState(() => {
+    if (!user?.createdAt) return 0;
+    const age = Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24 * 30));
+    return age > 0 ? age : 0;
+  });
 
   // Password Reset Modal states
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -554,7 +551,7 @@ const ProfileCard = () => {
                 <div className="flex justify-between items-center">
                   <span className="text-sm opacity-80">Account Age</span>
                   <span className="text-sm font-semibold">
-                    {user?.createdAt ? Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24 * 30)) : 0} months
+                    {accountAge} months
                   </span>
                 </div>
               </div>

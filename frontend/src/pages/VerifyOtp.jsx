@@ -2,15 +2,13 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import toast from 'react-hot-toast';
-import { FiShield, FiAlertTriangle, FiArrowLeft } from "react-icons/fi";
+import { FiAlertTriangle, FiArrowLeft } from "react-icons/fi";
 
 const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 const VerifyOtp = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const registrationData = location.state || {};
-  
   const registrationData = location.state || {};
   const { name, email, password, phone, verificationMethod, testOtp: initialTestOtp } = registrationData;
 

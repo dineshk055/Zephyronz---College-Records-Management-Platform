@@ -167,7 +167,7 @@ const StatsCards = ({ stats }) => {
 };
 
 // Navigation Buttons Component
-const NavButtons = ({ navigate, user }) => {
+const NavButtons = ({ navigate }) => {
   return (
     <div className="flex items-center gap-1.5 sm:gap-2">
       <motion.button
@@ -268,7 +268,7 @@ const AdminDashboard = () => {
     pendingApprovals: 0
   });
   const [showModal, setShowModal] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -454,14 +454,14 @@ const AdminDashboard = () => {
       });
     });
 
-    socket.on("folder-renamed", ({ id, oldName, newName }) => {
+    socket.on("folder-renamed", ({ id, newName }) => {
       setFolders((prev) =>
         prev.map((f) => (f._id === id ? { ...f, name: newName } : f)).sort((a, b) => a.name.localeCompare(b.name))
       );
       fetchFiles();
     });
 
-    socket.on("folder-deleted", ({ id, name }) => {
+    socket.on("folder-deleted", ({ id }) => {
       setFolders((prev) => prev.filter((f) => f._id !== id));
       fetchFiles();
     });
@@ -742,7 +742,7 @@ const AdminDashboard = () => {
             </div>
             
             {/* Navigation Buttons */}
-            <NavButtons navigate={navigate} user={user} />
+            <NavButtons navigate={navigate} />
           </div>
 
           {/* Bottom Row - User Info and Search (Mobile) */}

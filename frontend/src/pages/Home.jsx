@@ -18,7 +18,7 @@ import {
   FiFolder,
   FiArrowLeft
 } from "react-icons/fi";
-import { FaFilePdf, FaWhatsapp, FaGraduationCap, FaCoins } from "react-icons/fa";
+import { FaFilePdf, FaWhatsapp, FaCoins } from "react-icons/fa";
 import homeBg from "../assets/home_bg.jpg";
 
 const Home = () => {
@@ -142,6 +142,7 @@ const Home = () => {
 
   // Fetch files helper
   const fetchFiles = useCallback(async () => {
+    await Promise.resolve();
     try {
       setLoading(true);
       setError(null);
@@ -180,8 +181,11 @@ const Home = () => {
   // Initial load
   useEffect(() => {
     if (token) {
-      fetchFiles();
-      fetchFolders();
+      const timer = setTimeout(() => {
+        fetchFiles();
+        fetchFolders();
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [token, fetchFiles, fetchFolders]);
 
@@ -354,16 +358,6 @@ const Home = () => {
     );
   });
 
-  // Group files by folder (for the root folder buttons view)
-  const groupedFolders = files.reduce((acc, file) => {
-    const folderName = file.folder || "General";
-    if (!acc[folderName]) {
-      acc[folderName] = [];
-    }
-    acc[folderName].push(file);
-    return acc;
-  }, {});
-
   return (
     <div 
       className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
@@ -448,9 +442,7 @@ const Home = () => {
         {/* Main Content Area */}
         <main className="flex-1 px-6 pb-24">
           <div className="max-w-7xl mx-auto">
-            <div className="mb-6 p-4 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-white/30 rounded-2xl flex items-center gap-3 text-xs text-white font-semibold">
-              <span>🛡️ Security Alert: Screenshots and screen recording are disabled to protect document privacy.</span>
-            </div>
+            
             {activeFolder !== null && !loading && (
               <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/10 dark:bg-slate-900/40 backdrop-blur-md border border-white/20 rounded-2xl p-4 shadow-lg">
                 <div className="flex items-center gap-3">
@@ -830,7 +822,7 @@ const Home = () => {
                       Files Queue ({selectedFiles.length})
                     </label>
                     <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
-                      {selectedFiles.map((item, idx) => (
+                      {selectedFiles.map((item) => (
                         <div key={item.id} className="flex flex-col sm:flex-row gap-2 items-start sm:items-center bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl border border-gray-200 dark:border-slate-800/80">
                           <div className="flex-1 min-w-0 w-full">
                             <p className="text-xs font-semibold text-gray-700 dark:text-slate-350 truncate">{item.file.name}</p>

@@ -78,7 +78,7 @@ const ScreenshotGuard = () => {
         // Try to prevent clipboard capture
         try {
           navigator.clipboard.writeText("Screenshots are disabled for security reasons.");
-        } catch (err) {
+        } catch {
           // Ignore clipboard errors
         }
       }
