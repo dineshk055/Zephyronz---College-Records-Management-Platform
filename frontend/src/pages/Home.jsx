@@ -13,8 +13,6 @@ import {
   FiArrowRight,
   FiLock,
   FiSearch,
-  FiGrid,
-  FiList,
   FiFolder,
   FiArrowLeft
 } from "react-icons/fi";
@@ -30,7 +28,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState("list");
+  const [viewMode] = useState("list");
   const [activeFolder, setActiveFolder] = useState(null);
 
   // Floating WhatsApp Support Form State
@@ -566,7 +564,7 @@ const Home = () => {
               // Document Grid - Button Style with Impressive Colors
               <div className={`grid ${viewMode === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"} gap-4`}>
                 {filteredFiles.map((file) => (
-                  <motion.button
+                  <motion.div
                     key={file._id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -578,8 +576,24 @@ const Home = () => {
                       viewMode === "grid" 
                         ? "aspect-square" 
                         : "h-20"
-                    } bg-gradient-to-br ${getButtonColor(file.mimetype, file.originalName)} rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden flex items-center justify-center p-4 border-2 border-white/30 hover:border-white/60 ${getCardPattern(file.mimetype, file.originalName)} after:absolute after:inset-0 after:pointer-events-none`}
+                    } bg-gradient-to-br ${getButtonColor(file.mimetype, file.originalName)} rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden flex items-center justify-center p-4 border-2 border-white/30 hover:border-white/60 ${getCardPattern(file.mimetype, file.originalName)} after:absolute after:inset-0 after:pointer-events-none cursor-pointer`}
                   >
+                    {/* Folder Badge Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveFolder(file.folder || "General");
+                      }}
+                      className={`absolute ${
+                        viewMode === "grid" 
+                          ? "top-3 left-3" 
+                          : "top-1/2 -translate-y-1/2 left-4"
+                      } z-20 text-[10px] font-bold text-white bg-black/35 hover:bg-black/55 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10 transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95 flex items-center gap-1 shadow-sm`}
+                    >
+                      <FiFolder className="w-3 h-3 text-yellow-300" />
+                      <span>{file.folder || "General"}</span>
+                    </button>
+
                     {/* Animated gradient background */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-white/10 opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
                     
@@ -613,7 +627,7 @@ const Home = () => {
                     
                     {/* Glow effect on hover */}
                     <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
-                  </motion.button>
+                  </motion.div>
                 ))}
               </div>
             )}
