@@ -54,17 +54,40 @@ const ScreenshotGuard = () => {
       }
     };
 
+    // Log screenshot attempts to /api/security/log-screenshot
+    const logScreenshotAttempt = async (details) => {
+      if (!token || isAdmin) return; // Don't log for admin users
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+        await axios.post(
+          `${apiUrl}/api/security/log-screenshot`,
+          { details },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      } catch (err) {
+        console.debug("Screenshot log failed:", err);
+      }
+    };
+
     // Show warning popup
     const triggerPopup = (eventType, msg, detailMsg) => {
       setWarningMessage(msg);
       setShowWarning(true);
-      logSecurityEvent(eventType, detailMsg);
+      if (eventType === "screenshot") {
+        logScreenshotAttempt(detailMsg);
+      } else {
+        logSecurityEvent(eventType, detailMsg);
+      }
     };
 
     // Show toast notification
     const triggerToast = (eventType, msg, detailMsg) => {
       toast.error(msg, { icon: '🛡️' });
-      logSecurityEvent(eventType, detailMsg);
+      if (eventType === "screenshot") {
+        logScreenshotAttempt(detailMsg);
+      } else {
+        logSecurityEvent(eventType, detailMsg);
+      }
     };
 
     // Handle keyboard shortcuts
@@ -155,22 +178,41 @@ const ScreenshotGuard = () => {
       setIsScreenBlurred(false);
     };
 
+    // Track whether the page was blurred to show warning when focused back
+    let wasBlurred = false;
+
     // Handle mobile window blur / focus loss (usually triggered by hardware screenshot combo)
     const handleWindowBlur = () => {
       setIsScreenBlurred(true);
-      logSecurityEvent("screenshot", "Window lost focus (potential mobile screenshot attempt)");
+      wasBlurred = true;
     };
 
     const handleWindowFocus = () => {
       setIsScreenBlurred(false);
+      if (wasBlurred) {
+        wasBlurred = false;
+        triggerPopup(
+          "screenshot",
+          "Taking screenshots is restricted on this platform for security reasons.",
+          "Blocked: Hardware Screenshot combo (Power + Volume button)"
+        );
+      }
     };
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
         setIsScreenBlurred(true);
-        logSecurityEvent("screenshot", "Visibility changed to hidden (potential mobile screenshot attempt)");
+        wasBlurred = true;
       } else {
         setIsScreenBlurred(false);
+        if (wasBlurred) {
+          wasBlurred = false;
+          triggerPopup(
+            "screenshot",
+            "Taking screenshots is restricted on this platform for security reasons.",
+            "Blocked: Hardware Screenshot combo (Power + Volume button)"
+          );
+        }
       }
     };
 
@@ -216,7 +258,7 @@ const ScreenshotGuard = () => {
   return (
     <>
       {isScreenBlurred && (
-        <div className="fixed inset-0 z-[99999] bg-slate-955/95 backdrop-blur-lg flex flex-col items-center justify-center text-center p-6 pointer-events-auto">
+        <div className="fixed inset-0 z-[99999] bg-slate-950/95 backdrop-blur-lg flex flex-col items-center justify-center text-center p-6 pointer-events-auto">
           <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-4 border border-red-500/20">
             <FiAlertTriangle className="w-8 h-8 text-red-500 animate-pulse" />
           </div>
