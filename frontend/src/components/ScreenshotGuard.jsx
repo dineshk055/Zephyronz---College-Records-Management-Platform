@@ -8,6 +8,7 @@ const ScreenshotGuard = () => {
   const { token, user } = useAuth();
   const [showWarning, setShowWarning] = useState(false);
   const [warningMessage, setWarningMessage] = useState("");
+  const [isScreenBlurred, setIsScreenBlurred] = useState(false);
 
   // Check if user is admin
   const isAdmin = user?.role === 'admin' || user?.isAdmin === true;
@@ -93,12 +94,7 @@ const ScreenshotGuard = () => {
         detected = true;
         shortcutName = "Print Shortcut";
       }
-      // Dev Tools
-      else if (e.key === "F12" || ((e.ctrlKey || e.metaKey) && e.shiftKey && ["i", "I", "j", "J", "c", "C"].includes(e.key))) {
-        e.preventDefault();
-        triggerToast("developer_shortcut", "Developer tools are restricted.", "Dev Tools Shortcut");
-        return; // Use toast for dev tools so it's less intrusive
-      }
+      // Dev Tools are enabled (not restricted)
 
       if (detected) {
         triggerPopup("screenshot", "Taking screenshots or printing is restricted on this platform for security reasons.", `Blocked: ${shortcutName}`);
@@ -111,10 +107,7 @@ const ScreenshotGuard = () => {
       triggerToast("download_attempt", "Copying content is disabled.", "Copy blocked");
     };
 
-    // Prevent right-click
-    const handleContextMenu = (e) => {
-      e.preventDefault();
-    };
+    // Right-click context menu allowed for developer tools access
 
     // Prevent drag
     const handleDragStart = (e) => {
@@ -134,50 +127,129 @@ const ScreenshotGuard = () => {
       }
     };
 
+    // Detect mobile device
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                     (navigator.maxTouchPoints && navigator.maxTouchPoints > 0);
+
+    // Handle mobile three-finger screenshot gesture / touch
+    const handleTouchStart = (e) => {
+      if (e.touches.length >= 3) {
+        e.preventDefault();
+        triggerPopup(
+          "screenshot",
+          "Taking screenshots or using three-finger gestures is restricted for security reasons.",
+          "Blocked: Three-finger gesture"
+        );
+        setIsScreenBlurred(true);
+      }
+    };
+
+    const handleTouchMove = (e) => {
+      if (e.touches.length >= 3) {
+        e.preventDefault();
+        setIsScreenBlurred(true);
+      }
+    };
+
+    const handleTouchEnd = () => {
+      setIsScreenBlurred(false);
+    };
+
+    // Handle mobile window blur / focus loss (usually triggered by hardware screenshot combo)
+    const handleWindowBlur = () => {
+      setIsScreenBlurred(true);
+      logSecurityEvent("screenshot", "Window lost focus (potential mobile screenshot attempt)");
+    };
+
+    const handleWindowFocus = () => {
+      setIsScreenBlurred(false);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setIsScreenBlurred(true);
+        logSecurityEvent("screenshot", "Visibility changed to hidden (potential mobile screenshot attempt)");
+      } else {
+        setIsScreenBlurred(false);
+      }
+    };
+
     // Add event listeners
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyDown);
     window.addEventListener("copy", handleCopy);
-    window.addEventListener("contextmenu", handleContextMenu);
     window.addEventListener("dragstart", handleDragStart);
     window.addEventListener("paste", handlePaste);
     window.addEventListener("keydown", handleEscapeKey);
+
+    if (isMobile) {
+      window.addEventListener("blur", handleWindowBlur);
+      window.addEventListener("focus", handleWindowFocus);
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+      window.addEventListener("touchstart", handleTouchStart, { passive: false });
+      window.addEventListener("touchmove", handleTouchMove, { passive: false });
+      window.addEventListener("touchend", handleTouchEnd);
+      window.addEventListener("touchcancel", handleTouchEnd);
+    }
 
     // Cleanup
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyDown);
       window.removeEventListener("copy", handleCopy);
-      window.removeEventListener("contextmenu", handleContextMenu);
       window.removeEventListener("dragstart", handleDragStart);
       window.removeEventListener("paste", handlePaste);
       window.removeEventListener("keydown", handleEscapeKey);
+
+      if (isMobile) {
+        window.removeEventListener("blur", handleWindowBlur);
+        window.removeEventListener("focus", handleWindowFocus);
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+        window.removeEventListener("touchstart", handleTouchStart);
+        window.removeEventListener("touchmove", handleTouchMove);
+        window.removeEventListener("touchend", handleTouchEnd);
+        window.removeEventListener("touchcancel", handleTouchEnd);
+      }
     };
   }, [token, isAdmin, showWarning]);
 
-  if (!showWarning) return null;
-
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 backdrop-blur-[2px] p-4 animate-fade-in pointer-events-auto">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-sm w-full border border-red-500/30 shadow-2xl text-center relative">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-red-600 rounded-t-2xl"></div>
-        <div className="w-14 h-14 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/20">
-          <FiAlertTriangle className="w-7 h-7 text-red-500" />
+    <>
+      {isScreenBlurred && (
+        <div className="fixed inset-0 z-[99999] bg-slate-955/95 backdrop-blur-lg flex flex-col items-center justify-center text-center p-6 pointer-events-auto">
+          <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-4 border border-red-500/20">
+            <FiAlertTriangle className="w-8 h-8 text-red-500 animate-pulse" />
+          </div>
+          <h2 className="text-xl font-bold text-white mb-2">Content Protected</h2>
+          <p className="text-slate-400 text-sm max-w-xs leading-relaxed">
+            Screenshots and background viewing are restricted on this platform for security reasons.
+          </p>
         </div>
-        <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">
-          Security Alert
-        </h2>
-        <p className="text-slate-600 dark:text-slate-300 text-sm mb-6 leading-relaxed">
-          {warningMessage}
-        </p>
-        <button
-          onClick={() => setShowWarning(false)}
-          className="w-full bg-red-600 hover:bg-red-500 text-white font-semibold py-3 rounded-xl transition-all active:scale-95 text-sm"
-        >
-          OK, I Understand
-        </button>
-      </div>
-    </div>
+      )}
+
+      {showWarning && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 backdrop-blur-[2px] p-4 animate-fade-in pointer-events-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-sm w-full border border-red-500/30 shadow-2xl text-center relative">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-red-600 rounded-t-2xl"></div>
+            <div className="w-14 h-14 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/20">
+              <FiAlertTriangle className="w-7 h-7 text-red-500" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">
+              Security Alert
+            </h2>
+            <p className="text-slate-600 dark:text-slate-300 text-sm mb-6 leading-relaxed">
+              {warningMessage}
+            </p>
+            <button
+              onClick={() => setShowWarning(false)}
+              className="w-full bg-red-600 hover:bg-red-500 text-white font-semibold py-3 rounded-xl transition-all active:scale-95 text-sm"
+            >
+              OK, I Understand
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

@@ -234,12 +234,14 @@ const Home = () => {
           file.folder === oldName ? { ...file, folder: newName } : file
         )
       );
+      // Update active folder if it was the renamed one
       setActiveFolder((prev) => (prev === oldName ? newName : prev));
     });
 
     socket.on("folder-deleted", ({ id, name }) => {
       setFolders((prev) => prev.filter((f) => f._id !== id));
       setFiles((prevFiles) => prevFiles.filter((file) => file.folder !== name));
+      // Clear active folder if it was the deleted one
       setActiveFolder((prev) => (prev === name ? null : prev));
     });
 
@@ -485,15 +487,28 @@ const Home = () => {
                 </button>
               </div>
             ) : folders.length === 0 ? (
-              // Empty State (no folders created at all)
+              // Empty State - No folders found
               <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-3xl border-2 border-gray-200 dark:border-slate-800 p-16 text-center shadow-xl">
                 <div className="w-24 h-24 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FiLock className="w-12 h-12 text-gray-400 dark:text-slate-500" />
+                  <FiFolder className="w-12 h-12 text-gray-400 dark:text-slate-500" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">No Folders Found</h3>
+                <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">No Folders Available</h3>
                 <p className="text-gray-600 dark:text-slate-400">
-                  No folders have been created yet.
+                  {user?.role === "admin" 
+                    ? "Create a new folder to organize your documents." 
+                    : "No folders have been created yet. Please check back later."}
                 </p>
+                {user?.role === "admin" && (
+                  <button
+                    onClick={() => {
+                      // Navigate to folder management or trigger folder creation
+                      navigate("/folders");
+                    }}
+                    className="mt-4 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl"
+                  >
+                    Create Folder
+                  </button>
+                )}
               </div>
             ) : activeFolder === null && searchTerm === "" ? (
               // Folders View
@@ -529,7 +544,7 @@ const Home = () => {
                           <FiFolder className="w-8 h-8 text-white" />
                         </div>
                         
-                        {/* Title */}
+                        {/* Folder Name - Dynamically displays the actual folder name */}
                         <span className="text-white font-bold text-base text-center line-clamp-2 px-1 leading-tight drop-shadow-lg">
                           {folderName}
                         </span>
