@@ -14,7 +14,7 @@ function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowSplash(false);
-    }, 2500); // 2.5 seconds splash screen
+    }, 1000); // 1.0 second splash screen
     return () => clearTimeout(timer);
   }, []);
 

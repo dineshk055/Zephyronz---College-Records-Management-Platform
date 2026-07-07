@@ -188,6 +188,7 @@ export const uploadFile = async (req, res) => {
 export const getAllFiles = async (req, res) => {
   try {
     const files = await File.find()
+      .select("-pagesData")
       .populate("uploadedBy", "name email")
       .sort({ createdAt: -1 });
 
